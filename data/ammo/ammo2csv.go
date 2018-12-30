@@ -20,6 +20,7 @@ func main() {
 	}
 	defer f.Close()
 
+	fmt.Println("query_id;param_name;param_value")
 	s := bufio.NewScanner(f)
 	for s.Scan() {
 		s.Scan()
