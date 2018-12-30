@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"strings"
+	//"strings"
 )
 
 func main() {
@@ -14,31 +14,40 @@ func main() {
 		log.Fatal("No input file")
 	}
 
-	file, err := os.Open(os.Args[1])
+	f, err := os.Open(os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
+	defer f.Close()
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		scanner.Scan()
-		text, err := url.PathUnescape(scanner.Text())
+	s := bufio.NewScanner(f)
+	for s.Scan() {
+		s.Scan()
+		b := []byte(s.Text())
+		b = b[13:(len(b) - 9)]
+		u, err := url.ParseRequestURI(string(b))
 		if err != nil {
 			log.Fatal(err)
 		}
-		text = strings.Replace(text, "/", " ", -1)
-		text = strings.Replace(text, "?", " ", -1)
-		text = strings.Replace(text, "&", " ", -1)
-		fmt.Println(text)
-		scanner.Scan()
-		scanner.Scan()
-		scanner.Scan()
-		scanner.Scan()
-		scanner.Scan()
+		q := u.Query()
+		id, ok := q["query_id"]
+		if !ok {
+			log.Fatal("No query_id")
+		}
+		for k, v := range q {
+			if k == "query_id" {
+				continue
+			}
+			fmt.Printf("%s;%s;%s\n", id, k, v)
+		}
+		s.Scan()
+		s.Scan()
+		s.Scan()
+		s.Scan()
+		s.Scan()
 	}
 
-	if err := scanner.Err(); err != nil {
+	if err := s.Err(); err != nil {
 		log.Fatal(err)
 	}
 }
