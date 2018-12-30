@@ -20,7 +20,7 @@ func main() {
 	}
 	defer f.Close()
 
-	fmt.Println("query_id;param_name;param_value")
+	fmt.Println("query_path;query_id;param_name;param_value")
 	s := bufio.NewScanner(f)
 	for s.Scan() {
 		s.Scan()
@@ -39,7 +39,7 @@ func main() {
 			if k == "query_id" {
 				continue
 			}
-			fmt.Printf("%s;%s;%s\n", id, k, v)
+			fmt.Printf("%s;%s;%s;%s\n", u.EscapedPath(), id, k, v)
 		}
 		s.Scan()
 		s.Scan()
