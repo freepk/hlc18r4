@@ -7,13 +7,10 @@ import (
 	"sync"
 )
 
-const jsonSkip = 14
-
 func readFile(wait *sync.WaitGroup, file *zip.File) {
 	if wait != nil {
 		defer wait.Done()
 	}
-	println(file.Name)
 	r, err := file.Open()
 	if err != nil {
 		log.Fatal(err)
@@ -23,8 +20,7 @@ func readFile(wait *sync.WaitGroup, file *zip.File) {
 	x := 14
 	b := make([]byte, 8192)
 	for {
-		n, err := r.Read(b[p:])
-		if n > 0 {
+		if n, err := r.Read(b[p:]); n > 0 {
 			n += p
 			c := 0
 			i := 0
@@ -39,17 +35,16 @@ func readFile(wait *sync.WaitGroup, file *zip.File) {
 				case '}':
 					c--
 					if c == 0 {
+						j++
 					}
 				}
 				j++
 			}
 			x = 0
 			p = copy(b, b[i:n])
-		}
-		if err == io.EOF {
+		} else if err == io.EOF {
 			return
-		}
-		if err != nil {
+		} else if err != nil {
 			log.Fatal(err)
 		}
 	}
