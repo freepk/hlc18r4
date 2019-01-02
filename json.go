@@ -4,16 +4,18 @@ import (
 	"io"
 )
 
-func jsonFindObj(b []byte) (int, int, bool) {
+func jsonFindWrapped(b []byte, x, y byte) (int, int, bool) {
 	q := 0
 	i := 0
 	for j, c := range b {
-		if c == 123 {
+		switch c {
+		case x:
 			q++
 			if q == 1 {
 				i = j
 			}
-		} else if c == 125 {
+
+		case y:
 			q--
 			if q == 0 {
 				return i, j, true
@@ -21,6 +23,14 @@ func jsonFindObj(b []byte) (int, int, bool) {
 		}
 	}
 	return 0, 0, false
+}
+
+func jsonFindObj(b []byte) (int, int, bool) {
+	return jsonFindWrapped(b, 123, 125)
+}
+
+func jsonFindArr(b []byte) (int, int, bool) {
+	return jsonFindWrapped(b, 91, 93)
 }
 
 func jsonFindQuoted(b []byte) (int, int, bool) {
