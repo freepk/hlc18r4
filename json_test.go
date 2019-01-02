@@ -1,6 +1,8 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestJsonFindObj(t *testing.T) {
 	if _, _, ok := jsonFindObj([]byte("")); ok {
@@ -27,5 +29,4 @@ func TestJsonFindQuoted(t *testing.T) {
 	if i, j, ok := jsonFindQuoted([]byte("\"\"")); !ok || i != 0 || j != 1 {
 		t.Fail()
 	}
-
 }
