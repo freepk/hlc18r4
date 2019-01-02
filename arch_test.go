@@ -2,7 +2,6 @@ package main
 
 import (
 	"archive/zip"
-	//"fmt"
 	"sync"
 	"testing"
 )
@@ -25,9 +24,8 @@ func TestReadArchive(t *testing.T) {
 			defer w.Done()
 			defer r.Close()
 			b := make([]byte, 8192)
-			u := make([]byte, 8192)
 			jsonReadObj(r, b, 14, func(b []byte) error {
-				n := unquote(u, b)
+				n := utf8Unquote(b, b)
 				_ = n
 				return nil
 			})
