@@ -1,13 +1,5 @@
 package main
 
-func utf8Lookup(c byte) int {
-	if c >= 48 && c <= 57 {
-		return int(c) - 48
-	} else if c >= 97 && c <= 102 {
-		return int(c) - 87
-	}
-	return -1
-}
 func lookup(c byte) int {
 	if c >= 48 && c <= 57 {
 		return int(c) - 48
