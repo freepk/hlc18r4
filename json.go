@@ -14,7 +14,6 @@ func jsonFindWrapped(b []byte, x, y byte) (int, int, bool) {
 			if q == 1 {
 				i = j
 			}
-
 		case y:
 			q--
 			if q == 0 {
