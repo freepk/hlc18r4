@@ -7,29 +7,23 @@ import (
 )
 
 func TestReadArchive(t *testing.T) {
-	z, err := zip.OpenReader("data/data.zip")
+	arch, err := zip.OpenReader("data/data.zip")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer z.Close()
-	n := len(z.File)
-	w := new(sync.WaitGroup)
-	w.Add(n)
+	defer arch.Close()
+	n := 1 //len(arch.File)
+	group := new(sync.WaitGroup)
+	group.Add(n)
 	for i := 0; i < n; i++ {
-		r, err := z.File[i].Open()
+		src, err := arch.File[i].Open()
 		if err != nil {
 			t.Fatal(err)
 		}
 		go func() {
-			defer w.Done()
-			defer r.Close()
-			b := make([]byte, 8192)
-			jsonReadObj(r, b, 14, func(b []byte) error {
-				n := utf8Unquote(b, b)
-				_ = n
-				return nil
-			})
+			defer group.Done()
+			defer src.Close()
 		}()
 	}
-	w.Wait()
+	group.Wait()
 }
