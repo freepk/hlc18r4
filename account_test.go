@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -30,5 +31,23 @@ func TestAccountParse(t *testing.T) {
 func BenchmarkAccountParse(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		parseAccount(testAccount)
+	}
+}
+
+func BenchmarkCmpString(b *testing.B) {
+	s := string([]byte(`premium`))
+	p := []byte(`premium`)
+	for i := 0; i < b.N; i++ {
+		if s == string(p) {
+		}
+	}
+}
+
+func BenchmarkCmpBytes(b *testing.B) {
+	a := []byte(`premium`)
+	p := []byte(`premium`)
+	for i := 0; i < b.N; i++ {
+		if bytes.Equal(a, p) {
+		}
 	}
 }

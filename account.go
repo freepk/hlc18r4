@@ -1,9 +1,5 @@
 package main
 
-import (
-	"bytes"
-)
-
 func checkByte(b []byte, c byte) ([]byte, bool) {
 
 	for i, x := range b {
@@ -26,129 +22,52 @@ func checkByte(b []byte, c byte) ([]byte, bool) {
 
 }
 
+const (
+	accIdKey        = `"id"`
+	accIdLen        = len(accIdKey)
+	accInterestsKey = `"interests"`
+	accInterestsLen = len(accInterestsKey)
+	accPhoneKey     = `"phone"`
+	accPhoneLen     = len(accPhoneKey)
+	accPremiumKey   = `"premium"`
+	accPremiumLen   = len(accPremiumKey)
+)
+
 func parseAccount(b []byte) ([]byte, bool) {
-	var k []byte
+	var t []byte
 	var ok bool
 
-	b, ok = checkByte(b, '{')
+	t, ok = checkByte(b, '{')
 	if !ok {
-		return b, false
-	}
-
-	b, ok = checkByte(b, '"')
-	if !ok {
-		return b, false
-	}
-
-	for i, c := range b {
-		if c == '"' {
-			k = b[:i]
-			b = b[i+1:]
-			break
-		}
-		if c == '\\' {
-			return b, false
-		}
-	}
-
-	b, ok = checkByte(b, ':')
-	if !ok {
-		return b, false
-	}
-
-	if len(k) < 2 {
 		return b, false
 	}
 
 	// Validate key
-	//	i	id interests
-	//	e	email
-	//	f	finish fname
-	//	p	phone premium
-	//	b	birth
-	//	c	city country
-	//	j	joined
-	//	s	sex sname status
-	//	l	likes
-	switch k[0] {
-	case 'i':
-		switch k[1] {
-		case 'd':
-			if !bytes.Equal(k, []byte(`id`)) {
-				return b, false
-			}
-		case 'n':
-			if !bytes.Equal(k, []byte(`interests`)) {
-				return b, false
-			}
-		}
-	case 'e':
-		if !bytes.Equal(k, []byte(`email`)) {
-			return b, false
-		}
-	case 'f':
-		switch k[1] {
-		case 'i':
-			if !bytes.Equal(k, []byte(`finish`)) {
-				return b, false
-			}
-		case 'n':
-			if !bytes.Equal(k, []byte(`fname`)) {
-				return b, false
-			}
-		}
-	case 'p':
-		switch k[1] {
-		case 'h':
-			if !bytes.Equal(k, []byte(`phone`)) {
-				return b, false
-			}
-		case 'r':
-			if !bytes.Equal(k, []byte(`premium`)) {
-				return b, false
-			}
-		}
-	case 'b':
-		if !bytes.Equal(k, []byte(`birth`)) {
-			return b, false
-		}
-	case 'c':
-		switch k[1] {
-		case 'i':
-			if !bytes.Equal(k, []byte(`city`)) {
-				return b, false
-			}
-		case 'o':
-			if !bytes.Equal(k, []byte(`country`)) {
-				return b, false
-			}
-		}
-	case 'j':
-		if !bytes.Equal(k, []byte(`joined`)) {
-			return b, false
-		}
-	case 's':
-		switch k[1] {
-		case 'e':
-			if !bytes.Equal(k, []byte(`sex`)) {
-				return b, false
-			}
-		case 'n':
-			if !bytes.Equal(k, []byte(`sname`)) {
-				return b, false
-			}
-		case 't':
-			if !bytes.Equal(k, []byte(`status`)) {
-				return b, false
-			}
-		}
-	case 'l':
-		if !bytes.Equal(k, []byte(`likes`)) {
-			return b, false
-		}
+	//      i       id interests
+	//      e       email
+	//      f       finish fname
+	//      p       phone premium
+	//      b       birth
+	//      c       city country
+	//      j       joined
+	//      s       sex sname status
+	//      l       likes
+
+	// Minimal value len == len(`"_":_`)
+	if len(t) < 5 {
+		return b, false
 	}
 
-	//println("\n\nKey", string(k))
+	switch {
+	case len(t) > accIdLen && string(t[:accIdLen]) == accIdKey:
+		//println("\n\nValid id key")
+	case len(t) > accInterestsLen && string(t[:accInterestsLen]) == accInterestsKey:
+		//println("\n\nValid interests key")
+	case len(t) > accPhoneLen && string(t[:accPhoneLen]) == accPhoneKey:
+		//println("\n\nValid phone key")
+	case len(t) > accPremiumLen && string(t[:accPremiumLen]) == accPremiumKey:
+		//println("\n\nValid premium key")
+	}
 
-	return b, true
+	return b, false
 }

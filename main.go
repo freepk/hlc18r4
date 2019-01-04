@@ -1,9 +1,11 @@
 package main
 
-import "github.com/valyala/fasthttp"
+import (
+	"github.com/valyala/fasthttp"
+)
 
 func fastHTTPHandler(ctx *fasthttp.RequestCtx) {
-	ctx.Write([]byte("Hello, I'm Web Server!"))
+	ctx.Write([]byte("Hello world!"))
 }
 
 func main() {
