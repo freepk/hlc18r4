@@ -17,7 +17,173 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson97766e5aDecodeGitlabComFreepkHlc18r4(in *jlexer.Lexer, out *EasyAccount) {
+func easyjson97766e5aDecodeGitlabComFreepkHlc18r4(in *jlexer.Lexer, out *EasyPremium) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "finish":
+			out.Finish = int(in.Int())
+		case "start":
+			out.Start = int(in.Int())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson97766e5aEncodeGitlabComFreepkHlc18r4(out *jwriter.Writer, in EasyPremium) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"finish\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.Finish))
+	}
+	{
+		const prefix string = ",\"start\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.Start))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v EasyPremium) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson97766e5aEncodeGitlabComFreepkHlc18r4(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v EasyPremium) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson97766e5aEncodeGitlabComFreepkHlc18r4(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *EasyPremium) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson97766e5aDecodeGitlabComFreepkHlc18r4(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *EasyPremium) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson97766e5aDecodeGitlabComFreepkHlc18r4(l, v)
+}
+func easyjson97766e5aDecodeGitlabComFreepkHlc18r41(in *jlexer.Lexer, out *EasyLike) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "id":
+			out.ID = int(in.Int())
+		case "ts":
+			out.Ts = int(in.Int())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson97766e5aEncodeGitlabComFreepkHlc18r41(out *jwriter.Writer, in EasyLike) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"id\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.ID))
+	}
+	{
+		const prefix string = ",\"ts\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.Ts))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v EasyLike) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson97766e5aEncodeGitlabComFreepkHlc18r41(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v EasyLike) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson97766e5aEncodeGitlabComFreepkHlc18r41(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *EasyLike) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson97766e5aDecodeGitlabComFreepkHlc18r41(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *EasyLike) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson97766e5aDecodeGitlabComFreepkHlc18r41(l, v)
+}
+func easyjson97766e5aDecodeGitlabComFreepkHlc18r42(in *jlexer.Lexer, out *EasyAccount) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -43,7 +209,7 @@ func easyjson97766e5aDecodeGitlabComFreepkHlc18r4(in *jlexer.Lexer, out *EasyAcc
 		case "birth":
 			out.Birth = int(in.Int())
 		case "premium":
-			easyjson97766e5aDecode(in, &out.Premium)
+			(out.Premium).UnmarshalEasyJSON(in)
 		case "likes":
 			if in.IsNull() {
 				in.Skip()
@@ -52,25 +218,16 @@ func easyjson97766e5aDecodeGitlabComFreepkHlc18r4(in *jlexer.Lexer, out *EasyAcc
 				in.Delim('[')
 				if out.Likes == nil {
 					if !in.IsDelim(']') {
-						out.Likes = make([]struct {
-							ID int `json:"id"`
-							Ts int `json:"ts"`
-						}, 0, 4)
+						out.Likes = make([]EasyLike, 0, 4)
 					} else {
-						out.Likes = []struct {
-							ID int `json:"id"`
-							Ts int `json:"ts"`
-						}{}
+						out.Likes = []EasyLike{}
 					}
 				} else {
 					out.Likes = (out.Likes)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v1 struct {
-						ID int `json:"id"`
-						Ts int `json:"ts"`
-					}
-					easyjson97766e5aDecode1(in, &v1)
+					var v1 EasyLike
+					(v1).UnmarshalEasyJSON(in)
 					out.Likes = append(out.Likes, v1)
 					in.WantComma()
 				}
@@ -86,7 +243,7 @@ func easyjson97766e5aDecodeGitlabComFreepkHlc18r4(in *jlexer.Lexer, out *EasyAcc
 		in.Consumed()
 	}
 }
-func easyjson97766e5aEncodeGitlabComFreepkHlc18r4(out *jwriter.Writer, in EasyAccount) {
+func easyjson97766e5aEncodeGitlabComFreepkHlc18r42(out *jwriter.Writer, in EasyAccount) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -128,7 +285,7 @@ func easyjson97766e5aEncodeGitlabComFreepkHlc18r4(out *jwriter.Writer, in EasyAc
 		} else {
 			out.RawString(prefix)
 		}
-		easyjson97766e5aEncode(out, in.Premium)
+		(in.Premium).MarshalEasyJSON(out)
 	}
 	{
 		const prefix string = ",\"likes\":"
@@ -146,7 +303,7 @@ func easyjson97766e5aEncodeGitlabComFreepkHlc18r4(out *jwriter.Writer, in EasyAc
 				if v2 > 0 {
 					out.RawByte(',')
 				}
-				easyjson97766e5aEncode1(out, v3)
+				(v3).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -157,153 +314,23 @@ func easyjson97766e5aEncodeGitlabComFreepkHlc18r4(out *jwriter.Writer, in EasyAc
 // MarshalJSON supports json.Marshaler interface
 func (v EasyAccount) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson97766e5aEncodeGitlabComFreepkHlc18r4(&w, v)
+	easyjson97766e5aEncodeGitlabComFreepkHlc18r42(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v EasyAccount) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson97766e5aEncodeGitlabComFreepkHlc18r4(w, v)
+	easyjson97766e5aEncodeGitlabComFreepkHlc18r42(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *EasyAccount) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson97766e5aDecodeGitlabComFreepkHlc18r4(&r, v)
+	easyjson97766e5aDecodeGitlabComFreepkHlc18r42(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *EasyAccount) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson97766e5aDecodeGitlabComFreepkHlc18r4(l, v)
-}
-func easyjson97766e5aDecode1(in *jlexer.Lexer, out *struct {
-	ID int `json:"id"`
-	Ts int `json:"ts"`
-}) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "id":
-			out.ID = int(in.Int())
-		case "ts":
-			out.Ts = int(in.Int())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson97766e5aEncode1(out *jwriter.Writer, in struct {
-	ID int `json:"id"`
-	Ts int `json:"ts"`
-}) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"id\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Int(int(in.ID))
-	}
-	{
-		const prefix string = ",\"ts\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Int(int(in.Ts))
-	}
-	out.RawByte('}')
-}
-func easyjson97766e5aDecode(in *jlexer.Lexer, out *struct {
-	Finish int `json:"finish"`
-	Start  int `json:"start"`
-}) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "finish":
-			out.Finish = int(in.Int())
-		case "start":
-			out.Start = int(in.Int())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson97766e5aEncode(out *jwriter.Writer, in struct {
-	Finish int `json:"finish"`
-	Start  int `json:"start"`
-}) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"finish\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Int(int(in.Finish))
-	}
-	{
-		const prefix string = ",\"start\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Int(int(in.Start))
-	}
-	out.RawByte('}')
+	easyjson97766e5aDecodeGitlabComFreepkHlc18r42(l, v)
 }
