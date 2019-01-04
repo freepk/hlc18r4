@@ -1,5 +1,15 @@
 package main
 
+func parseSpaces(b []byte) []byte {
+	n := len(b)
+	for i := 0; i < n; i++ {
+		if b[i] > 0x20 {
+			return b[i:]
+		}
+	}
+	return b[n:]
+}
+
 func parseSymbol(b []byte, c byte) ([]byte, bool) {
 	n := len(b)
 	for i := 0; i < n; i++ {

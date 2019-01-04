@@ -1,34 +1,141 @@
 package main
 
 import (
+	"encoding/json"
+	"github.com/json-iterator/go"
+	"github.com/valyala/fastjson"
 	"testing"
 )
 
-var testAccount = []byte(`{"birth":692070602,"premium":{"finish":1569783897,"start":1538247897},
-	"likes":[{"id":1066502,"ts":1457224588},{"id":78150,"ts":1510460183},{"id":853672,"ts":1515150863},
-	{"id":733556,"ts":1481890895},{"id":856740,"ts":1487805837},{"id":1047142,"ts":1458068896},{"id":629144,"ts":1497234539},
-	{"id":300826,"ts":1487754288},{"id":452932,"ts":1461098717},{"id":1195182,"ts":1530979034},{"id":30712,"ts":1461763696},
-	{"id":454620,"ts":1481582929},{"id":407760,"ts":1529800373},{"id":371160,"ts":1501625150},{"id":241380,"ts":1534382164},
-	{"id":803700,"ts":1519479388},{"id":685966,"ts":1486322921},{"id":705718,"ts":1520958917},{"id":626422,"ts":1510751192},
-	{"id":804108,"ts":1493807254},{"id":129572,"ts":1497212902},{"id":778756,"ts":1510678372},{"id":773756,"ts":1532030052},
-	{"id":492876,"ts":1502403536},{"id":142110,"ts":1519654549},{"id":1160208,"ts":1492142179},{"id":102868,"ts":1488957199},
-	{"id":684186,"ts":1489454147},{"id":234630,"ts":1535043000},{"id":973762,"ts":1458619587},{"id":172290,"ts":1486412904},
-	{"id":559182,"ts":1521790424},{"id":1181378,"ts":1495685605},{"id":1213814,"ts":1476655968},{"id":664086,"ts":1501684354},
-	{"id":1270304,"ts":1517398037},{"id":804610,"ts":1525566197},{"id":593016,"ts":1504872249},{"id":239696,"ts":1535239086},
-	{"id":579844,"ts":1525424588},{"id":986152,"ts":1494908263},{"id":799462,"ts":1468367050},{"id":519462,"ts":1470576898},
-	{"id":824660,"ts":1453419877},{"id":738136,"ts":1488428182},{"id":683884,"ts":1468286120},{"id":218188,"ts":1506629719},
-	{"id":1008478,"ts":1533144960},{"id":1090292,"ts":1515672077},{"id":1230224,"ts":1526088509},{"id":298636,"ts":1522805966},
-	{"id":540050,"ts":1532083398},{"id":1200456,"ts":1455636126},{"id":342036,"ts":1467363135},{"id":810644,"ts":1515156323}],
-	"sex":"m","status":"\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b","country":"\u0424\u0438\u043d\u043c\u0430\u043b\u044c",
-	"interests":["\u0420\u0435\u0433\u0433\u0438","\u041f\u0430\u0441\u0442\u0430","\u0414\u0440\u0443\u0437\u044c\u044f"],
-	"joined":1342828800,"city":"\u041a\u0440\u043e\u043d\u043e\u0433\u043e\u0440\u0441\u043a","email":"hiteher@inbox.ru"}`)
+var testAccount = []byte(`{"likes":[{"id":484053,"ts":1476605353},{"id":1055765,"ts":1467406524},{"id":793185,"ts":1534580707},{"id":955917,"ts":1493975640},
+	{"id":375379,"ts":1539985529},{"id":836773,"ts":1481693076},{"id":691655,"ts":1533981341},{"id":1299873,"ts":1524997142},{"id":179795,"ts":1522779391},
+	{"id":1126729,"ts":1514445485},{"id":206461,"ts":1482808241},{"id":991685,"ts":1530470598},{"id":1020737,"ts":1515144827},{"id":1173581,"ts":1515302882},
+	{"id":1261119,"ts":1463651782},{"id":885573,"ts":1485624715},{"id":919053,"ts":1470545613},{"id":1271139,"ts":1506959707},{"id":702175,"ts":1454866547},
+	{"id":561969,"ts":1490090604},{"id":553607,"ts":1476342851},{"id":1219173,"ts":1511964110},{"id":1184959,"ts":1516403946},{"id":1047217,"ts":1520897805},
+	{"id":372333,"ts":1499389210},{"id":22407,"ts":1482159817},{"id":115595,"ts":1470196720},{"id":1237357,"ts":1482467303},{"id":332051,"ts":1530385062},
+	{"id":147429,"ts":1502689778},{"id":702575,"ts":1532061307},{"id":1018911,"ts":1512525241},{"id":898517,"ts":1473651435},{"id":1188903,"ts":1502156143},
+	{"id":153049,"ts":1517466016},{"id":1162483,"ts":1499023984},{"id":15269,"ts":1502187927},{"id":996347,"ts":1528218998},{"id":147613,"ts":1468601563},
+	{"id":392399,"ts":1510199233},{"id":736801,"ts":1463709303},{"id":1130559,"ts":1469541346},{"id":624079,"ts":1460211737},{"id":264859,"ts":1536663165},
+	{"id":64879,"ts":1514674199},{"id":353639,"ts":1531604504},{"id":1119055,"ts":1473334604},{"id":1089201,"ts":1530561229},{"id":279193,"ts":1503074606},
+	{"id":888793,"ts":1466196633},{"id":934971,"ts":1462351420},{"id":1094279,"ts":1531759443},{"id":861239,"ts":1522612147},{"id":920775,"ts":1453119149},
+	{"id":1125623,"ts":1517244991},{"id":280299,"ts":1513154136},{"id":991349,"ts":1466842610},{"id":627749,"ts":1481164079},{"id":673817,"ts":1482148311},
+	{"id":315959,"ts":1488954321},{"id":1149819,"ts":1504710243},{"id":154063,"ts":1514595923},{"id":1234339,"ts":1499566684},{"id":255459,"ts":1488352776},
+	{"id":662745,"ts":1481216775},{"id":213813,"ts":1532623824},{"id":220947,"ts":1539456021},{"id":343395,"ts":1466892947},{"id":426101,"ts":1508163208},
+	{"id":727005,"ts":1511899829},{"id":1075081,"ts":1535117975},{"id":328859,"ts":1492901718},{"id":141525,"ts":1491766730},{"id":1281457,"ts":1508215106},
+	{"id":185571,"ts":1492654210},{"id":853249,"ts":1501262537},{"id":627375,"ts":1501865401},{"id":567469,"ts":1523708266},{"id":179143,"ts":1538726433},
+	{"id":30491,"ts":1474338607},{"id":451121,"ts":1465475793},{"id":1110529,"ts":1505407844},{"id":33841,"ts":1520879410},{"id":1116037,"ts":1478847461}],
+	"id":1300026,"joined":1332115200,"birth":721360390}`)
 
 func TestAccountParse(t *testing.T) {
 	parseAccount(testAccount)
 }
 
-func BenchmarkAccountParse(b *testing.B) {
+func TestAccountParseFastJson(t *testing.T) {
+	var p fastjson.Parser
+	v, err := p.ParseBytes(testAccount)
+	t.Log(v, err)
+}
+
+func TestAccountParseStandart(t *testing.T) {
+	var account struct {
+		ID      int `json:"id"`
+		Joined  int `json:"joined"`
+		Birth   int `json:"birth"`
+		Premium struct {
+			Finish int `json:"finish"`
+			Start  int `json:"start"`
+		} `json:"premium"`
+		Likes []struct {
+			ID int `json:"id"`
+			Ts int `json:"ts"`
+		} `json:"likes"`
+	}
+	err := json.Unmarshal(testAccount, &account)
+	t.Log(account, err)
+}
+
+func TestAccountParseJsoniter(t *testing.T) {
+	var account struct {
+		ID      int `json:"id"`
+		Joined  int `json:"joined"`
+		Birth   int `json:"birth"`
+		Premium struct {
+			Finish int `json:"finish"`
+			Start  int `json:"start"`
+		} `json:"premium"`
+		Likes []struct {
+			ID int `json:"id"`
+			Ts int `json:"ts"`
+		} `json:"likes"`
+	}
+
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+	err := json.Unmarshal(testAccount, &account)
+	t.Log(account, err)
+}
+
+func TestAccountParseEasyJson(t *testing.T) {
+	account := &EasyAccount{}
+	err := account.UnmarshalJSON(testAccount)
+	t.Log(account, err)
+}
+
+func BenchmarkAccountParseInHouse(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		parseAccount(testAccount)
+		parseAccountX(testAccount)
+	}
+}
+
+func BenchmarkAccountParseFastjson(b *testing.B) {
+	var p fastjson.Parser
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		p.ParseBytes(testAccount)
+	}
+}
+
+func BenchmarkAccountParseJsoniter(b *testing.B) {
+	var account struct {
+		ID      int `json:"id"`
+		Joined  int `json:"joined"`
+		Birth   int `json:"birth"`
+		Premium struct {
+			Finish int `json:"finish"`
+			Start  int `json:"start"`
+		} `json:"premium"`
+		Likes []struct {
+			ID int `json:"id"`
+			Ts int `json:"ts"`
+		} `json:"likes"`
+	}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+	for i := 0; i < b.N; i++ {
+		json.Unmarshal(testAccount, &account)
+	}
+}
+
+func BenchmarkAccountParseStandart(b *testing.B) {
+	var account struct {
+		ID      int `json:"id"`
+		Joined  int `json:"joined"`
+		Birth   int `json:"birth"`
+		Premium struct {
+			Finish int `json:"finish"`
+			Start  int `json:"start"`
+		} `json:"premium"`
+		Likes []struct {
+			ID int `json:"id"`
+			Ts int `json:"ts"`
+		} `json:"likes"`
+	}
+	for i := 0; i < b.N; i++ {
+		json.Unmarshal(testAccount, &account)
+	}
+}
+
+func BenchmarkAccountParseEasyJson(b *testing.B) {
+	account := &EasyAccount{}
+	for i := 0; i < b.N; i++ {
+		account.UnmarshalJSON(testAccount)
 	}
 }
