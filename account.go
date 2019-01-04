@@ -4,38 +4,42 @@ import (
 	"bytes"
 )
 
-func skipSpace(b []byte) []byte {
-	for i := range b {
-		if b[i] > 0x20 {
-			return b[i:]
+func checkByte(b []byte, c byte) ([]byte, bool) {
+
+	for i, x := range b {
+		if x > 0x20 {
+			if b[i] == c {
+				return b[i+1:], true
+			}
+			return b, false
 		}
 	}
-	return nil
+
+	//if len(b) == 0 {
+	//	return b, false
+	//}
+	//if b[0] == c {
+	//	return b[1:], true
+	//}
+
+	return b, false
+
 }
 
 func parseAccount(b []byte) ([]byte, bool) {
-	// SkipSpace and check '{'
-	b = skipSpace(b)
-	if len(b) == 0 {
-		return b, false
-	}
-	if b[0] != '{' {
-		return b, false
-	}
-	b = b[1:]
-
-	// Parse key
 	var k []byte
-	// SkipSpace and check '"'
-	b = skipSpace(b)
-	if len(b) == 0 {
+	var ok bool
+
+	b, ok = checkByte(b, '{')
+	if !ok {
 		return b, false
 	}
-	if b[0] != '"' {
+
+	b, ok = checkByte(b, '"')
+	if !ok {
 		return b, false
 	}
-	b = b[1:]
-	// Lookup double quote
+
 	for i, c := range b {
 		if c == '"' {
 			k = b[:i]
@@ -46,19 +50,16 @@ func parseAccount(b []byte) ([]byte, bool) {
 			return b, false
 		}
 	}
-	// SkipSpace and check ':'
-	b = skipSpace(b)
-	if len(b) == 0 {
+
+	b, ok = checkByte(b, ':')
+	if !ok {
 		return b, false
 	}
-	if b[0] != ':' {
-		return b, false
-	}
-	b = b[1:]
 
 	if len(k) < 2 {
 		return b, false
 	}
+
 	// Validate key
 	//	i	id interests
 	//	e	email
@@ -146,6 +147,8 @@ func parseAccount(b []byte) ([]byte, bool) {
 			return b, false
 		}
 	}
+
+	//println("\n\nKey", string(k))
 
 	return b, true
 }
