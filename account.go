@@ -2,6 +2,14 @@ package main
 
 func checkByte(b []byte, c byte) ([]byte, bool) {
 
+	// Fast way
+	//if len(b) == 0 {
+	//	return b, false
+	//}
+	//if b[0] == c {
+	//	return b[1:], true
+	//}
+
 	for i, x := range b {
 		if x > 0x20 {
 			if b[i] == c {
@@ -11,62 +19,27 @@ func checkByte(b []byte, c byte) ([]byte, bool) {
 		}
 	}
 
-	//if len(b) == 0 {
-	//	return b, false
-	//}
-	//if b[0] == c {
-	//	return b[1:], true
-	//}
-
 	return b, false
 
 }
-
-const (
-	accIdKey        = `"id"`
-	accIdLen        = len(accIdKey)
-	accInterestsKey = `"interests"`
-	accInterestsLen = len(accInterestsKey)
-	accPhoneKey     = `"phone"`
-	accPhoneLen     = len(accPhoneKey)
-	accPremiumKey   = `"premium"`
-	accPremiumLen   = len(accPremiumKey)
-)
 
 func parseAccount(b []byte) ([]byte, bool) {
 	var t []byte
 	var ok bool
 
-	t, ok = checkByte(b, '{')
-	if !ok {
-		return b, false
-	}
-
-	// Validate key
-	//      i       id interests
-	//      e       email
-	//      f       finish fname
-	//      p       phone premium
-	//      b       birth
-	//      c       city country
-	//      j       joined
-	//      s       sex sname status
-	//      l       likes
-
-	// Minimal value len == len(`"_":_`)
-	if len(t) < 5 {
+	if t, ok = checkByte(t, '{'); !ok {
 		return b, false
 	}
 
 	switch {
+	case len(t) > accBirthLen && string(t[:accBirthLen]) == accBirthKey:
+	case len(t) > accCityLen && string(t[:accCityLen]) == accCityKey:
+	case len(t) > accCountryLen && string(t[:accCountryLen]) == accCountryKey:
+	case len(t) > accEmailLen && string(t[:accEmailLen]) == accEmailKey:
 	case len(t) > accIdLen && string(t[:accIdLen]) == accIdKey:
-		//println("\n\nValid id key")
 	case len(t) > accInterestsLen && string(t[:accInterestsLen]) == accInterestsKey:
-		//println("\n\nValid interests key")
 	case len(t) > accPhoneLen && string(t[:accPhoneLen]) == accPhoneKey:
-		//println("\n\nValid phone key")
 	case len(t) > accPremiumLen && string(t[:accPremiumLen]) == accPremiumKey:
-		//println("\n\nValid premium key")
 	}
 
 	return b, false
