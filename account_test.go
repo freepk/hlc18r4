@@ -1,11 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"testing"
 )
 
-var testAccount = []byte(`{"premium":{"finish":1569783897,"start":1538247897},"birth":692070602,
+var testAccount = []byte(`{"birth":692070602,"premium":{"finish":1569783897,"start":1538247897},
 	"likes":[{"id":1066502,"ts":1457224588},{"id":78150,"ts":1510460183},{"id":853672,"ts":1515150863},
 	{"id":733556,"ts":1481890895},{"id":856740,"ts":1487805837},{"id":1047142,"ts":1458068896},{"id":629144,"ts":1497234539},
 	{"id":300826,"ts":1487754288},{"id":452932,"ts":1461098717},{"id":1195182,"ts":1530979034},{"id":30712,"ts":1461763696},
@@ -31,23 +30,5 @@ func TestAccountParse(t *testing.T) {
 func BenchmarkAccountParse(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		parseAccount(testAccount)
-	}
-}
-
-func BenchmarkCmpString(b *testing.B) {
-	s := string([]byte(`premium`))
-	p := []byte(`premium`)
-	for i := 0; i < b.N; i++ {
-		if s == string(p) {
-		}
-	}
-}
-
-func BenchmarkCmpBytes(b *testing.B) {
-	a := []byte(`premium`)
-	p := []byte(`premium`)
-	for i := 0; i < b.N; i++ {
-		if bytes.Equal(a, p) {
-		}
 	}
 }
