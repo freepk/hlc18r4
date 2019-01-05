@@ -97,6 +97,7 @@ func main() {
 			json := payload[a : b+1]
 			n := utf8Unquote(json, json)
 			fmt.Println(string(json[:n]))
+			//fmt.Println(string(json))
 			payload = payload[b+1:]
 		}
 

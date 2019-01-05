@@ -5,23 +5,20 @@ import (
 )
 
 func TestCountry(t *testing.T) {
-	for i := 1; i <= 70; i++ {
-		name := getCountryName(i)
-		if getCountryId(name) != i {
-			t.Log(name)
+	for i := 0; i < 70; i++ {
+		item := countryLookup.GetItem(i)
+		if item == nil {
+			t.Fail()
+		}
+		index := countryLookup.GetIndex(item)
+		if index != i {
 			t.Fail()
 		}
 	}
 }
 
-func BenchmarkGetCountryName(b *testing.B) {
+func BenchmarkCountryGetItemNoLock(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		getCountryName(55)
-	}
-}
-
-func BenchmarkGetCountryId(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		getCountryId("Алания")
+		countryLookup.GetItemNoLock(55)
 	}
 }
