@@ -13,7 +13,6 @@ type Account struct {
 	Status        []byte
 	City          []byte
 	Country       []byte
-	Interest      []byte
 	Birth         int
 	ID            int
 	Joined        int

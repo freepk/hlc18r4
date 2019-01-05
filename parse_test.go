@@ -93,3 +93,10 @@ func BenchmarkParseInt(b *testing.B) {
 		parseInt(x)
 	}
 }
+
+func BenchmarkParsePhrase(b *testing.B) {
+	x := []byte("         \"1234567\"")
+	for i := 0; i < b.N; i++ {
+		parsePhrase(x, '"')
+	}
+}

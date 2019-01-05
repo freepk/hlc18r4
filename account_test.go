@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/valyala/fastjson"
 	"testing"
 )
 
@@ -40,4 +41,29 @@ func TestAccountParse(t *testing.T) {
 	}
 	t.Log("\n\nAccount", acc)
 	t.Log("\n\nTail", tail)
+}
+
+func BenchmarkAccountParse(b *testing.B) {
+	acc := &Account{}
+	for i := 0; i < b.N; i++ {
+		_, ok := acc.Parse(testAccount)
+		if !ok {
+			b.Fatal()
+		}
+	}
+}
+
+func BenchmarkAccountParseFastjson(b *testing.B) {
+	var p fastjson.Parser
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		p.ParseBytes(testAccount)
+	}
+}
+
+func BenchmarkAccountParseEasyJson(b *testing.B) {
+	acc := &EasyAccount{}
+	for i := 0; i < b.N; i++ {
+		acc.UnmarshalJSON(testAccount)
+	}
 }
