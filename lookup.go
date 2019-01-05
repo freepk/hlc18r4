@@ -51,7 +51,7 @@ func (l *Lookup) GetItem(index int) []byte {
 	}
 	index -= l.offset
 	l.RLock()
-	if index < len(l.items) {
+	if int(index) < len(l.items) {
 		l.RUnlock()
 		return l.items[index]
 	}
@@ -64,7 +64,7 @@ func (l *Lookup) GetItemNoLock(index int) []byte {
 		return nil
 	}
 	index -= l.offset
-	if index < len(l.items) {
+	if int(index) < len(l.items) {
 		return l.items[index]
 	}
 	return nil

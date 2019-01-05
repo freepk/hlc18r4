@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
@@ -49,6 +52,15 @@ func fastHTTPHandler(ctx *fasthttp.RequestCtx) {
 	}
 }
 
+func outputStatm() {
+	buf, err := ioutil.ReadFile("/proc/self/statm")
+	if err != nil {
+		log.Fatal(err)
+	}
+	split := bytes.Split(buf, []byte{0x20})
+	fmt.Println("Statm: size", split[0], "resident", split[1], "share", split[2])
+}
+
 func main() {
 	if 0 == 1 {
 		if fd, err := os.Create("cpu.prof"); err == nil {
@@ -66,6 +78,29 @@ func main() {
 			}
 		}()
 	}
+
+	//	runtime.GC()
+	//	outputStatm()
+
+	//	n := 20
+	//	m := 2 * 1024 * 1024
+	//	tempItemBuffer := make([]byte, 8)
+	//	lookups := make([]*Lookup, 0, n)
+	//	for i := 0; i < n; i++ {
+	//		lookup := NewLookup(int32(m), 0)
+	//		for j := 0; j < m; j++ {
+	//			binary.LittleEndian.PutUint64(tempItemBuffer, uint64(j))
+	//			index := lookup.GetIndexOrSet(tempItemBuffer)
+	//			item := lookup.GetItemNoLock(index)
+	//			if !bytes.Equal(tempItemBuffer, item) {
+	//				log.Fatal("Items not equal")
+	//			}
+	//		}
+	//		lookups = append(lookups, lookup)
+	//	}
+
+	runtime.GC()
+	outputStatm()
 
 	go func() {
 		log.Println(fasthttp.ListenAndServe(":80", fastHTTPHandler))
