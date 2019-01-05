@@ -34,5 +34,10 @@ var testAccount = []byte(`{"status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d
 
 func TestAccountParse(t *testing.T) {
 	acc := &Account{}
-	acc.Parse(testAccount)
+	tail, ok := acc.Parse(testAccount)
+	if !ok {
+		t.Fail()
+	}
+	t.Log("\n\nAccount", acc)
+	t.Log("\n\nTail", tail)
 }
