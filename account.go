@@ -1,10 +1,31 @@
 package main
 
-func parseAccount(b []byte) ([]byte, bool) {
+type Like struct {
+	ID int
+	TS int
+}
+
+type Account struct {
+	Sex           []byte
+	Email         []byte
+	Sname         []byte
+	Fname         []byte
+	Status        []byte
+	City          []byte
+	Country       []byte
+	Interest      []byte
+	Birth         int
+	ID            int
+	Joined        int
+	PremiumStart  int
+	PremiumFinish int
+	Interests     [][]byte
+	Likes         []Like
+}
+
+func (acc *Account) Parse(b []byte) ([]byte, bool) {
 	var t []byte
 	var ok bool
-	var vint int
-	var vbytes []byte
 
 	if t, ok = parseSymbol(b, '{'); !ok {
 		return b, false
@@ -13,51 +34,67 @@ func parseAccount(b []byte) ([]byte, bool) {
 	for {
 		t = parseSpaces(t)
 		switch {
+		// Sex
 		case len(t) > accSexLen && string(t[:accSexLen]) == accSexKey:
-			if vbytes, t, ok = parsePhrase(t[accSexLen:], '"'); !ok {
+			if acc.Sex, t, ok = parsePhrase(t[accSexLen:], '"'); !ok {
 				return b, false
 			}
-			println("\tSex", string(vbytes))
+			println("\tSex", string(acc.Sex))
+		// Email
 		case len(t) > accEmailLen && string(t[:accEmailLen]) == accEmailKey:
-			if vbytes, t, ok = parsePhrase(t[accEmailLen:], '"'); !ok {
+			if acc.Email, t, ok = parsePhrase(t[accEmailLen:], '"'); !ok {
 				return b, false
 			}
-			println("\tEmail", string(vbytes))
+			println("\tEmail", string(acc.Email))
+		// Sname
 		case len(t) > accSnameLen && string(t[:accSnameLen]) == accSnameKey:
-			if vbytes, t, ok = parsePhrase(t[accSnameLen:], '"'); !ok {
+			if acc.Sname, t, ok = parsePhrase(t[accSnameLen:], '"'); !ok {
 				return b, false
 			}
-			println("\tSname", string(vbytes))
+			println("\tSname", string(acc.Sname))
+		// Fname
 		case len(t) > accFnameLen && string(t[:accFnameLen]) == accFnameKey:
-			if vbytes, t, ok = parsePhrase(t[accFnameLen:], '"'); !ok {
+			if acc.Fname, t, ok = parsePhrase(t[accFnameLen:], '"'); !ok {
 				return b, false
 			}
-			println("\tFname", string(vbytes))
+			println("\tFname", string(acc.Fname))
+		// Status
 		case len(t) > accStatusLen && string(t[:accStatusLen]) == accStatusKey:
-			if vbytes, t, ok = parsePhrase(t[accStatusLen:], '"'); !ok {
+			if acc.Status, t, ok = parsePhrase(t[accStatusLen:], '"'); !ok {
 				return b, false
 			}
-			println("\tStatus", string(vbytes))
+			println("\tStatus", string(acc.Status))
+		// City
 		case len(t) > accCityLen && string(t[:accCityLen]) == accCityKey:
-			if vbytes, t, ok = parsePhrase(t[accCityLen:], '"'); !ok {
+			if acc.City, t, ok = parsePhrase(t[accCityLen:], '"'); !ok {
 				return b, false
 			}
-			println("\tCity", string(vbytes))
+			println("\tCity", string(acc.City))
+		// Country
 		case len(t) > accCountryLen && string(t[:accCountryLen]) == accCountryKey:
-			if vbytes, t, ok = parsePhrase(t[accCountryLen:], '"'); !ok {
+			if acc.Country, t, ok = parsePhrase(t[accCountryLen:], '"'); !ok {
 				return b, false
 			}
-			println("\tCountry", string(vbytes))
+			println("\tCountry", string(acc.Country))
+		// Birth
 		case len(t) > accBirthLen && string(t[:accBirthLen]) == accBirthKey:
-			if vint, t, ok = parseInt(t[accBirthLen:]); !ok {
+			if acc.Birth, t, ok = parseInt(t[accBirthLen:]); !ok {
 				return b, false
 			}
-			println("\tBirth", vint)
+			println("\tBirth", acc.Birth)
+		// ID
 		case len(t) > accIdLen && string(t[:accIdLen]) == accIdKey:
-			if vint, t, ok = parseInt(t[accIdLen:]); !ok {
+			if acc.ID, t, ok = parseInt(t[accIdLen:]); !ok {
 				return b, false
 			}
-			println("\tID", vint)
+			println("\tID", acc.ID)
+		// Joined
+		case len(t) > accJoinedLen && string(t[:accJoinedLen]) == accJoinedKey:
+			if acc.Joined, t, ok = parseInt(t[accJoinedLen:]); !ok {
+				return b, false
+			}
+			println("\tJoined", acc.Joined)
+		// Premium
 		case len(t) > accPremiumLen && string(t[:accPremiumLen]) == accPremiumKey:
 			if t, ok = parseSymbol(t[accPremiumLen:], '{'); !ok {
 				return b, false
@@ -66,16 +103,18 @@ func parseAccount(b []byte) ([]byte, bool) {
 			for {
 				t = parseSpaces(t)
 				switch {
+				// PremiumStart
 				case len(t) > premiumStartLen && string(t[:premiumStartLen]) == premiumStartKey:
-					if vint, t, ok = parseInt(t[premiumStartLen:]); !ok {
+					if acc.PremiumStart, t, ok = parseInt(t[premiumStartLen:]); !ok {
 						return b, false
 					}
-					println("\t\tStart", vint)
+					println("\t\tStart", acc.PremiumStart)
+				// PremiumFinish
 				case len(t) > premiumFinishLen && string(t[:premiumFinishLen]) == premiumFinishKey:
-					if vint, t, ok = parseInt(t[premiumFinishLen:]); !ok {
+					if acc.PremiumFinish, t, ok = parseInt(t[premiumFinishLen:]); !ok {
 						return b, false
 					}
-					println("\t\tFinish", vint)
+					println("\t\tFinish", acc.PremiumFinish)
 				}
 				if t, ok = parseSymbol(t, ','); !ok {
 					break
@@ -85,34 +124,58 @@ func parseAccount(b []byte) ([]byte, bool) {
 				return b, false
 			}
 			println("\t} // Premium")
-		case len(t) > accJoinedLen && string(t[:accJoinedLen]) == accJoinedKey:
-			if vint, t, ok = parseInt(t[accJoinedLen:]); !ok {
+		// Interests
+		case len(t) > accInterestsLen && string(t[:accInterestsLen]) == accInterestsKey:
+			if t, ok = parseSymbol(t[accInterestsLen:], '['); !ok {
 				return b, false
 			}
-			println("\tJoined", vint)
+			println("\tInterests [")
+			acc.Interests = acc.Interests[:0]
+			for {
+				// Interest
+				var accInterest []byte
+				if accInterest, t, ok = parsePhrase(t, '"'); !ok {
+					return b, false
+				}
+				println("\t\t", string(accInterest))
+				acc.Interests = append(acc.Interests, accInterest)
+				if t, ok = parseSymbol(t, ','); !ok {
+					break
+				}
+			}
+			if t, ok = parseSymbol(t, ']'); !ok {
+				return b, false
+			}
+			println("\t] // Interests")
+		// Likes
 		case len(t) > accLikesLen && string(t[:accLikesLen]) == accLikesKey:
 			if t, ok = parseSymbol(t[accLikesLen:], '['); !ok {
 				return b, false
 			}
 			println("\tLikes [")
+			acc.Likes = acc.Likes[:0]
 			for {
 				if t, ok = parseSymbol(t, '{'); !ok {
 					return b, false
 				}
 				println("\t\tLike {")
+				accLikeId := 0
+				accLikeTs := 0
 				for {
 					t = parseSpaces(t)
 					switch {
+					// accLikeId
 					case len(t) > likesIdLen && string(t[:likesIdLen]) == likesIdKey:
-						if vint, t, ok = parseInt(t[likesIdLen:]); !ok {
+						if accLikeId, t, ok = parseInt(t[likesIdLen:]); !ok {
 							return b, false
 						}
-						println("\t\t\tId", vint)
+						println("\t\t\tId", accLikeId)
+					// accLikeTs
 					case len(t) > likesTsLen && string(t[:likesTsLen]) == likesTsKey:
-						if vint, t, ok = parseInt(t[likesTsLen:]); !ok {
+						if accLikeTs, t, ok = parseInt(t[likesTsLen:]); !ok {
 							return b, false
 						}
-						println("\t\t\tTs", vint)
+						println("\t\t\tTs", accLikeTs)
 					}
 					if t, ok = parseSymbol(t, ','); !ok {
 						break
@@ -121,6 +184,7 @@ func parseAccount(b []byte) ([]byte, bool) {
 				if t, ok = parseSymbol(t, '}'); !ok {
 					return b, false
 				}
+				acc.Likes = append(acc.Likes, Like{ID: accLikeId, TS: accLikeTs})
 				println("\t\t} //Like")
 				if t, ok = parseSymbol(t, ','); !ok {
 					break
@@ -130,24 +194,6 @@ func parseAccount(b []byte) ([]byte, bool) {
 				return b, false
 			}
 			println("\t] // Likes")
-		case len(t) > accInterestsLen && string(t[:accInterestsLen]) == accInterestsKey:
-			if t, ok = parseSymbol(t[accInterestsLen:], '['); !ok {
-				return b, false
-			}
-			println("\tInterests [")
-			for {
-				if vbytes, t, ok = parsePhrase(t, '"'); !ok {
-					return b, false
-				}
-				println("\t\t", string(vbytes))
-				if t, ok = parseSymbol(t, ','); !ok {
-					break
-				}
-			}
-			if t, ok = parseSymbol(t, ']'); !ok {
-				return b, false
-			}
-			println("\t] // Interests")
 		}
 		if t, ok = parseSymbol(t, ','); !ok {
 			break
@@ -157,5 +203,6 @@ func parseAccount(b []byte) ([]byte, bool) {
 		return b, false
 	}
 	println("} //Account")
+
 	return b, false
 }
