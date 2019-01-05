@@ -87,7 +87,8 @@ func main() {
 		buf.Reset()
 		io.Copy(buf, src)
 		payload := buf.Bytes()
-		payload = payload[14 : len(payload)-2]
+		//payload = payload[14 : len(payload)-2]
+		payload = payload[14 : 8192*4]
 
 		for {
 			a, b, ok := xbytes.IndexScoped(payload, '\\', '"', '{', '}')
@@ -95,9 +96,7 @@ func main() {
 				break
 			}
 			json := payload[a : b+1]
-			n := utf8Unquote(json, json)
-			fmt.Println(string(json[:n]))
-			//fmt.Println(string(json))
+			fmt.Println(string(json))
 			payload = payload[b+1:]
 		}
 

@@ -1,13 +1,16 @@
 package main
 
 import (
-	"encoding/json"
-	"github.com/json-iterator/go"
-	"github.com/valyala/fastjson"
 	"testing"
 )
 
-var testAccount = []byte(`{"likes":[{"id":484053,"ts":1476605353},{"id":1055765,"ts":1467406524},{"id":793185,"ts":1534580707},{"id":955917,"ts":1493975640},
+var testAccount = []byte(`{"status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b",
+	"interests": ["\u041f\u0440\u043e\u0433\u0443\u043b\u043a\u0438 \u043f\u043e \u043f\u043b\u044f\u0436\u0443", "\u0412\u044b\u0445\u043e\u0434\u043d\u044b\u0435",
+	"\u0422\u044f\u0436\u0451\u043b\u0430\u044f \u0430\u0442\u043b\u0435\u0442\u0438\u043a\u0430", "\u041a\u043e\u043c\u043f\u044c\u044e\u0442\u0435\u0440\u044b",
+	"\u041f\u0438\u0432\u043e"], "sex": "f", "city": "\u0410\u043c\u0441\u0442\u0435\u0440\u043e\u0431\u0438\u0440\u0441\u043a",
+	"sname": "\u041a\u043e\u043b\u0435\u0442\u0430\u043a\u0438\u0439", "fname": "\u041c\u0438\u043b\u0430\u043d\u0430",
+	"email": "ogradonwefutmidy@me.com", "country": "\u0420\u0443\u043c\u0430\u043d\u0438\u044f",
+	"likes":[{"id":484053,"ts":1476605353},	{"id":1055765,"ts":1467406524},{"id":793185,"ts":1534580707},{"id":955917,"ts":1493975640},
 	{"id":375379,"ts":1539985529},{"id":836773,"ts":1481693076},{"id":691655,"ts":1533981341},{"id":1299873,"ts":1524997142},{"id":179795,"ts":1522779391},
 	{"id":1126729,"ts":1514445485},{"id":206461,"ts":1482808241},{"id":991685,"ts":1530470598},{"id":1020737,"ts":1515144827},{"id":1173581,"ts":1515302882},
 	{"id":1261119,"ts":1463651782},{"id":885573,"ts":1485624715},{"id":919053,"ts":1470545613},{"id":1271139,"ts":1506959707},{"id":702175,"ts":1454866547},
@@ -28,114 +31,4 @@ var testAccount = []byte(`{"likes":[{"id":484053,"ts":1476605353},{"id":1055765,
 
 func TestAccountParse(t *testing.T) {
 	parseAccount(testAccount)
-}
-
-func TestAccountParseFastJson(t *testing.T) {
-	var p fastjson.Parser
-	v, err := p.ParseBytes(testAccount)
-	t.Log(v, err)
-}
-
-func TestAccountParseStandart(t *testing.T) {
-	var account struct {
-		ID      int `json:"id"`
-		Joined  int `json:"joined"`
-		Birth   int `json:"birth"`
-		Premium struct {
-			Finish int `json:"finish"`
-			Start  int `json:"start"`
-		} `json:"premium"`
-		Likes []struct {
-			ID int `json:"id"`
-			Ts int `json:"ts"`
-		} `json:"likes"`
-	}
-	err := json.Unmarshal(testAccount, &account)
-	t.Log(account, err)
-}
-
-func TestAccountParseJsoniter(t *testing.T) {
-	var account struct {
-		ID      int `json:"id"`
-		Joined  int `json:"joined"`
-		Birth   int `json:"birth"`
-		Premium struct {
-			Finish int `json:"finish"`
-			Start  int `json:"start"`
-		} `json:"premium"`
-		Likes []struct {
-			ID int `json:"id"`
-			Ts int `json:"ts"`
-		} `json:"likes"`
-	}
-
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	err := json.Unmarshal(testAccount, &account)
-	t.Log(account, err)
-}
-
-func TestAccountParseEasyJson(t *testing.T) {
-	account := &EasyAccount{}
-	err := account.UnmarshalJSON(testAccount)
-	t.Log(account, err)
-}
-
-func BenchmarkAccountParseInHouse(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		parseAccountX(testAccount)
-	}
-}
-
-func BenchmarkAccountParseFastjson(b *testing.B) {
-	var p fastjson.Parser
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		p.ParseBytes(testAccount)
-	}
-}
-
-func BenchmarkAccountParseJsoniter(b *testing.B) {
-	var account struct {
-		ID      int `json:"id"`
-		Joined  int `json:"joined"`
-		Birth   int `json:"birth"`
-		Premium struct {
-			Finish int `json:"finish"`
-			Start  int `json:"start"`
-		} `json:"premium"`
-		Likes []struct {
-			ID int `json:"id"`
-			Ts int `json:"ts"`
-		} `json:"likes"`
-	}
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	for i := 0; i < b.N; i++ {
-		json.Unmarshal(testAccount, &account)
-	}
-}
-
-func BenchmarkAccountParseStandart(b *testing.B) {
-	var account struct {
-		ID      int `json:"id"`
-		Joined  int `json:"joined"`
-		Birth   int `json:"birth"`
-		Premium struct {
-			Finish int `json:"finish"`
-			Start  int `json:"start"`
-		} `json:"premium"`
-		Likes []struct {
-			ID int `json:"id"`
-			Ts int `json:"ts"`
-		} `json:"likes"`
-	}
-	for i := 0; i < b.N; i++ {
-		json.Unmarshal(testAccount, &account)
-	}
-}
-
-func BenchmarkAccountParseEasyJson(b *testing.B) {
-	account := &EasyAccount{}
-	for i := 0; i < b.N; i++ {
-		account.UnmarshalJSON(testAccount)
-	}
 }

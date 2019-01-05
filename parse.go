@@ -45,3 +45,31 @@ func parseInt(b []byte) (int, []byte, bool) {
 	}
 	return 0, b, false
 }
+
+func parsePhrase(b []byte, c byte) ([]byte, []byte, bool) {
+	n := len(b)
+	for i := 0; i < n; i++ {
+		if b[i] > 0x20 {
+			if b[i] != c {
+				return nil, b, false
+			}
+			p := i
+			i++
+			for i < n {
+				switch b[i] {
+				case '\\':
+					if i+5 < n && b[i+1] == 'u' {
+						i += 5
+					} else {
+						i += 1
+					}
+				case c:
+					return b[p : i+1], b[i+1:], true
+				}
+				i++
+			}
+			return nil, b, false
+		}
+	}
+	return nil, b, false
+}
