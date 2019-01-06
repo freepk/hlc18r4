@@ -23,9 +23,29 @@ type Account struct {
 	Likes         []Like
 }
 
+func (acc *Account) Reset() {
+	acc.Sex = acc.Sex[:0]
+	acc.Email = acc.Email[:0]
+	acc.Sname = acc.Sname[:0]
+	acc.Fname = acc.Fname[:0]
+	acc.Status = acc.Status[:0]
+	acc.City = acc.City[:0]
+	acc.Country = acc.Country[:0]
+	acc.Phone = acc.Phone[:0]
+	acc.Birth = 0
+	acc.ID = 0
+	acc.Joined = 0
+	acc.PremiumStart = 0
+	acc.PremiumFinish = 0
+	acc.Interests = acc.Interests[:0]
+	acc.Likes = acc.Likes[:0]
+}
+
 func (acc *Account) Parse(b []byte) ([]byte, bool) {
 	var t []byte
 	var ok bool
+
+	acc.Reset()
 
 	if t, ok = parseSymbol(b, '{'); !ok {
 		return b, false
@@ -121,7 +141,6 @@ func (acc *Account) Parse(b []byte) ([]byte, bool) {
 				return b, false
 			}
 			// println("\tInterests [")
-			acc.Interests = acc.Interests[:0]
 			for {
 				var accInterest []byte
 				if accInterest, t, ok = parsePhrase(t, '"'); !ok {
@@ -142,7 +161,6 @@ func (acc *Account) Parse(b []byte) ([]byte, bool) {
 				return b, false
 			}
 			// println("\tLikes [")
-			acc.Likes = acc.Likes[:0]
 			for {
 				if t, ok = parseSymbol(t, '{'); !ok {
 					return b, false

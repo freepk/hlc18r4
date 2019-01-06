@@ -222,6 +222,8 @@ func easyjson97766e5aDecodeGitlabComFreepkHlc18r42(in *jlexer.Lexer, out *EasyAc
 			out.Sex = string(in.String())
 		case "status":
 			out.Status = string(in.String())
+		case "phone":
+			out.Phone = string(in.String())
 		case "premium":
 			(out.Premium).UnmarshalEasyJSON(in)
 		case "likes":
@@ -383,6 +385,16 @@ func easyjson97766e5aEncodeGitlabComFreepkHlc18r42(out *jwriter.Writer, in EasyA
 			out.RawString(prefix)
 		}
 		out.String(string(in.Status))
+	}
+	{
+		const prefix string = ",\"phone\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Phone))
 	}
 	{
 		const prefix string = ",\"premium\":"

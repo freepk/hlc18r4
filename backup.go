@@ -44,7 +44,7 @@ func readBackup(path string) {
 	w.Add(n)
 	for i := 0; i < n; i++ {
 		f := a.File[i]
-		log.Println("File", f.Name)
+		//println("File", f.Name)
 		r, err := f.Open()
 		if err != nil {
 			log.Fatal(err)

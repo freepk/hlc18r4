@@ -12,6 +12,7 @@ type EasyAccount struct {
 	Fname     string      `json:"fname"`
 	Sex       string      `json:"sex"`
 	Status    string      `json:"status"`
+	Phone     string      `json:"phone"`
 	Premium   EasyPremium `json:"premium"`
 	Likes     []EasyLike  `json:"likes"`
 	Interests []string    `json:"interests"`
