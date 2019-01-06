@@ -58,7 +58,7 @@ func outputStatm() {
 		log.Fatal(err)
 	}
 	split := bytes.Split(buf, []byte{0x20})
-	fmt.Println("Statm: size", split[0], "resident", split[1], "share", split[2])
+	fmt.Println("Statm: size", string(split[0]), "resident", string(split[1]), "share", string(split[2]))
 }
 
 func main() {
