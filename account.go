@@ -13,6 +13,7 @@ type Account struct {
 	Status        []byte
 	City          []byte
 	Country       []byte
+	Phone         []byte
 	Birth         int
 	ID            int
 	Joined        int
@@ -33,6 +34,11 @@ func (acc *Account) Parse(b []byte) ([]byte, bool) {
 	for {
 		t = parseSpaces(t)
 		switch {
+		case len(t) > accPhoneLen && string(t[:accPhoneLen]) == accPhoneKey:
+			if acc.Phone, t, ok = parsePhrase(t[accPhoneLen:], '"'); !ok {
+				return b, false
+			}
+			// println("\tPhone", string(acc.Phone))
 		case len(t) > accSexLen && string(t[:accSexLen]) == accSexKey:
 			if acc.Sex, t, ok = parsePhrase(t[accSexLen:], '"'); !ok {
 				return b, false
