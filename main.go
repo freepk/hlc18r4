@@ -14,7 +14,7 @@ import (
 
 func fastHTTPHandler(ctx *fasthttp.RequestCtx) {
 	path := ctx.Path()
-	if string(path[:10]) != "/accounts/" {
+	if len(path) < 10 || string(path[:10]) != "/accounts/" {
 		ctx.SetStatusCode(fasthttp.StatusNotFound)
 		return
 	}
