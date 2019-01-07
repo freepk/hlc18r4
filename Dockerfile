@@ -4,5 +4,7 @@ ADD hlc18r4 /
 
 EXPOSE 80
 
-ENTRYPOINT ["GOGC=off /hlc18r4"]
+ENV GOGC off
+
+ENTRYPOINT ["/hlc18r4"]
 
