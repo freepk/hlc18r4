@@ -1,11 +1,12 @@
 package db
 
 import (
-	"archive/zip"
+	//"archive/zip"
 	"io"
 	"log"
 	"sync"
 
+	"github.com/klauspost/compress/zip"
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/parse/account"
 )
