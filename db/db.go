@@ -13,13 +13,19 @@ import (
 )
 
 type account struct {
+	fname   uint8
+	sname   uint16
+	sex     bool
+	country uint8
+	city    uint8
+	status  uint8
 }
 
 type DB struct {
-	// email
-	// phone
+	email    *lookup.Lookup
 	fname    *lookup.Lookup
 	sname    *lookup.Lookup
+	phone    *lookup.Lookup
 	sex      *lookup.Lookup
 	country  *lookup.Lookup
 	city     *lookup.Lookup
@@ -30,51 +36,43 @@ type DB struct {
 
 func NewDB() *DB {
 	return &DB{
+		email:    lookup.NewLookup(1400000),
 		fname:    lookup.NewLookup(128),
-		sname:    lookup.NewLookup(1024),
-		sex:      lookup.NewLookup(2),
+		sname:    lookup.NewLookup(2048),
+		phone:    lookup.NewLookup(1048576),
+		sex:      lookup.NewLookup(4),
 		country:  lookup.NewLookup(128),
 		city:     lookup.NewLookup(1024),
-		status:   lookup.NewLookup(4),
+		status:   lookup.NewLookup(8),
 		interest: lookup.NewLookup(128),
-		accounts: make([]account, 1400000)}
+		accounts: make([]account, 1500000)}
 }
 
 func (db *DB) insertAccount(a *json.Account) {
-	if a.ID > 0 && len(a.Email) > 0 {
-		if len(a.Fname) > 0 {
-			db.fname.GetKeyOrSet(a.Fname)
-		}
-		if len(a.Sname) > 0 {
-			db.sname.GetKeyOrSet(a.Sname)
-		}
-		if len(a.Sex) > 0 {
-			db.sex.GetKeyOrSet(a.Sex)
-		}
-		if len(a.Country) > 0 {
-			db.country.GetKeyOrSet(a.Country)
-		}
-		if len(a.City) > 0 {
-			db.city.GetKeyOrSet(a.City)
-		}
-		if len(a.Status) > 0 {
-			db.status.GetKeyOrSet(a.Status)
-		}
-		n := len(a.Interests)
-		for i := 0; i < n; i++ {
-			db.interest.GetKeyOrSet(a.Interests[i])
-		}
+	db.email.GetKeyOrSet(a.Email)
+	db.fname.GetKeyOrSet(a.Fname)
+	db.sname.GetKeyOrSet(a.Sname)
+	db.phone.GetKeyOrSet(a.Phone)
+	db.sex.GetKeyOrSet(a.Sex)
+	db.country.GetKeyOrSet(a.Country)
+	db.city.GetKeyOrSet(a.City)
+	db.status.GetKeyOrSet(a.Status)
+	n := len(a.Interests)
+	for i := 0; i < n; i++ {
+		db.interest.GetKeyOrSet(a.Interests[i])
 	}
 }
 
-func (db *DB) dump() {
-	fmt.Printf("\n\nFname: %#v", db.fname)
-	fmt.Printf("\n\nSname: %#v", db.sname)
-	fmt.Printf("\n\nSex: %#v", db.sex)
-	fmt.Printf("\n\nCountry: %#v", db.country)
-	fmt.Printf("\n\nCity: %#v", db.city)
-	fmt.Printf("\n\nStatus: %#v", db.status)
-	fmt.Printf("\n\nInterest: %#v", db.interest)
+func (db *DB) printStats() {
+	fmt.Println("email", db.email.LastKey())
+	fmt.Println("fname", db.fname.LastKey())
+	fmt.Println("sname", db.sname.LastKey())
+	fmt.Println("phone", db.phone.LastKey())
+	fmt.Println("sex", db.sex.LastKey())
+	fmt.Println("country", db.country.LastKey())
+	fmt.Println("city", db.city.LastKey())
+	fmt.Println("status", db.status.LastKey())
+	fmt.Println("interest", db.interest.LastKey())
 }
 
 func (db *DB) readData(r io.Reader) {
@@ -127,5 +125,4 @@ func (db *DB) Restore(path string) {
 		}()
 	}
 	w.Wait()
-	db.dump()
 }

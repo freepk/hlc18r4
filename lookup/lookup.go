@@ -46,3 +46,7 @@ func (l *Lookup) GetValue(k int) []byte {
 	}
 	return nil
 }
+
+func (l *Lookup) LastKey() int {
+	return l.k
+}
