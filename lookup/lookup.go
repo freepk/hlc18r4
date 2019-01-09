@@ -13,9 +13,10 @@ type Lookup struct {
 
 func NewLookup(num int) *Lookup {
 	l := &Lookup{
-		k: 1,
-		a: make([][]byte, 1, num),
+		k: 0,
+		a: make([][]byte, 0, num),
 		m: make(map[string]int, num)}
+	l.GetKeyOrSet([]byte{})
 	return l
 }
 

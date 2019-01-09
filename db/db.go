@@ -1,30 +1,80 @@
 package db
 
 import (
-	//"archive/zip"
+	"fmt"
 	"io"
 	"log"
 	"sync"
 
-<<<<<<< HEAD
 	"github.com/klauspost/compress/zip"
-=======
 	"gitlab.com/freepk/hlc18r4/json"
->>>>>>> 1080997c262264826bb2bda81788695301410c77
+	"gitlab.com/freepk/hlc18r4/lookup"
 	"gitlab.com/freepk/hlc18r4/parse"
 )
 
 type account struct {
-	country byte
 }
 
 type DB struct {
-	a []account
+	// email
+	// phone
+	fname    *lookup.Lookup
+	sname    *lookup.Lookup
+	sex      *lookup.Lookup
+	country  *lookup.Lookup
+	city     *lookup.Lookup
+	status   *lookup.Lookup
+	interest *lookup.Lookup
+	accounts []account
 }
 
 func NewDB() *DB {
-	a := make([]account, 1400000)
-	return &DB{a: a}
+	return &DB{
+		fname:    lookup.NewLookup(128),
+		sname:    lookup.NewLookup(1024),
+		sex:      lookup.NewLookup(2),
+		country:  lookup.NewLookup(128),
+		city:     lookup.NewLookup(1024),
+		status:   lookup.NewLookup(4),
+		interest: lookup.NewLookup(128),
+		accounts: make([]account, 1400000)}
+}
+
+func (db *DB) insertAccount(a *json.Account) {
+	if a.ID > 0 && len(a.Email) > 0 {
+		if len(a.Fname) > 0 {
+			db.fname.GetKeyOrSet(a.Fname)
+		}
+		if len(a.Sname) > 0 {
+			db.sname.GetKeyOrSet(a.Sname)
+		}
+		if len(a.Sex) > 0 {
+			db.sex.GetKeyOrSet(a.Sex)
+		}
+		if len(a.Country) > 0 {
+			db.country.GetKeyOrSet(a.Country)
+		}
+		if len(a.City) > 0 {
+			db.city.GetKeyOrSet(a.City)
+		}
+		if len(a.Status) > 0 {
+			db.status.GetKeyOrSet(a.Status)
+		}
+		n := len(a.Interests)
+		for i := 0; i < n; i++ {
+			db.interest.GetKeyOrSet(a.Interests[i])
+		}
+	}
+}
+
+func (db *DB) dump() {
+	fmt.Printf("\n\nFname: %#v", db.fname)
+	fmt.Printf("\n\nSname: %#v", db.sname)
+	fmt.Printf("\n\nSex: %#v", db.sex)
+	fmt.Printf("\n\nCountry: %#v", db.country)
+	fmt.Printf("\n\nCity: %#v", db.city)
+	fmt.Printf("\n\nStatus: %#v", db.status)
+	fmt.Printf("\n\nInterest: %#v", db.interest)
 }
 
 func (db *DB) readData(r io.Reader) {
@@ -43,8 +93,7 @@ func (db *DB) readData(r io.Reader) {
 				if !ok {
 					break
 				}
-				x := db.a[a.ID]
-				x.country = 10
+				db.insertAccount(a)
 			}
 			p = copy(b, t)
 			x = 0
@@ -78,4 +127,5 @@ func (db *DB) Restore(path string) {
 		}()
 	}
 	w.Wait()
+	db.dump()
 }
