@@ -1,6 +1,6 @@
-package main
+package parse
 
-func parseSpaces(b []byte) []byte {
+func ParseSpaces(b []byte) []byte {
 	n := len(b)
 	for i := 0; i < n; i++ {
 		if b[i] > 0x20 {
@@ -10,7 +10,7 @@ func parseSpaces(b []byte) []byte {
 	return b[n:]
 }
 
-func parseSymbol(b []byte, c byte) ([]byte, bool) {
+func ParseSymbol(b []byte, c byte) ([]byte, bool) {
 	n := len(b)
 	for i := 0; i < n; i++ {
 		if b[i] > 0x20 {
@@ -23,7 +23,7 @@ func parseSymbol(b []byte, c byte) ([]byte, bool) {
 	return b, false
 }
 
-func parseInt(b []byte) (int, []byte, bool) {
+func ParseInt(b []byte) (int, []byte, bool) {
 	n := len(b)
 	for i := 0; i < n; i++ {
 		if b[i] > 0x20 {
@@ -46,7 +46,7 @@ func parseInt(b []byte) (int, []byte, bool) {
 	return 0, b, false
 }
 
-func parsePhrase(b []byte, c byte) ([]byte, []byte, bool) {
+func ParsePhrase(b []byte, c byte) ([]byte, []byte, bool) {
 	n := len(b)
 	for i := 0; i < n; i++ {
 		if b[i] > 0x20 {
