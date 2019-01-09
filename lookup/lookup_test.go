@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestLookupGetOrSetIndex(t *testing.T) {
+func TestLookupGetKeyOrSet(t *testing.T) {
 	l := NewLookup(100)
 	for i := 1; i <= 50; i++ {
 		b := make([]byte, 8)
