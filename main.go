@@ -15,6 +15,10 @@ func fastHTTPHandler(ctx *fasthttp.RequestCtx) {
 		ctx.SetStatusCode(fasthttp.StatusNotFound)
 		return
 	}
+	switch string(ctx.Method()) {
+	case `POST`:
+	case `GET`:
+	}
 	ctx.SetStatusCode(fasthttp.StatusOK)
 }
 
