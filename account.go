@@ -41,6 +41,7 @@ func (a *Account) SetSex(sex []byte) {
 }
 
 func (a *Account) SetCountry(country []byte) {
+	countryLookup.GetIndexOrSet(country)
 }
 
 func (a *Account) SetCity(city []byte) {
