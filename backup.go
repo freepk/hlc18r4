@@ -8,7 +8,7 @@ import (
 )
 
 func readData(r io.Reader) {
-	acc := &Account{}
+	a := &Account{}
 	b := make([]byte, 8192)
 	p := 0
 	x := 14
@@ -18,7 +18,8 @@ func readData(r io.Reader) {
 			t, ok := b[x:n], true
 			for {
 				t, ok = parseSymbol(t, ',')
-				t, ok = acc.Parse(t)
+				a.Reset()
+				t, ok = a.UnmarshalJSON(t)
 				if !ok {
 					break
 				}

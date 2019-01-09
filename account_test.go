@@ -35,7 +35,7 @@ var testAccount = []byte(`{"status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d
 
 func TestAccountParse(t *testing.T) {
 	acc := &Account{}
-	tail, ok := acc.Parse(testAccount)
+	tail, ok := acc.UnmarshalJSON(testAccount)
 	if !ok {
 		t.Fail()
 	}
@@ -46,7 +46,7 @@ func TestAccountParse(t *testing.T) {
 func BenchmarkAccountParse(b *testing.B) {
 	acc := &Account{}
 	for i := 0; i < b.N; i++ {
-		_, ok := acc.Parse(testAccount)
+		_, ok := acc.UnmarshalJSON(testAccount)
 		if !ok {
 			b.Fatal()
 		}
