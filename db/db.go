@@ -6,19 +6,25 @@ import (
 	"log"
 	"sync"
 
+	"gitlab.com/freepk/hlc18r4/json"
 	"gitlab.com/freepk/hlc18r4/parse"
-	"gitlab.com/freepk/hlc18r4/parse/account"
 )
 
+type account struct {
+	country byte
+}
+
 type DB struct {
+	a []account
 }
 
 func NewDB() *DB {
-	return &DB{}
+	a := make([]account, 1400000)
+	return &DB{a: a}
 }
 
 func (db *DB) readData(r io.Reader) {
-	a := &account.Account{}
+	a := &json.Account{}
 	b := make([]byte, 8192)
 	p := 0
 	x := 14
@@ -29,10 +35,12 @@ func (db *DB) readData(r io.Reader) {
 			for {
 				t, ok = parse.ParseSymbol(t, ',')
 				a.Reset()
-				t, ok = a.Parse(t)
+				t, ok = a.UnmarshalJSON(t)
 				if !ok {
 					break
 				}
+				x := db.a[a.ID]
+				x.country = 10
 			}
 			p = copy(b, t)
 			x = 0

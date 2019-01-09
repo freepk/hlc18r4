@@ -1,4 +1,4 @@
-package account
+package json
 
 import (
 	"gitlab.com/freepk/hlc18r4/parse"
@@ -45,7 +45,7 @@ func (a *Account) Reset() {
 	a.Likes = a.Likes[:0]
 }
 
-func (a *Account) Parse(buf []byte) ([]byte, bool) {
+func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 	var tail []byte
 	var ok bool
 
