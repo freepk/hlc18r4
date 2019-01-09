@@ -1,4 +1,4 @@
-package account
+package json
 
 import (
 	"testing"
@@ -28,9 +28,9 @@ var testAccount = []byte(`{"status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d
 	{"id":30491,"ts":1474338607},{"id":451121,"ts":1465475793},{"id":1110529,"ts":1505407844},{"id":33841,"ts":1520879410},{"id":1116037,"ts":1478847461}],
 	"id":1300026,"joined":1332115200,"birth":721360390}`)
 
-func TestAccountParse(t *testing.T) {
+func TestAccountUnmarshalJSON(t *testing.T) {
 	a := &Account{}
-	tail, ok := a.Parse(testAccount)
+	tail, ok := a.UnmarshalJSON(testAccount)
 	if !ok {
 		t.Fail()
 	}
@@ -38,11 +38,11 @@ func TestAccountParse(t *testing.T) {
 	t.Log("\n\nTail", tail)
 }
 
-func BenchmarkAccountParse(b *testing.B) {
+func BenchmarkAccountUnmarshalJSON(b *testing.B) {
 	a := &Account{}
 	for i := 0; i < b.N; i++ {
 		a.Reset()
-		_, ok := a.Parse(testAccount)
+		_, ok := a.UnmarshalJSON(testAccount)
 		if !ok {
 			b.Fatal()
 		}
