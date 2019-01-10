@@ -20,12 +20,12 @@ func NewLookup(num int) *Lookup {
 	return l
 }
 
-func (l *Lookup) GetKeyOrSet(v []byte) int {
+func (l *Lookup) GetKeyOrSet(v []byte) (int, bool) {
 	l.Lock()
 	k, ok := l.m[string(v)]
 	if ok {
 		l.Unlock()
-		return k
+		return k, true
 	}
 	x := make([]byte, len(v))
 	copy(x, v)
@@ -34,17 +34,17 @@ func (l *Lookup) GetKeyOrSet(v []byte) int {
 	l.k++
 	l.a = append(l.a, x)
 	l.Unlock()
-	return k
+	return k, false
 }
 
-func (l *Lookup) GetValue(k int) []byte {
+func (l *Lookup) GetValue(k int) ([]byte, bool) {
 	if k < 1 {
-		return nil
+		return nil, false
 	}
 	if k < len(l.a) {
-		return l.a[k]
+		return l.a[k], true
 	}
-	return nil
+	return nil, false
 }
 
 func (l *Lookup) LastKey() int {

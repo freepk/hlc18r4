@@ -73,6 +73,24 @@ func TestParseInt(t *testing.T) {
 	}
 }
 
+func TestParseQuoted(t *testing.T) {
+	if x, b, ok := ParseQuoted([]byte("")); x != nil || ok || string(b) != "" {
+		t.Fail()
+	}
+	if x, b, ok := ParseQuoted([]byte(" ")); x != nil || ok || string(b) != " " {
+		t.Fail()
+	}
+	if x, b, ok := ParseQuoted([]byte(" aa\"")); x != nil || ok || string(b) != " aa\"" {
+		t.Fail()
+	}
+	if x, b, ok := ParseQuoted([]byte(" \"aa\"")); string(x) != "aa" || !ok || string(b) != "" {
+		t.Fail()
+	}
+	if x, b, ok := ParseQuoted([]byte(" \"aa\" ")); string(x) != "aa" || !ok || string(b) != " " {
+		t.Fail()
+	}
+}
+
 func BenchmarkParseSpaces(b *testing.B) {
 	x := []byte("         ")
 	for i := 0; i < b.N; i++ {
@@ -94,9 +112,9 @@ func BenchmarkParseInt(b *testing.B) {
 	}
 }
 
-func BenchmarkParsePhrase(b *testing.B) {
+func BenchmarkParseQuoted(b *testing.B) {
 	x := []byte("         \"1234567\"")
 	for i := 0; i < b.N; i++ {
-		ParsePhrase(x, '"')
+		ParseQuoted(x)
 	}
 }

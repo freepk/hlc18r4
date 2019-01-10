@@ -11,8 +11,14 @@ func TestLookupGetKeyOrSet(t *testing.T) {
 	for i := 1; i <= 50; i++ {
 		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(i))
-		k := l.GetKeyOrSet(b)
-		v := l.GetValue(k)
+		k, ok := l.GetKeyOrSet(b)
+		if ok {
+			t.Fail()
+		}
+		v, ok := l.GetValue(k)
+		if !ok {
+			t.Fail()
+		}
 		if !bytes.Equal(b, v) {
 			t.Fail()
 		}

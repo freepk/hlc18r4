@@ -46,25 +46,26 @@ func ParseInt(b []byte) (int, []byte, bool) {
 	return 0, b, false
 }
 
-func ParsePhrase(b []byte, c byte) ([]byte, []byte, bool) {
+func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 	n := len(b)
 	for i := 0; i < n; i++ {
 		if b[i] > 0x20 {
-			if b[i] != c {
+			if b[i] != 0x22 {
 				return nil, b, false
 			}
-			p := i
+			p := i + 1
 			i++
 			for i < n {
+				j := i + 1
 				switch b[i] {
-				case '\\':
-					if i+5 < n && b[i+1] == 'u' {
+				case 0x5C:
+					if (i+5) < n && b[j] == 0x75 {
 						i += 5
 					} else {
 						i += 1
 					}
-				case c:
-					return b[p : i+1], b[i+1:], true
+				case 0x22:
+					return b[p:i], b[j:], true
 				}
 				i++
 			}

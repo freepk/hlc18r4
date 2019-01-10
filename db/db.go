@@ -1,78 +1,56 @@
 package db
 
 import (
-	"fmt"
+	"errors"
 	"io"
 	"log"
 	"sync"
 
 	"github.com/klauspost/compress/zip"
+	//"gitlab.com/freepk/hlc18r4/hashtab"
+	"gitlab.com/freepk/hlc18r4/hashmap"
 	"gitlab.com/freepk/hlc18r4/lookup"
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 )
 
-type account struct {
-	fname   uint8
-	sname   uint16
-	sex     bool
-	country uint8
-	city    uint8
-	status  uint8
-}
+var (
+	DefaultError = errors.New("Error")
+)
+
+var (
+	domainLookup = lookup.NewLookup(16)
+)
 
 type DB struct {
-	email    *lookup.Lookup
-	fname    *lookup.Lookup
-	sname    *lookup.Lookup
-	phone    *lookup.Lookup
-	sex      *lookup.Lookup
-	country  *lookup.Lookup
-	city     *lookup.Lookup
-	status   *lookup.Lookup
-	interest *lookup.Lookup
-	accounts []account
+	emailHashMaps []*hashmap.HashMap
 }
 
 func NewDB() *DB {
+	emailHashMaps := make([]*hashmap.HashMap, 16)
+	for i := 0; i < 16; i++ {
+		emailHashMaps[i] = hashmap.NewHashMap()
+	}
 	return &DB{
-		email:    lookup.NewLookup(1400000),
-		fname:    lookup.NewLookup(128),
-		sname:    lookup.NewLookup(2048),
-		phone:    lookup.NewLookup(1048576),
-		sex:      lookup.NewLookup(4),
-		country:  lookup.NewLookup(128),
-		city:     lookup.NewLookup(1024),
-		status:   lookup.NewLookup(8),
-		interest: lookup.NewLookup(128),
-		accounts: make([]account, 1500000)}
-}
-
-func (db *DB) insertAccount(a *proto.Account) {
-	db.email.GetKeyOrSet(a.Email)
-	db.fname.GetKeyOrSet(a.Fname)
-	db.sname.GetKeyOrSet(a.Sname)
-	db.phone.GetKeyOrSet(a.Phone)
-	db.sex.GetKeyOrSet(a.Sex)
-	db.country.GetKeyOrSet(a.Country)
-	db.city.GetKeyOrSet(a.City)
-	db.status.GetKeyOrSet(a.Status)
-	n := len(a.Interests)
-	for i := 0; i < n; i++ {
-		db.interest.GetKeyOrSet(a.Interests[i])
+		emailHashMaps: emailHashMaps,
 	}
 }
 
-func (db *DB) printStats() {
-	fmt.Println("email", db.email.LastKey())
-	fmt.Println("fname", db.fname.LastKey())
-	fmt.Println("sname", db.sname.LastKey())
-	fmt.Println("phone", db.phone.LastKey())
-	fmt.Println("sex", db.sex.LastKey())
-	fmt.Println("country", db.country.LastKey())
-	fmt.Println("city", db.city.LastKey())
-	fmt.Println("status", db.status.LastKey())
-	fmt.Println("interest", db.interest.LastKey())
+func (db *DB) insertAccount(src *proto.Account) error {
+	login, domain, ok := splitEmail(src.Email)
+	if !ok {
+		return DefaultError
+	}
+	domainKey, ok := domainLookup.GetKeyOrSet(domain)
+	emailHashMap := db.emailHashMaps[domainKey]
+	if emailHashMap == nil {
+		log.Println("Have to add new emailHashMap", domain, domainKey)
+	}
+	id, ok := emailHashMap.GetOrSet(login, src.ID)
+	if ok {
+		log.Fatal("!!!!!!!", id, src.ID)
+	}
+	return nil
 }
 
 func (db *DB) readData(r io.Reader) {

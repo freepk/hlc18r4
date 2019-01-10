@@ -68,35 +68,35 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				return buf, false
 			}
 		case len(tail) > EmailLen && string(tail[:EmailLen]) == EmailKey:
-			if a.Email, tail, ok = parse.ParsePhrase(tail[EmailLen:], '"'); !ok {
+			if a.Email, tail, ok = parse.ParseQuoted(tail[EmailLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > FnameLen && string(tail[:FnameLen]) == FnameKey:
-			if a.Fname, tail, ok = parse.ParsePhrase(tail[FnameLen:], '"'); !ok {
+			if a.Fname, tail, ok = parse.ParseQuoted(tail[FnameLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > SnameLen && string(tail[:SnameLen]) == SnameKey:
-			if a.Sname, tail, ok = parse.ParsePhrase(tail[SnameLen:], '"'); !ok {
+			if a.Sname, tail, ok = parse.ParseQuoted(tail[SnameLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > PhoneLen && string(tail[:PhoneLen]) == PhoneKey:
-			if a.Phone, tail, ok = parse.ParsePhrase(tail[PhoneLen:], '"'); !ok {
+			if a.Phone, tail, ok = parse.ParseQuoted(tail[PhoneLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > SexLen && string(tail[:SexLen]) == SexKey:
-			if a.Sex, tail, ok = parse.ParsePhrase(tail[SexLen:], '"'); !ok {
+			if a.Sex, tail, ok = parse.ParseQuoted(tail[SexLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > CountryLen && string(tail[:CountryLen]) == CountryKey:
-			if a.Country, tail, ok = parse.ParsePhrase(tail[CountryLen:], '"'); !ok {
+			if a.Country, tail, ok = parse.ParseQuoted(tail[CountryLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > CityLen && string(tail[:CityLen]) == CityKey:
-			if a.City, tail, ok = parse.ParsePhrase(tail[CityLen:], '"'); !ok {
+			if a.City, tail, ok = parse.ParseQuoted(tail[CityLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > StatusLen && string(tail[:StatusLen]) == StatusKey:
-			if a.Status, tail, ok = parse.ParsePhrase(tail[StatusLen:], '"'); !ok {
+			if a.Status, tail, ok = parse.ParseQuoted(tail[StatusLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > PremiumLen && string(tail[:PremiumLen]) == PremiumKey:
@@ -133,7 +133,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			}
 			for {
 				var interest []byte
-				if interest, tail, ok = parse.ParsePhrase(tail, '"'); !ok {
+				if interest, tail, ok = parse.ParseQuoted(tail); !ok {
 					return buf, false
 				}
 				a.Interests = append(a.Interests, interest)
