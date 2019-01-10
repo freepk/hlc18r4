@@ -1,4 +1,4 @@
-package json
+package proto
 
 import (
 	"gitlab.com/freepk/hlc18r4/parse"

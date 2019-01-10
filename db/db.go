@@ -7,9 +7,9 @@ import (
 	"sync"
 
 	"github.com/klauspost/compress/zip"
-	"gitlab.com/freepk/hlc18r4/json"
 	"gitlab.com/freepk/hlc18r4/lookup"
 	"gitlab.com/freepk/hlc18r4/parse"
+	"gitlab.com/freepk/hlc18r4/proto"
 )
 
 type account struct {
@@ -48,7 +48,7 @@ func NewDB() *DB {
 		accounts: make([]account, 1500000)}
 }
 
-func (db *DB) insertAccount(a *json.Account) {
+func (db *DB) insertAccount(a *proto.Account) {
 	db.email.GetKeyOrSet(a.Email)
 	db.fname.GetKeyOrSet(a.Fname)
 	db.sname.GetKeyOrSet(a.Sname)
@@ -76,7 +76,7 @@ func (db *DB) printStats() {
 }
 
 func (db *DB) readData(r io.Reader) {
-	a := &json.Account{}
+	a := &proto.Account{}
 	b := make([]byte, 8192)
 	p := 0
 	x := 14
