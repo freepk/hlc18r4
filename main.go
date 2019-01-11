@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"runtime"
 	"runtime/pprof"
+	"syscall"
 
 	"github.com/valyala/fasthttp"
 	"gitlab.com/freepk/hlc18r4/db"
@@ -48,11 +49,14 @@ func main() {
 
 	log.Println("Start load DB")
 	mainDb := db.NewDB()
-	mainDb.Restore("/tmp/data/data.zip")
+	//mainDb.Restore("/tmp/data/data.zip")
+	mainDb.Restore("./data/data.zip")
 	db.Print()
 
 	runtime.GC()
 	outputStatm()
+
+	syscall.Mlockall(syscall.MCL_FUTURE)
 
 	go func() {
 		err := fasthttp.ListenAndServe(":80", AccountsHandler)
