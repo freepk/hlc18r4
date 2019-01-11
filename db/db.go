@@ -20,6 +20,7 @@ var (
 )
 
 var (
+	maxLikes       = 0
 	emailHashTab   = hashtab.NewHashTab(21)
 	domainLookup   = lookup.NewLookup(4)
 	fnameLookup    = lookup.NewLookup(8)
@@ -32,34 +33,47 @@ var (
 )
 
 func Print() {
-	fmt.Println("\n\nid domain")
+	fmt.Println("Max likes", maxLikes)
+	return
+	fmt.Println("\n# Domain", domainLookup.LastKey())
+	fmt.Println("id qty domain")
 	domainLookup.Print()
-	fmt.Println("\n\nid fname")
+	fmt.Println("\n# Fname", fnameLookup.LastKey())
+	fmt.Println("id qty fname")
 	fnameLookup.Print()
-	fmt.Println("\n\nid sname")
+	fmt.Println("\n# Sname", snameLookup.LastKey())
+	fmt.Println("id qty sname")
 	snameLookup.Print()
-	fmt.Println("\n\nid sex")
+	fmt.Println("\n# Sex", sexLookup.LastKey())
+	fmt.Println("id qty sex")
 	sexLookup.Print()
-	fmt.Println("\n\nid country")
+	fmt.Println("\n# Country", countryLookup.LastKey())
+	fmt.Println("id qty country")
 	countryLookup.Print()
-	fmt.Println("\n\nid city")
+	fmt.Println("\n# City", cityLookup.LastKey())
+	fmt.Println("id qty city")
 	cityLookup.Print()
-	fmt.Println("\n\nid status")
+	fmt.Println("\n# Status", statusLookup.LastKey())
+	fmt.Println("id qty status")
 	statusLookup.Print()
-	fmt.Println("\n\nid interest")
+	fmt.Println("\n# Interest", interestLookup.LastKey())
+	fmt.Println("id qty interest")
 	interestLookup.Print()
 }
 
 type account struct {
-	domain    uint8
-	fname     uint8
-	sname     uint16
-	sex       uint8
-	country   uint8
-	city      uint16
-	status    uint8
-	loginSize uint8
-	login     [24]byte
+	domain       uint8
+	fname        uint8
+	sname        uint16
+	sex          uint8
+	country      uint8
+	city         uint16
+	status       uint8
+	interestSize uint8
+	interest     [10]uint8
+	loginSize    uint8
+	login        [24]byte
+	likes        []uint64
 }
 
 type DB struct {
@@ -70,7 +84,7 @@ func NewDB() *DB {
 	return &DB{a: make([]account, 1400000)}
 }
 
-func (db *DB) insertAccount(src *proto.Account) error {
+func (db *DB) insertAccount(src *proto.Account, checkLikes bool) error {
 	emailHash := murmur3.Sum64(src.Email)
 	id, ok := emailHashTab.GetOrSet(uint64(emailHash), uint64(src.ID))
 	if ok {
@@ -105,11 +119,27 @@ func (db *DB) insertAccount(src *proto.Account) error {
 	dst.city = uint16(k)
 	k, _ = statusLookup.GetOrGen(src.Status)
 	dst.status = uint8(k)
-
-	//n := len(src.Interests)
-	//for i := 0; i < n; i++ {
-	//	interestLookup.GetOrGen(src.Interests[i])
-	//}
+	n = len(src.Interests)
+	if n > 10 {
+		log.Println("Too much interests", n)
+		return DefaultError
+	}
+	dst.interestSize = uint8(n)
+	for i := 0; i < n; i++ {
+		k, _ = interestLookup.GetOrGen(src.Interests[i])
+		dst.interest[i] = uint8(k)
+	}
+	n = len(src.Likes)
+	maxLikes += n
+	for i := 0; i < n; i++ {
+		like := src.Likes[i]
+		if like.ID < src.ID {
+			db.a[like.ID].likes = append(db.a[like.ID].likes, uint64(src.ID))
+		}
+		//if checkLikes && db.a[like.ID].loginSize == 0 {
+		//	return DefaultError
+		//}
+	}
 	return nil
 }
 
@@ -123,13 +153,16 @@ func (db *DB) readData(r io.Reader) {
 			n += p
 			t, ok := b[x:n], true
 			for {
-				t, ok = parse.ParseSymbol(t, ',')
 				a.Reset()
+				t, ok = parse.ParseSymbol(t, ',')
 				t, ok = a.UnmarshalJSON(t)
 				if !ok {
 					break
 				}
-				db.insertAccount(a)
+				err := db.insertAccount(a, false)
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 			p = copy(b, t)
 			x = 0
