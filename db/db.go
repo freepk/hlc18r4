@@ -9,7 +9,7 @@ import (
 
 	"github.com/freepk/hashtab"
 	"github.com/klauspost/compress/zip"
-	"github.com/spaolacci/murmur3"
+	//"github.com/spaolacci/murmur3"
 	"gitlab.com/freepk/hlc18r4/lookup"
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
@@ -19,8 +19,16 @@ var (
 	DefaultError = errors.New("Error")
 )
 
+const (
+	likePageSize        = 256
+	likePagesPerAccount = 4
+	likeStructSize      = 8
+	likeExtPagesCount   = 1500000
+)
+
 var (
-	maxLikes       = 0
+	likeCounters   [20]int
+	likePagePool   [likeExtPagesCount][likePageSize]byte
 	emailHashTab   = hashtab.NewHashTab(21)
 	domainLookup   = lookup.NewLookup(4)
 	fnameLookup    = lookup.NewLookup(8)
@@ -33,7 +41,16 @@ var (
 )
 
 func Print() {
-	fmt.Println("Max likes", maxLikes)
+	fmt.Println("# Page size", likePageSize, "like struct size", likeStructSize)
+	fmt.Printf("%8s %8s %10s %10s\n", "pages", "accounts", "part", "total")
+	totalSize := 0
+	for i := 0; i < len(likeCounters); i++ {
+		pages := i + 1
+		accounts := likeCounters[i]
+		partSize := accounts * pages * likePageSize
+		totalSize += partSize
+		fmt.Printf("%8d %8d %10d %10d\n", pages, accounts, partSize, totalSize)
+	}
 	return
 	fmt.Println("\n# Domain", domainLookup.LastKey())
 	fmt.Println("id qty domain")
@@ -62,18 +79,19 @@ func Print() {
 }
 
 type account struct {
-	domain       uint8
-	fname        uint8
-	sname        uint16
-	sex          uint8
-	country      uint8
-	city         uint16
-	status       uint8
-	interestSize uint8
-	interest     [10]uint8
-	loginSize    uint8
-	login        [24]byte
-	likes        []uint64
+	domain        uint8
+	fname         uint8
+	sname         uint16
+	sex           uint8
+	country       uint8
+	city          uint16
+	status        uint8
+	interestSize  uint8
+	interest      [10]uint8
+	loginSize     uint8
+	login         [24]byte
+	likePages     [likePagesPerAccount - 1]uint32
+	likeFirstPage [likePageSize]byte
 }
 
 type DB struct {
@@ -85,61 +103,54 @@ func NewDB() *DB {
 }
 
 func (db *DB) insertAccount(src *proto.Account, checkLikes bool) error {
-	emailHash := murmur3.Sum64(src.Email)
-	id, ok := emailHashTab.GetOrSet(uint64(emailHash), uint64(src.ID))
-	if ok {
-		log.Println("Email duplicate", src.Email, src.ID, id)
-		return DefaultError
-	}
-	login, domain, ok := splitEmail(src.Email)
-	if !ok {
-		return DefaultError
-	}
-	n := len(login)
-	if n > 24 {
-		return DefaultError
-	}
-	dst := &db.a[src.ID]
-	dst.loginSize = uint8(n)
-	for i := 0; i < n; i++ {
-		dst.login[i] = login[i]
-	}
-	k := 0
-	k, _ = domainLookup.GetOrGen(domain)
-	dst.domain = uint8(k)
-	k, _ = fnameLookup.GetOrGen(src.Fname)
-	dst.fname = uint8(k)
-	k, _ = snameLookup.GetOrGen(src.Sname)
-	dst.sname = uint16(k)
-	k, _ = sexLookup.GetOrGen(src.Sex)
-	dst.sex = uint8(k)
-	k, _ = countryLookup.GetOrGen(src.Country)
-	dst.country = uint8(k)
-	k, _ = cityLookup.GetOrGen(src.City)
-	dst.city = uint16(k)
-	k, _ = statusLookup.GetOrGen(src.Status)
-	dst.status = uint8(k)
-	n = len(src.Interests)
-	if n > 10 {
-		log.Println("Too much interests", n)
-		return DefaultError
-	}
-	dst.interestSize = uint8(n)
-	for i := 0; i < n; i++ {
-		k, _ = interestLookup.GetOrGen(src.Interests[i])
-		dst.interest[i] = uint8(k)
-	}
-	n = len(src.Likes)
-	maxLikes += n
-	for i := 0; i < n; i++ {
-		like := src.Likes[i]
-		if like.ID < src.ID {
-			db.a[like.ID].likes = append(db.a[like.ID].likes, uint64(src.ID))
+	/*
+		emailHash := murmur3.Sum64(src.Email)
+		id, ok := emailHashTab.GetOrSet(uint64(emailHash), uint64(src.ID))
+		if ok {
+			log.Println("Email duplicate", src.Email, src.ID, id)
+			return DefaultError
 		}
-		//if checkLikes && db.a[like.ID].loginSize == 0 {
-		//	return DefaultError
-		//}
-	}
+		login, domain, ok := splitEmail(src.Email)
+		if !ok {
+			return DefaultError
+		}
+		n := len(login)
+		if n > 24 {
+			return DefaultError
+		}
+		dst := &db.a[src.ID]
+		dst.loginSize = uint8(n)
+		for i := 0; i < n; i++ {
+			dst.login[i] = login[i]
+		}
+		k := 0
+		k, _ = domainLookup.GetOrGen(domain)
+		dst.domain = uint8(k)
+		k, _ = fnameLookup.GetOrGen(src.Fname)
+		dst.fname = uint8(k)
+		k, _ = snameLookup.GetOrGen(src.Sname)
+		dst.sname = uint16(k)
+		k, _ = sexLookup.GetOrGen(src.Sex)
+		dst.sex = uint8(k)
+		k, _ = countryLookup.GetOrGen(src.Country)
+		dst.country = uint8(k)
+		k, _ = cityLookup.GetOrGen(src.City)
+		dst.city = uint16(k)
+		k, _ = statusLookup.GetOrGen(src.Status)
+		dst.status = uint8(k)
+		n = len(src.Interests)
+		if n > 10 {
+			log.Println("Too much interests", n)
+			return DefaultError
+		}
+		dst.interestSize = uint8(n)
+		for i := 0; i < n; i++ {
+			k, _ = interestLookup.GetOrGen(src.Interests[i])
+			dst.interest[i] = uint8(k)
+		}
+		n = len(src.Likes)
+		likeCounters[n/(likePageSize/likeStructSize)]++
+	*/
 	return nil
 }
 
