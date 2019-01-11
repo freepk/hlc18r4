@@ -6,9 +6,9 @@ import (
 	"log"
 	"sync"
 
+	"github.com/freepk/hashtab"
 	"github.com/klauspost/compress/zip"
-	//"gitlab.com/freepk/hlc18r4/hashtab"
-	"gitlab.com/freepk/hlc18r4/hashmap"
+	"gitlab.com/freepk/hlc18r4/hash"
 	"gitlab.com/freepk/hlc18r4/lookup"
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
@@ -19,21 +19,15 @@ var (
 )
 
 var (
-	domainLookup = lookup.NewLookup(16)
+	domainLookup    = lookup.NewLookup(16)
+	emailHashTab, _ = hashtab.NewHashTab(21)
 )
 
 type DB struct {
-	emailHashMaps []*hashmap.HashMap
 }
 
 func NewDB() *DB {
-	emailHashMaps := make([]*hashmap.HashMap, 16)
-	for i := 0; i < 16; i++ {
-		emailHashMaps[i] = hashmap.NewHashMap()
-	}
-	return &DB{
-		emailHashMaps: emailHashMaps,
-	}
+	return &DB{}
 }
 
 func (db *DB) insertAccount(src *proto.Account) error {
@@ -41,14 +35,10 @@ func (db *DB) insertAccount(src *proto.Account) error {
 	if !ok {
 		return DefaultError
 	}
-	domainKey, ok := domainLookup.GetKeyOrSet(domain)
-	emailHashMap := db.emailHashMaps[domainKey]
-	if emailHashMap == nil {
-		log.Println("Have to add new emailHashMap", domain, domainKey)
-	}
-	id, ok := emailHashMap.GetOrSet(login, src.ID)
+	emailHash := hash.Hash64(src.Email, 1234)
+	id, ok := emailHashTab.GetOrSet(uint64(emailHash), uint64(src.ID))
 	if ok {
-		log.Fatal("!!!!!!!", id, src.ID)
+		log.Println(login, domain, id, src.ID)
 	}
 	return nil
 }
