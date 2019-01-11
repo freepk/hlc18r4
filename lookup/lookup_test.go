@@ -7,8 +7,8 @@ import (
 )
 
 func TestLookupGetKeyOrSet(t *testing.T) {
-	l, err := NewLookup(7)
-	if err != nil {
+	l := NewLookup(7)
+	if l == nil {
 		t.Fail()
 	}
 	for i := 1; i <= 50; i++ {

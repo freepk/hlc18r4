@@ -20,15 +20,15 @@ var (
 )
 
 var (
-	emailHashTab, _   = hashtab.NewHashTab(21)
-	domainLookup, _   = lookup.NewLookup(4)
-	fnameLookup, _    = lookup.NewLookup(8)
-	snameLookup, _    = lookup.NewLookup(12)
-	sexLookup, _      = lookup.NewLookup(4)
-	countryLookup, _  = lookup.NewLookup(8)
-	cityLookup, _     = lookup.NewLookup(10)
-	statusLookup, _   = lookup.NewLookup(4)
-	interestLookup, _ = lookup.NewLookup(8)
+	emailHashTab   = hashtab.NewHashTab(21)
+	domainLookup   = lookup.NewLookup(4)
+	fnameLookup    = lookup.NewLookup(8)
+	snameLookup    = lookup.NewLookup(12)
+	sexLookup      = lookup.NewLookup(4)
+	countryLookup  = lookup.NewLookup(8)
+	cityLookup     = lookup.NewLookup(10)
+	statusLookup   = lookup.NewLookup(4)
+	interestLookup = lookup.NewLookup(8)
 )
 
 func Print() {
@@ -50,11 +50,24 @@ func Print() {
 	interestLookup.Print()
 }
 
+type account struct {
+	domain    uint8
+	fname     uint8
+	sname     uint16
+	sex       uint8
+	country   uint8
+	city      uint16
+	status    uint8
+	loginSize uint8
+	login     [24]byte
+}
+
 type DB struct {
+	a []account
 }
 
 func NewDB() *DB {
-	return &DB{}
+	return &DB{a: make([]account, 1400000)}
 }
 
 func (db *DB) insertAccount(src *proto.Account) error {
@@ -62,23 +75,41 @@ func (db *DB) insertAccount(src *proto.Account) error {
 	id, ok := emailHashTab.GetOrSet(uint64(emailHash), uint64(src.ID))
 	if ok {
 		log.Println("Email duplicate", src.Email, src.ID, id)
+		return DefaultError
 	}
 	login, domain, ok := splitEmail(src.Email)
 	if !ok {
 		return DefaultError
 	}
-	_ = login
-	domainLookup.GetOrGen(domain)
-	fnameLookup.GetOrGen(src.Fname)
-	snameLookup.GetOrGen(src.Sname)
-	sexLookup.GetOrGen(src.Sex)
-	countryLookup.GetOrGen(src.Country)
-	cityLookup.GetOrGen(src.City)
-	statusLookup.GetOrGen(src.Status)
-	n := len(src.Interests)
-	for i := 0; i < n; i++ {
-		interestLookup.GetOrGen(src.Interests[i])
+	n := len(login)
+	if n > 24 {
+		return DefaultError
 	}
+	dst := &db.a[src.ID]
+	dst.loginSize = uint8(n)
+	for i := 0; i < n; i++ {
+		dst.login[i] = login[i]
+	}
+	k := 0
+	k, _ = domainLookup.GetOrGen(domain)
+	dst.domain = uint8(k)
+	k, _ = fnameLookup.GetOrGen(src.Fname)
+	dst.fname = uint8(k)
+	k, _ = snameLookup.GetOrGen(src.Sname)
+	dst.sname = uint16(k)
+	k, _ = sexLookup.GetOrGen(src.Sex)
+	dst.sex = uint8(k)
+	k, _ = countryLookup.GetOrGen(src.Country)
+	dst.country = uint8(k)
+	k, _ = cityLookup.GetOrGen(src.City)
+	dst.city = uint16(k)
+	k, _ = statusLookup.GetOrGen(src.Status)
+	dst.status = uint8(k)
+
+	//n := len(src.Interests)
+	//for i := 0; i < n; i++ {
+	//	interestLookup.GetOrGen(src.Interests[i])
+	//}
 	return nil
 }
 
