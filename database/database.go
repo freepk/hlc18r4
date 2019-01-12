@@ -4,89 +4,124 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"time"
+	"sync"
 
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 )
 
 var (
-	WrongFileHeaderError = errors.New("Wrong file header")
-	NullAccountSexError  = errors.New("Account sex is null")
+	FileCorruptedError = errors.New("File corrupted")
+	WrongStateError    = errors.New("Database in wrong state")
+	SexValidationError = errors.New("Sex is not valid")
 )
+
+type DatabaseState int
+
+const (
+	OnlineState = DatabaseState(iota)
+	RecoveryState
+)
+
+const (
+	likesPerAccount = 32
+)
+
+type account struct {
+	sex              uint8
+	maleLikesCount   uint8
+	femaleLikesCount uint8
+	likesCount       uint8
+}
 
 type likex struct {
 	liker uint32
 	likee uint32
-	ts uint32
-}
-
-type like struct {
-	id uint32
-	ts uint32
-}
-
-type account struct {
-	sex         string
-	maleLikee   []uint32 // likes to account from other males, only liker id
-	femaleLikee []uint32 // likes to account from other females, only liker id
-	liker       []like   // from account to others accounts with same sex (m->m or f->f, likee id and ts)
+	ts    uint32
 }
 
 type Database struct {
-	currentTime time.Time
-	accounts    []account
-	likesTail   []likex
+	sync.RWMutex
+	state     DatabaseState
+	accounts  []account
+	likesTemp []likex
 }
 
-func NewDatabase(numAccounts int, currentTime time.Time) *Database {
-	accounts := make([]account, numAccounts)
-	likesTail := make([]likex, 0, 45000000)
-	return &Database{currentTime: currentTime, accounts: accounts, likesTail: likesTail}
+func NewDatabase(accountsNum int) (*Database, error) {
+	accounts := make([]account, accountsNum)
+	fmt.Println("New database, accountsNum", accountsNum)
+	return &Database{state: OnlineState, accounts: accounts}, nil
 }
 
-func (db *Database) PrintStatus() {
-	maleLiker := 0
-	femaleLiker := 0
-	liker := 0
-	for i := 0; i < len(db.accounts); i++ {
-		maleLiker += len(db.accounts[i].maleLiker)
-		femaleLiker += len(db.accounts[i].femaleLiker)
-		liker += len(db.accounts[i].liker)
+func (db *Database) State() DatabaseState {
+	db.RLock()
+	defer db.RUnlock()
+	return db.state
+}
+
+func (db *Database) addLike(liker, likee, ts uint32) {
+	db.RLock()
+	if db.state == RecoveryState {
+		db.likesTemp = append(db.likesTemp, likex{liker, likee, ts})
+		{
+			likerAcc := &db.accounts[liker]
+			likerAcc.likesCount++
+			likeeAcc := &db.accounts[likee]
+			switch likerAcc.sex {
+			case 'm':
+				likeeAcc.maleLikesCount++
+			case 'f':
+				likeeAcc.femaleLikesCount++
+			}
+		}
 	}
-	fmt.Println("male", maleLiker, "female", femaleLiker, "liker", liker)
+	db.RUnlock()
 }
 
-func (db *Database) ShrinkLikesTail() {
-	temp := make([]struct {
-		mlikee uint32
-		flikee uint32
-		liker uint32
-	}, 1400000 )
-	n := len(db.likesTail)
+func (db *Database) estimateLikesSize() int {
+	n := len(db.accounts)
+	size := 0
 	for i := 0; i < n; i++ {
-		liker := db.likesTail[i].liker
-		likee := db.likesTail[i].liker
-		src := &db.accounts[liker]
-		dst := &db.accounts[likee]
-		if src.sex == "" { fmt.Println("src.sex empty!!!") }
-		if dst.sex == "" { fmt.Println("dst.sex empty!!!") }
+		self := &db.accounts[i]
+		size += int(self.likesCount) / 2 * 4
+		size += int(self.maleLikesCount+self.femaleLikesCount) * 8
+		fmt.Println("sex", self.sex, "likesCount", self.likesCount, "femaleLikesCount", self.femaleLikesCount, "maleLikesCount", self.maleLikesCount)
 	}
-	_ = temp
+	return size
 }
 
 func (db *Database) NewAccount(src *proto.Account) error {
-	self := &db.accounts[src.ID]
-	if len(src.Sex) == 0 {
-		return NullAccountSexError
-	}
-	self.sex = string(src.Sex)
+	dst := &db.accounts[src.ID]
+	dst.sex = src.Sex[0]
 	n := len(src.Likes)
-	for i:=0;i<n;i++{
-		likee := uint32(src.Likes[i].ID)
-		ts := uint32(src.Likes[i].TS)
-		db.likesTail = append(db.likesTail, likex{uint32(src.ID), likee, ts})
+	for i := 0; i < n; i++ {
+		db.addLike(uint32(src.ID), uint32(src.Likes[i].ID), uint32(src.Likes[i].TS))
 	}
+	return nil
+}
+
+func (db *Database) StartRecovery() error {
+	db.Lock()
+	defer db.Unlock()
+	if db.state != OnlineState {
+		return WrongStateError
+	}
+	numLikesInTemp := len(db.accounts) * likesPerAccount
+	db.likesTemp = make([]likex, 0, numLikesInTemp)
+	db.state = RecoveryState
+	fmt.Println("Start revovery, numLikesInTemp", numLikesInTemp)
+	return nil
+}
+
+func (db *Database) FinishRecovery() error {
+	db.Lock()
+	defer db.Unlock()
+	if db.state != RecoveryState {
+		return WrongStateError
+	}
+	db.likesTemp = nil
+	db.state = OnlineState
+	fmt.Println("Finish revovery, estimateLikesSize", db.estimateLikesSize())
 	return nil
 }
 
@@ -98,7 +133,7 @@ func (db *Database) ReadFrom(r io.Reader) error {
 		return err
 	}
 	if n != headerSize || string(buf[:headerSize]) != `{"accounts": [` {
-		return WrongFileHeaderError
+		return FileCorruptedError
 	}
 	account := &proto.Account{}
 	tailSize := 0
