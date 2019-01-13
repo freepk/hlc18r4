@@ -4,6 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"reflect"
+	"sync/atomic"
+	"unsafe"
 
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
@@ -14,44 +17,62 @@ var (
 )
 
 const (
-	likesPerAccount = 34
+	likesPerAccount = 35
 )
 
-type like struct {
-	id uint32
-	ts uint32
+type Like struct {
+	ID uint32
+	TS uint32
 }
 
-type account struct {
-	sex    uint8
-	likees []like
+type Account struct {
+	Sex        uint8
+	LikesCount uint8
+	LikesPos   uint32
 }
 
 type Database struct {
-	accounts []account
-	likees   []like
+	accounts   []Account
+	arenaPos   uint32
+	arenaBytes []byte
 }
 
 func NewDatabase(accountsNum int) (*Database, error) {
-	accounts := make([]account, accountsNum)
+	accounts := make([]Account, accountsNum)
 	likesNum := accountsNum * likesPerAccount
-	likees := make([]like, likesNum)
-	fmt.Println("New database, accountsNum", accountsNum, "likesNum", likesNum)
-	return &Database{accounts: accounts, likees: likees}, nil
+	arenaSize := likesNum * 8
+	arenaBytes := make([]byte, arenaSize)
+	fmt.Println("New database, accountsNum", accountsNum, "likesNum", likesNum, "arenaBytes", len(arenaBytes))
+	return &Database{accounts: accounts, arenaPos: 0, arenaBytes: arenaBytes}, nil
 }
 
 func (db *Database) Ping() {
 }
 
+func (db *Database) PrintStats() {
+}
+
 func (db *Database) NewAccount(src *proto.Account) error {
 	dst := &db.accounts[src.ID]
-	dst.sex = src.Sex[0]
+	dst.Sex = src.Sex[0]
 	n := len(src.Likes)
-	dst.likees = db.likees[:n]
-	db.likees = db.likees[n:]
-	for i := 0; i < n; i++ {
-		dst.likees[i].id = uint32(src.Likes[i].ID)
-		dst.likees[i].ts = uint32(src.Likes[i].TS)
+	if n > 0 {
+		likesCount := uint8(n)
+		likesSize := uint32(likesCount * 8)
+		likesPos := atomic.AddUint32(&db.arenaPos, likesSize) - likesSize
+		arenaSlice := (*reflect.SliceHeader)(unsafe.Pointer(&db.arenaBytes))
+		likesSlice := reflect.SliceHeader{
+			Data: arenaSlice.Data + uintptr(likesPos),
+			Len:  int(likesCount),
+			Cap:  int(likesCount),
+		}
+		likes := *(*[]Like)(unsafe.Pointer(&likesSlice))
+		for i := 0; i < n; i++ {
+			likes[i].ID = uint32(src.Likes[i].ID)
+			likes[i].TS = uint32(src.Likes[i].TS)
+		}
+		dst.LikesCount = likesCount
+		dst.LikesPos = likesPos
 	}
 	return nil
 }
