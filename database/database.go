@@ -4,10 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"reflect"
-	"sync/atomic"
-	"unsafe"
 
+	"github.com/freepk/dictionary"
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 )
@@ -26,24 +24,32 @@ type Like struct {
 }
 
 type Account struct {
-	Sex        uint8
-	LikesCount uint8
-	LikesPos   uint32
+	Sex       byte
+	Country   uint8
+	City      uint16
+	Interests []uint8
+	LikesTo   []Like
+	LikesFrom []uint32
 }
 
 type Database struct {
-	accounts   []Account
-	arenaPos   uint32
-	arenaBytes []byte
+	accounts  []Account
+	countries *dictionary.Dictionary
+	cities    *dictionary.Dictionary
+	interests *dictionary.Dictionary
 }
 
 func NewDatabase(accountsNum int) (*Database, error) {
 	accounts := make([]Account, accountsNum)
-	likesNum := accountsNum * likesPerAccount
-	arenaSize := likesNum * 8
-	arenaBytes := make([]byte, arenaSize)
-	fmt.Println("New database, accountsNum", accountsNum, "likesNum", likesNum, "arenaBytes", len(arenaBytes))
-	return &Database{accounts: accounts, arenaPos: 0, arenaBytes: arenaBytes}, nil
+	countries, _ := dictionary.NewDictionary(8)
+	cities, _ := dictionary.NewDictionary(12)
+	interests, _ := dictionary.NewDictionary(8)
+	fmt.Println("New database, accountsNum", accountsNum)
+	return &Database{
+		accounts:  accounts,
+		countries: countries,
+		cities:    cities,
+		interests: interests}, nil
 }
 
 func (db *Database) Ping() {
@@ -55,24 +61,22 @@ func (db *Database) PrintStats() {
 func (db *Database) NewAccount(src *proto.Account) error {
 	dst := &db.accounts[src.ID]
 	dst.Sex = src.Sex[0]
-	n := len(src.Likes)
-	if n > 0 {
-		likesCount := uint8(n)
-		likesSize := uint32(likesCount * 8)
-		likesPos := atomic.AddUint32(&db.arenaPos, likesSize) - likesSize
-		arenaSlice := (*reflect.SliceHeader)(unsafe.Pointer(&db.arenaBytes))
-		likesSlice := reflect.SliceHeader{
-			Data: arenaSlice.Data + uintptr(likesPos),
-			Len:  int(likesCount),
-			Cap:  int(likesCount),
+	if country, err := db.countries.GetKey(src.Country); err == nil {
+		dst.Country = uint8(country)
+	}
+	if city, err := db.cities.GetKey(src.City); err == nil {
+		dst.City = uint16(city)
+	}
+	dst.Interests = make([]uint8, len(src.Interests))
+	for i := 0; i < len(src.Interests); i++ {
+		if interest, err := db.interests.GetKey(src.Interests[i]); err == nil {
+			dst.Interests[i] = uint8(interest)
 		}
-		likes := *(*[]Like)(unsafe.Pointer(&likesSlice))
-		for i := 0; i < n; i++ {
-			likes[i].ID = uint32(src.Likes[i].ID)
-			likes[i].TS = uint32(src.Likes[i].TS)
-		}
-		dst.LikesCount = likesCount
-		dst.LikesPos = likesPos
+	}
+	dst.LikesTo = make([]Like, len(src.Likes))
+	for i := 0; i < len(src.Likes); i++ {
+		dst.LikesTo[i].ID = uint32(src.Likes[i].ID)
+		dst.LikesTo[i].TS = uint32(src.Likes[i].TS)
 	}
 	return nil
 }

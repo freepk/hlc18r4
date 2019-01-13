@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/valyala/fasthttp"
+	"gitlab.com/freepk/hlc18r4/backup"
 )
 
 func AccountsHandler(ctx *fasthttp.RequestCtx) {
@@ -20,8 +21,14 @@ func AccountsHandler(ctx *fasthttp.RequestCtx) {
 }
 
 func main() {
-	err := fasthttp.ListenAndServe(":80", AccountsHandler)
+	db, err := backup.Restore("./data/")
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
+	}
+	db.Ping()
+
+	err = fasthttp.ListenAndServe(":80", AccountsHandler)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
