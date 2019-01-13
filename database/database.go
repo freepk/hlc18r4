@@ -55,9 +55,6 @@ func NewDatabase(accountsNum int) (*Database, error) {
 func (db *Database) Ping() {
 }
 
-func (db *Database) PrintStats() {
-}
-
 func (db *Database) NewAccount(src *proto.Account) error {
 	dst := &db.accounts[src.ID]
 	dst.Sex = src.Sex[0]

@@ -21,7 +21,6 @@ func Restore(path string) (*database.Database, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.PrintStats()
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(n)
 	errChan := make(chan error)
@@ -45,6 +44,5 @@ func Restore(path string) (*database.Database, error) {
 	for err := range errChan {
 		return nil, err
 	}
-	db.PrintStats()
 	return db, nil
 }
