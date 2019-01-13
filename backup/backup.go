@@ -8,7 +8,6 @@ import (
 )
 
 const accountsPerFile = 10000
-const likesPerAccount = 32
 
 func Restore(path string) (*database.Database, error) {
 	arch, err := zip.OpenReader(path + "data.zip")
@@ -17,17 +16,11 @@ func Restore(path string) (*database.Database, error) {
 	}
 	defer arch.Close()
 	n := len(arch.File)
-	accountsSize := n * accountsPerFile
-	accountsSize += (accountsSize/100 + 1) * 10
-	db, err := database.NewDatabase(accountsSize)
+	accountsNum := n * accountsPerFile * 105 / 100
+	db, err := database.NewDatabase(accountsNum)
 	if err != nil {
 		return nil, err
 	}
-	err = db.StartRecovery()
-	if err != nil {
-		return nil, err
-	}
-
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(n)
 	errChan := make(chan error)
@@ -51,10 +44,5 @@ func Restore(path string) (*database.Database, error) {
 	for err := range errChan {
 		return nil, err
 	}
-	err = db.FinishRecovery()
-	if err != nil {
-		return nil, err
-	}
-
 	return db, nil
 }

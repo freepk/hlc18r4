@@ -7,9 +7,7 @@ import (
 func TestRestore(t *testing.T) {
 	db, err := Restore("../data/")
 	if err != nil {
-		t.Log(err)
-		t.Fail()
-		return
+		t.Fatal(err)
 	}
-	t.Log(db.State())
+	db.Ping()
 }
