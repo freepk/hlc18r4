@@ -24,29 +24,40 @@ type Like struct {
 }
 
 type Account struct {
-	Sex       byte
-	Country   uint8
-	City      uint16
-	Interests []uint8
-	LikesTo   []Like
-	LikesFrom []uint32
+	Brith         uint32
+	Joined        uint32
+	Fname         uint8
+	Sname         uint16
+	Country       uint8
+	City          uint16
+	PremiumStart  uint32
+	PremiumFinish uint32
+	Interests     []uint8
+	LikesTo       []Like
+	LikesFrom     []uint32
 }
 
 type Database struct {
-	accounts  []Account
+	fnames    *dictionary.Dictionary
+	snames    *dictionary.Dictionary
 	countries *dictionary.Dictionary
 	cities    *dictionary.Dictionary
 	interests *dictionary.Dictionary
+	accounts  []Account
 }
 
 func NewDatabase(accountsNum int) (*Database, error) {
 	accounts := make([]Account, accountsNum)
+	fnames, _ := dictionary.NewDictionary(8)
+	snames, _ := dictionary.NewDictionary(12)
 	countries, _ := dictionary.NewDictionary(8)
 	cities, _ := dictionary.NewDictionary(12)
 	interests, _ := dictionary.NewDictionary(8)
 	fmt.Println("New database, accountsNum", accountsNum)
 	return &Database{
 		accounts:  accounts,
+		fnames:    fnames,
+		snames:    snames,
 		countries: countries,
 		cities:    cities,
 		interests: interests}, nil
@@ -57,13 +68,26 @@ func (db *Database) Ping() {
 
 func (db *Database) NewAccount(src *proto.Account) error {
 	dst := &db.accounts[src.ID]
-	dst.Sex = src.Sex[0]
+	// ID
+	dst.Brith = uint32(src.Birth)
+	dst.Joined = uint32(src.Joined)
+	// Email
+	if fname, err := db.fnames.GetKey(src.Fname); err == nil {
+		dst.Fname = uint8(fname)
+	}
+	if sname, err := db.snames.GetKey(src.Sname); err == nil {
+		dst.Sname = uint16(sname)
+	}
+	// Phone
 	if country, err := db.countries.GetKey(src.Country); err == nil {
 		dst.Country = uint8(country)
 	}
 	if city, err := db.cities.GetKey(src.City); err == nil {
 		dst.City = uint16(city)
 	}
+	// Status
+	dst.PremiumStart = uint32(src.Premium.Start)
+	dst.PremiumFinish = uint32(src.Premium.Finish)
 	dst.Interests = make([]uint8, len(src.Interests))
 	for i := 0; i < len(src.Interests); i++ {
 		if interest, err := db.interests.GetKey(src.Interests[i]); err == nil {
