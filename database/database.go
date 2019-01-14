@@ -2,8 +2,8 @@ package database
 
 import (
 	"errors"
-	"log"
 	"io"
+	"log"
 	"sync"
 	"sync/atomic"
 
@@ -47,7 +47,6 @@ type Database struct {
 	interests    *dictionary.Dictionary
 	accounts     []Account
 	lastInserted uint32
-	lastIndexed  uint32
 }
 
 func NewDatabase(accountsNum int) (*Database, error) {
@@ -59,12 +58,13 @@ func NewDatabase(accountsNum int) (*Database, error) {
 	accounts := make([]Account, accountsNum+1)
 	log.Println("New database, accountsNum", accountsNum, "allocated", accountsNum+1)
 	return &Database{
-		fnames:    fnames,
-		snames:    snames,
-		countries: countries,
-		cities:    cities,
-		interests: interests,
-		accounts:  accounts}, nil
+		fnames:       fnames,
+		snames:       snames,
+		countries:    countries,
+		cities:       cities,
+		interests:    interests,
+		accounts:     accounts,
+		lastInserted: 0}, nil
 }
 
 func (db *Database) Ping() {
@@ -139,21 +139,20 @@ func (db *Database) WalkAccounts(first, last, step uint32, callback WalkCallback
 }
 
 func (db *Database) buildLikesFrom() {
-	counters := make([]uint32, db.lastInserted-db.lastIndexed+1)
-	db.WalkAccounts(db.lastIndexed+1, db.lastInserted, 30000, func(id uint32) {
+	log.Println("Counting Likes")
+	counters := make([]uint32, db.lastInserted+1)
+	db.WalkAccounts(1, db.lastInserted, 30000, func(id uint32) {
 		likesTo := db.accounts[id].LikesTo
 		n := len(likesTo)
 		for i := 0; i < n; i++ {
 			atomic.AddUint32(&counters[likesTo[i].ID], 1)
 		}
 	})
-	db.WalkAccounts(db.lastIndexed+1, db.lastInserted, 30000, func(id uint32) {
-		db.accounts[id].LikesFrom = make([]Like, int(counters[id]))
-	})
+	log.Println("Allocating Likes")
 }
 
 func (db *Database) BuildIndexes() {
-	log.Println("Build indexes, lastIndexed", db.lastIndexed, "lastInserted", db.lastInserted)
+	log.Println("Build indexes, lastInserted", db.lastInserted)
 	db.buildLikesFrom()
 }
 
