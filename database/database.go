@@ -2,8 +2,10 @@ package database
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"io"
+	"sync"
+	"sync/atomic"
 
 	"github.com/freepk/dictionary"
 	"gitlab.com/freepk/hlc18r4/parse"
@@ -34,16 +36,18 @@ type Account struct {
 	PremiumFinish uint32
 	Interests     []uint8
 	LikesTo       []Like
-	LikesFrom     []uint32
+	LikesFrom     []Like
 }
 
 type Database struct {
-	fnames    *dictionary.Dictionary
-	snames    *dictionary.Dictionary
-	countries *dictionary.Dictionary
-	cities    *dictionary.Dictionary
-	interests *dictionary.Dictionary
-	accounts  []Account
+	fnames       *dictionary.Dictionary
+	snames       *dictionary.Dictionary
+	countries    *dictionary.Dictionary
+	cities       *dictionary.Dictionary
+	interests    *dictionary.Dictionary
+	accounts     []Account
+	lastInserted uint32
+	lastIndexed  uint32
 }
 
 func NewDatabase(accountsNum int) (*Database, error) {
@@ -52,8 +56,8 @@ func NewDatabase(accountsNum int) (*Database, error) {
 	countries, _ := dictionary.NewDictionary(8)
 	cities, _ := dictionary.NewDictionary(12)
 	interests, _ := dictionary.NewDictionary(8)
-	accounts := make([]Account, accountsNum*105/100)
-	fmt.Println("New database, accountsNum", accountsNum)
+	accounts := make([]Account, accountsNum+1)
+	log.Println("New database, accountsNum", accountsNum, "allocated", accountsNum+1)
 	return &Database{
 		fnames:    fnames,
 		snames:    snames,
@@ -64,6 +68,13 @@ func NewDatabase(accountsNum int) (*Database, error) {
 }
 
 func (db *Database) Ping() {
+}
+
+func (db *Database) updateLastInserted(id uint32) {
+	last := atomic.LoadUint32(&db.lastInserted)
+	if id > last {
+		atomic.CompareAndSwapUint32(&db.lastInserted, last, id)
+	}
 }
 
 func (db *Database) NewAccount(src *proto.Account) error {
@@ -99,7 +110,51 @@ func (db *Database) NewAccount(src *proto.Account) error {
 		dst.LikesTo[i].ID = uint32(src.Likes[i].ID)
 		dst.LikesTo[i].TS = uint32(src.Likes[i].TS)
 	}
+	db.updateLastInserted(uint32(src.ID))
 	return nil
+}
+
+type WalkCallback func(id uint32)
+
+func (db *Database) WalkAccounts(first, last, step uint32, callback WalkCallback) {
+	if first >= last {
+		return
+	}
+	waitGroup := &sync.WaitGroup{}
+	for i := uint32(first); i <= last; i += step {
+		a := i
+		b := i + step - 1
+		if b > last {
+			b = last
+		}
+		waitGroup.Add(1)
+		go func() {
+			defer waitGroup.Done()
+			for id := a; id <= b; id++ {
+				callback(id)
+			}
+		}()
+	}
+	waitGroup.Wait()
+}
+
+func (db *Database) buildLikesFrom() {
+	counters := make([]uint32, db.lastInserted-db.lastIndexed+1)
+	db.WalkAccounts(db.lastIndexed+1, db.lastInserted, 30000, func(id uint32) {
+		likesTo := db.accounts[id].LikesTo
+		n := len(likesTo)
+		for i := 0; i < n; i++ {
+			atomic.AddUint32(&counters[likesTo[i].ID], 1)
+		}
+	})
+	db.WalkAccounts(db.lastIndexed+1, db.lastInserted, 30000, func(id uint32) {
+		db.accounts[id].LikesFrom = make([]Like, int(counters[id]))
+	})
+}
+
+func (db *Database) BuildIndexes() {
+	log.Println("Build indexes, lastIndexed", db.lastIndexed, "lastInserted", db.lastInserted)
+	db.buildLikesFrom()
 }
 
 func (db *Database) ReadFrom(r io.Reader) error {

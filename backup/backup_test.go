@@ -10,4 +10,5 @@ func TestRestore(t *testing.T) {
 		t.Fatal(err)
 	}
 	db.Ping()
+	db.BuildIndexes()
 }

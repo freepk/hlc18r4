@@ -26,6 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 	db.Ping()
+	db.BuildIndexes()
 
 	err = fasthttp.ListenAndServe(":80", AccountsHandler)
 	if err != nil {
