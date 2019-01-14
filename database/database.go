@@ -55,8 +55,8 @@ func NewDatabase(accountsNum int) (*Database, error) {
 	countries, _ := dictionary.NewDictionary(8)
 	cities, _ := dictionary.NewDictionary(12)
 	interests, _ := dictionary.NewDictionary(8)
-	accounts := make([]Account, accountsNum+1)
-	log.Println("New database, accountsNum", accountsNum, "allocated", accountsNum+1)
+	accounts := make([]Account, accountsNum*105/100)
+	log.Println("New database, accountsNum", accountsNum, "allocated", accountsNum*105/100)
 	return &Database{
 		fnames:       fnames,
 		snames:       snames,
@@ -139,16 +139,48 @@ func (db *Database) WalkAccounts(first, last, step uint32, callback WalkCallback
 }
 
 func (db *Database) buildLikesFrom() {
-	log.Println("Counting Likes")
-	counters := make([]uint32, db.lastInserted+1)
-	db.WalkAccounts(1, db.lastInserted, 30000, func(id uint32) {
+	log.Println("Counting LikesFrom")
+	likesFromCount := make([]uint32, db.lastInserted+1)
+	db.WalkAccounts(1, db.lastInserted, 10000, func(id uint32) {
 		likesTo := db.accounts[id].LikesTo
 		n := len(likesTo)
 		for i := 0; i < n; i++ {
-			atomic.AddUint32(&counters[likesTo[i].ID], 1)
+			atomic.AddUint32(&likesFromCount[likesTo[i].ID], 1)
 		}
 	})
-	log.Println("Allocating Likes")
+	log.Println("Allocating LikesFrom")
+	unused := uint32(0)
+	allocated := uint32(0)
+	unchanged := uint32(0)
+	relocated := uint32(0)
+	db.WalkAccounts(1, db.lastInserted, 10000, func(id uint32) {
+		required := likesFromCount[id]
+		if required == 0 {
+			atomic.AddUint32(&unused, 1)
+			return
+		}
+		capacity := cap(db.accounts[id].LikesFrom)
+		if capacity == 0 {
+			atomic.AddUint32(&allocated, 1)
+			db.accounts[id].LikesFrom = make([]Like, 0, required)
+			return
+		}
+		if uint32(capacity) == required {
+			atomic.AddUint32(&unchanged, 1)
+			return
+		}
+		atomic.AddUint32(&relocated, 1)
+		buf := make([]Like, 0, required)
+		db.accounts[id].LikesFrom = append(buf, db.accounts[id].LikesFrom...)
+	})
+	log.Println("Unused", unused, "allocated", allocated, "unchanged", unchanged, "relocated", relocated)
+	log.Println("Copying LikesFrom")
+	db.WalkAccounts(1, db.lastInserted, 10000, func(id uint32) {
+		likesTo := db.accounts[id].LikesTo
+		n := len(likesTo)
+		for i := 0; i < n; i++ {
+		}
+	})
 }
 
 func (db *Database) BuildIndexes() {
