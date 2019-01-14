@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	//"strconv"
 
 	"github.com/freepk/dictionary"
 	"gitlab.com/freepk/hlc18r4/parse"
@@ -47,20 +48,20 @@ type Database struct {
 }
 
 func NewDatabase(accountsNum int) (*Database, error) {
-	accounts := make([]Account, accountsNum)
 	fnames, _ := dictionary.NewDictionary(8)
 	snames, _ := dictionary.NewDictionary(12)
 	countries, _ := dictionary.NewDictionary(8)
 	cities, _ := dictionary.NewDictionary(12)
 	interests, _ := dictionary.NewDictionary(8)
+	accounts := make([]Account, accountsNum*105/100)
 	fmt.Println("New database, accountsNum", accountsNum)
 	return &Database{
-		accounts:  accounts,
 		fnames:    fnames,
 		snames:    snames,
 		countries: countries,
 		cities:    cities,
-		interests: interests}, nil
+		interests: interests,
+		accounts:  accounts}, nil
 }
 
 func (db *Database) Ping() {
@@ -92,13 +93,26 @@ func (db *Database) NewAccount(src *proto.Account) error {
 	for i := 0; i < len(src.Interests); i++ {
 		if interest, err := db.interests.GetKey(src.Interests[i]); err == nil {
 			dst.Interests[i] = uint8(interest)
+			println(src.ID, interest)
 		}
 	}
 	dst.LikesTo = make([]Like, len(src.Likes))
 	for i := 0; i < len(src.Likes); i++ {
 		dst.LikesTo[i].ID = uint32(src.Likes[i].ID)
 		dst.LikesTo[i].TS = uint32(src.Likes[i].TS)
+		//println(src.ID, src.Likes[i].ID, src.Likes[i].TS)
 	}
+	//fname, _ := strconv.Unquote(`"` + string(src.Fname) + `"`)
+	//sname, _ := strconv.Unquote(`"` + string(src.Sname) + `"`)
+	//country, _ := strconv.Unquote(`"` + string(src.Country) + `"`)
+	//city, _ := strconv.Unquote(`"` + string(src.City) + `"`)
+	//status, _ := strconv.Unquote(`"` + string(src.Status) + `"`)
+	//println(src.ID, src.Birth, src.Joined,
+	//	strconv.Quote(fname),
+	//	strconv.Quote(sname),
+	//	strconv.Quote(country),
+	//	strconv.Quote(city),
+	//	strconv.Quote(status), src.Premium.Start, src.Premium.Finish)
 	return nil
 }
 
@@ -119,21 +133,22 @@ func (db *Database) ReadFrom(r io.Reader) error {
 		if n > 0 {
 			n += tailSize
 			tail, ok := parse.ParseSymbol(buf[:n], ',')
-			account.Reset()
-			tail, ok = account.UnmarshalJSON(tail)
-			if !ok {
-				break
-			}
-			err = db.NewAccount(account)
-			if err != nil {
-				return err
+			for {
+				account.Reset()
+				tail, ok = account.UnmarshalJSON(tail)
+				if !ok {
+					break
+				}
+				err = db.NewAccount(account)
+				if err != nil {
+					return err
+				}
+				tail, ok = parse.ParseSymbol(tail, ',')
 			}
 			tailSize = copy(buf, tail)
-		}
-		if err == io.EOF {
+		} else if err == io.EOF {
 			break
-		}
-		if err != nil {
+		} else if err != nil {
 			return err
 		}
 	}
