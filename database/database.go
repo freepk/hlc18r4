@@ -4,6 +4,8 @@ import (
 	"errors"
 	"io"
 	"log"
+	"sync"
+	"sync/atomic"
 
 	"github.com/freepk/dictionary"
 	"gitlab.com/freepk/hlc18r4/parse"
@@ -38,12 +40,14 @@ type Account struct {
 }
 
 type Database struct {
+	sync.RWMutex
 	fnames       *dictionary.Dictionary
 	snames       *dictionary.Dictionary
 	countries    *dictionary.Dictionary
 	cities       *dictionary.Dictionary
 	interests    *dictionary.Dictionary
 	accounts     []Account
+	lastInserted uint32
 }
 
 func NewDatabase(accountsNum int) (*Database, error) {
@@ -52,15 +56,15 @@ func NewDatabase(accountsNum int) (*Database, error) {
 	countries, _ := dictionary.NewDictionary(8)
 	cities, _ := dictionary.NewDictionary(12)
 	interests, _ := dictionary.NewDictionary(8)
-	accounts := make([]Account, accountsNum*105/100)
-	log.Println("New database, accountsNum", accountsNum, "allocated", accountsNum*105/100)
+	accounts := make([]Account, (accountsNum * 105 / 100))
+	log.Println("New database, accountsNum", accountsNum, "allocated", (accountsNum * 105 / 100))
 	return &Database{
-		fnames:       fnames,
-		snames:       snames,
-		countries:    countries,
-		cities:       cities,
-		interests:    interests,
-		accounts:     accounts}, nil
+		fnames:    fnames,
+		snames:    snames,
+		countries: countries,
+		cities:    cities,
+		interests: interests,
+		accounts:  accounts}, nil
 }
 
 func (db *Database) Ping() {
@@ -99,11 +103,24 @@ func (db *Database) NewAccount(src *proto.Account) error {
 		dst.LikesTo[i].ID = uint32(src.Likes[i].ID)
 		dst.LikesTo[i].TS = uint32(src.Likes[i].TS)
 	}
+	inserted := uint32(src.ID)
+	db.updateLastInserted(inserted)
 	return nil
 }
 
 func (db *Database) BuildIndexes() {
-	log.Println("Build Indexes")
+	log.Println("Build Indexes, lastInserted", db.lastInserted)
+}
+
+func (db *Database) updateLastInserted(inserted uint32) {
+	lastInserted := atomic.LoadUint32(&db.lastInserted)
+	if inserted > lastInserted {
+		db.Lock()
+		if inserted > db.lastInserted {
+			db.lastInserted = inserted
+		}
+		db.Unlock()
+	}
 }
 
 func (db *Database) ReadFrom(r io.Reader) error {
