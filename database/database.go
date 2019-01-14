@@ -4,8 +4,6 @@ import (
 	"errors"
 	"io"
 	"log"
-	"sync"
-	"sync/atomic"
 
 	"github.com/freepk/dictionary"
 	"gitlab.com/freepk/hlc18r4/parse"
@@ -46,7 +44,6 @@ type Database struct {
 	cities       *dictionary.Dictionary
 	interests    *dictionary.Dictionary
 	accounts     []Account
-	lastInserted uint32
 }
 
 func NewDatabase(accountsNum int) (*Database, error) {
@@ -63,18 +60,10 @@ func NewDatabase(accountsNum int) (*Database, error) {
 		countries:    countries,
 		cities:       cities,
 		interests:    interests,
-		accounts:     accounts,
-		lastInserted: 0}, nil
+		accounts:     accounts}, nil
 }
 
 func (db *Database) Ping() {
-}
-
-func (db *Database) updateLastInserted(id uint32) {
-	last := atomic.LoadUint32(&db.lastInserted)
-	if id > last {
-		atomic.CompareAndSwapUint32(&db.lastInserted, last, id)
-	}
 }
 
 func (db *Database) NewAccount(src *proto.Account) error {
@@ -110,82 +99,11 @@ func (db *Database) NewAccount(src *proto.Account) error {
 		dst.LikesTo[i].ID = uint32(src.Likes[i].ID)
 		dst.LikesTo[i].TS = uint32(src.Likes[i].TS)
 	}
-	db.updateLastInserted(uint32(src.ID))
 	return nil
 }
 
-type WalkCallback func(id uint32)
-
-func (db *Database) WalkAccounts(first, last, step uint32, callback WalkCallback) {
-	if first >= last {
-		return
-	}
-	waitGroup := &sync.WaitGroup{}
-	for i := uint32(first); i <= last; i += step {
-		a := i
-		b := i + step - 1
-		if b > last {
-			b = last
-		}
-		waitGroup.Add(1)
-		go func() {
-			defer waitGroup.Done()
-			for id := a; id <= b; id++ {
-				callback(id)
-			}
-		}()
-	}
-	waitGroup.Wait()
-}
-
-func (db *Database) buildLikesFrom() {
-	log.Println("Counting LikesFrom")
-	likesFromCount := make([]uint32, db.lastInserted+1)
-	db.WalkAccounts(1, db.lastInserted, 10000, func(id uint32) {
-		likesTo := db.accounts[id].LikesTo
-		n := len(likesTo)
-		for i := 0; i < n; i++ {
-			atomic.AddUint32(&likesFromCount[likesTo[i].ID], 1)
-		}
-	})
-	log.Println("Allocating LikesFrom")
-	unused := uint32(0)
-	allocated := uint32(0)
-	unchanged := uint32(0)
-	relocated := uint32(0)
-	db.WalkAccounts(1, db.lastInserted, 10000, func(id uint32) {
-		required := likesFromCount[id]
-		if required == 0 {
-			atomic.AddUint32(&unused, 1)
-			return
-		}
-		capacity := cap(db.accounts[id].LikesFrom)
-		if capacity == 0 {
-			atomic.AddUint32(&allocated, 1)
-			db.accounts[id].LikesFrom = make([]Like, 0, required)
-			return
-		}
-		if uint32(capacity) == required {
-			atomic.AddUint32(&unchanged, 1)
-			return
-		}
-		atomic.AddUint32(&relocated, 1)
-		buf := make([]Like, 0, required)
-		db.accounts[id].LikesFrom = append(buf, db.accounts[id].LikesFrom...)
-	})
-	log.Println("Unused", unused, "allocated", allocated, "unchanged", unchanged, "relocated", relocated)
-	log.Println("Copying LikesFrom")
-	db.WalkAccounts(1, db.lastInserted, 10000, func(id uint32) {
-		likesTo := db.accounts[id].LikesTo
-		n := len(likesTo)
-		for i := 0; i < n; i++ {
-		}
-	})
-}
-
 func (db *Database) BuildIndexes() {
-	log.Println("Build indexes, lastInserted", db.lastInserted)
-	db.buildLikesFrom()
+	log.Println("Build Indexes")
 }
 
 func (db *Database) ReadFrom(r io.Reader) error {

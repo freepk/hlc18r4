@@ -21,7 +21,7 @@ func AccountsHandler(ctx *fasthttp.RequestCtx) {
 }
 
 func main() {
-	db, err := backup.Restore("./data/")
+	db, err := backup.Restore("/tmp/data/")
 	if err != nil {
 		log.Fatal(err)
 	}

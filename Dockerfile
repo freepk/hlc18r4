@@ -1,10 +1,10 @@
 FROM ubuntu
 
-ADD hlc18r4 /
+ADD hlc18r4 .
 
 EXPOSE 80
 
 ENV GOGC off
 
-ENTRYPOINT ["/hlc18r4"]
+CMD ulimit -n 8192 && ulimit -n && ./hlc18r4
 
