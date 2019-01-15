@@ -71,6 +71,7 @@ func (rep *AccountsRepo) set(id uint32, account *Account, checkExists bool) erro
 	if checkExists && rep.exists(id) {
 		return AccountsRepoExistsError
 	}
+	rep.emails[account.Email] = id
 	rep.accounts[id] = *account
 	return nil
 }
