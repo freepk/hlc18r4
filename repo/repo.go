@@ -18,22 +18,14 @@ var (
 
 type AccountsRepo struct {
 	sync.RWMutex
-	accounts    []Account
-	length      uint32
-	lastID      uint32
-	bucketLocks []sync.RWMutex
+	accounts []Account
+	length   uint32
+	lastID   uint32
 }
 
 func NewAccountsRepo(size int) *AccountsRepo {
-	bucketLocksSize := (size / accountsBucketSize) + 1
-	bucketLocks := make([]sync.RWMutex, bucketLocksSize)
 	accounts := make([]Account, size)
-	return &AccountsRepo{accounts: accounts, bucketLocks: bucketLocks}
-}
-
-func (rep *AccountsRepo) bucketLock(id uint32) *sync.RWMutex {
-	bucket := id / accountsBucketSize
-	return &rep.bucketLocks[bucket]
+	return &AccountsRepo{accounts: accounts}
 }
 
 func (rep *AccountsRepo) exists(id uint32) bool {
@@ -51,10 +43,7 @@ func (rep *AccountsRepo) Get(id uint32) (*Account, error) {
 	if !rep.exists(id) {
 		return nil, AccountsRepoNotExistsError
 	}
-	lock := rep.bucketLock(id)
-	lock.RLock()
 	account := rep.accounts[id]
-	lock.RUnlock()
 	return &account, nil
 }
 
@@ -94,14 +83,10 @@ func (rep *AccountsRepo) set(id uint32, account *Account, checkExists bool) erro
 	if err := rep.validate(account); err != nil {
 		return err
 	}
-	lock := rep.bucketLock(id)
-	lock.Lock()
 	if checkExists && rep.exists(id) {
-		lock.Unlock()
 		return AccountsRepoAlreadyExistsError
 	}
 	rep.accounts[id] = *account
-	lock.Unlock()
 	rep.setLastID(id)
 	return nil
 }
