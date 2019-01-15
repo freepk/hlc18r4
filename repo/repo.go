@@ -4,10 +4,6 @@ import (
 	"errors"
 )
 
-const (
-	accountsBucketSize = 10000
-)
-
 var (
 	AccountsRepoExistsError    = errors.New("Account exists")
 	AccountsRepoNotExistsError = errors.New("Account not exists")
