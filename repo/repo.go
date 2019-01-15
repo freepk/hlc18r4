@@ -2,7 +2,6 @@ package repo
 
 import (
 	"errors"
-	"sync"
 )
 
 const (
@@ -10,29 +9,29 @@ const (
 )
 
 var (
-	AccountsRepoOverflowError      = errors.New("Account ID overflow")
-	AccountsRepoAlreadyExistsError = errors.New("Account already exists")
-	AccountsRepoNotExistsError     = errors.New("Account not exists")
-	AccountsRepoValidationError    = errors.New("Account validation error")
+	AccountsRepoExistsError    = errors.New("Account exists")
+	AccountsRepoNotExistsError = errors.New("Account not exists")
+	AccountsRepoEmailError     = errors.New("Account Email error")
+	AccountsRepoJonedError     = errors.New("Account Joined error")
+	AccountsRepoBirthError     = errors.New("Account Birth error")
+	AccountsRepoStatusError    = errors.New("Account Status error")
+	AccountsRepoPremiumError   = errors.New("Account Premium error")
 )
 
 type AccountsRepo struct {
-	sync.RWMutex
-	accounts []Account
-	length   uint32
-	lastID   uint32
+	emails   map[string]uint32
+	accounts map[uint32]Account
 }
 
-func NewAccountsRepo(size int) *AccountsRepo {
-	accounts := make([]Account, size)
-	return &AccountsRepo{accounts: accounts}
+func NewAccountsRepo() *AccountsRepo {
+	emails := make(map[string]uint32)
+	accounts := make(map[uint32]Account)
+	return &AccountsRepo{emails: emails, accounts: accounts}
 }
 
 func (rep *AccountsRepo) exists(id uint32) bool {
-	if id > rep.lastID {
-		return false
-	}
-	return (rep.accounts[id].Joined > 0)
+	_, ok := rep.accounts[id]
+	return ok
 }
 
 func (rep *AccountsRepo) Exists(id uint32) bool {
@@ -49,45 +48,34 @@ func (rep *AccountsRepo) Get(id uint32) (*Account, error) {
 
 func (rep *AccountsRepo) validate(account *Account) error {
 	if account.Email == "" {
-		return AccountsRepoValidationError
+		return AccountsRepoEmailError
 	}
 	if account.Joined == 0 {
-		return AccountsRepoValidationError
+		return AccountsRepoJonedError
 	}
 	if account.Birth == 0 {
-		return AccountsRepoValidationError
+		return AccountsRepoBirthError
 	}
 	if account.Status != FreeStatus && account.Status != BusyStatus && account.Status != ComplicatedStatus {
-		return AccountsRepoValidationError
+		return AccountsRepoStatusError
 	}
 	if account.PremiumFinish > 0 && account.PremiumPeriod != MonthPeriod && account.PremiumPeriod != QuarterPeriod && account.PremiumPeriod != HalfYearPeriod {
-		return AccountsRepoValidationError
+		return AccountsRepoPremiumError
 	}
 	return nil
 }
 
-func (rep *AccountsRepo) setLastID(id uint32) {
-	if id > rep.lastID {
-		rep.Lock()
-		if id > rep.lastID {
-			rep.lastID = id
-		}
-		rep.Unlock()
-	}
-}
-
 func (rep *AccountsRepo) set(id uint32, account *Account, checkExists bool) error {
-	if id > uint32(len(rep.accounts)) {
-		return AccountsRepoOverflowError
-	}
 	if err := rep.validate(account); err != nil {
 		return err
 	}
+	if eid, ok := rep.emails[account.Email]; ok && eid != id {
+		return AccountsRepoEmailError
+	}
 	if checkExists && rep.exists(id) {
-		return AccountsRepoAlreadyExistsError
+		return AccountsRepoExistsError
 	}
 	rep.accounts[id] = *account
-	rep.setLastID(id)
 	return nil
 }
 
