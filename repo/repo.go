@@ -79,10 +79,10 @@ func (rep *AccountsRepo) set(id uint32, account *Account, checkExists bool) erro
 	return nil
 }
 
-func (rep *AccountsRepo) Add(id uint32, account Account) error {
-	return rep.set(id, &account, true)
+func (rep *AccountsRepo) Add(id uint32, account *Account) error {
+	return rep.set(id, account, true)
 }
 
-func (rep *AccountsRepo) Set(id uint32, account Account) error {
-	return rep.set(id, &account, false)
+func (rep *AccountsRepo) Set(id uint32, account *Account) error {
+	return rep.set(id, account, false)
 }
