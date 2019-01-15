@@ -18,13 +18,14 @@ type PeriodEnum uint8
 
 const (
 	_           = iota
-	MonthPerion = PeriodEnum(iota)
+	MonthPeriod = PeriodEnum(iota)
 	QuarterPeriod
 	HalfYearPeriod
 )
 
 type Account struct {
-	Brith         uint32
+	Email         string
+	Birth         uint32
 	Joined        uint32
 	Fname         uint8
 	Sname         uint16
