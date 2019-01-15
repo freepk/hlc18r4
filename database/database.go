@@ -107,23 +107,29 @@ func (db *Database) NewAccount(src *proto.Account) error {
 }
 
 func (db *Database) buildLikesFrom() {
-	counters := make([]int, db.lastInserted)
+	log.Println("Counting LikesFrom")
+	counters := make([]int, db.lastInserted + 1)
 	for _, liker := range db.accounts {
 		for _, like := range liker.LikesTo {
 			counters[like.ID]++
 		}
 	}
+	log.Println("Allocating LikesFrom")
 	for id, count := range counters {
-		likee := db.accounts[id]
-		if count > len(likee.LikesFrom) {
+		likee := &db.accounts[id]
+		if count > cap(likee.LikesFrom) {
 			likee.LikesFrom = make([]Like, 0, count)
 		} else {
-			likee.LikesFrom = likee.LikesFrom[:0]
+			counters[id] = 0
 		}
 	}
+	log.Println("Copying LikesFrom")
 	for id, liker := range db.accounts {
 		for _, like := range liker.LikesTo {
-			likee := db.accounts[like.ID]
+			if counters[like.ID] == 0 {
+				continue
+			}
+			likee := &db.accounts[like.ID]
 			likee.LikesFrom = append(likee.LikesFrom, Like{uint32(id), uint32(like.TS)})
 		}
 	}
@@ -131,6 +137,14 @@ func (db *Database) buildLikesFrom() {
 
 func (db *Database) BuildIndexes() {
 	log.Println("Build Indexes, lastInserted", db.lastInserted)
+	db.buildLikesFrom()
+	db.buildLikesFrom()
+	db.buildLikesFrom()
+	db.buildLikesFrom()
+	db.buildLikesFrom()
+	db.buildLikesFrom()
+	db.buildLikesFrom()
+	db.buildLikesFrom()
 }
 
 func (db *Database) updateLastInserted(inserted uint32) {
