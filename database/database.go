@@ -117,20 +117,19 @@ func (db *Database) buildLikesFrom() {
 	log.Println("Allocating LikesFrom")
 	for id, count := range counters {
 		likee := &db.accounts[id]
-		if count > cap(likee.LikesFrom) {
-			likee.LikesFrom = make([]Like, 0, count)
-		} else {
+		if count == len(likee.LikesFrom) {
 			counters[id] = 0
+		} else {
+			likee.LikesFrom = make([]Like, 0, count)
 		}
 	}
 	log.Println("Copying LikesFrom")
 	for id, liker := range db.accounts {
 		for _, like := range liker.LikesTo {
-			if counters[like.ID] == 0 {
-				continue
+			if counters[like.ID] > 0 {
+				likee := &db.accounts[like.ID]
+				likee.LikesFrom = append(likee.LikesFrom, Like{uint32(id), uint32(like.TS)})
 			}
-			likee := &db.accounts[like.ID]
-			likee.LikesFrom = append(likee.LikesFrom, Like{uint32(id), uint32(like.TS)})
 		}
 	}
 }
