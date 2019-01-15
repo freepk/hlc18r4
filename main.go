@@ -58,7 +58,6 @@ func main() {
 		log.Fatal(err)
 	}
 	db.Ping()
-	db.Reindex()
 
 	err = fasthttp.ListenAndServe(":80", func(ctx *fasthttp.RequestCtx) {
 		AccountsHandler(ctx, db)

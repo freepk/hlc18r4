@@ -134,18 +134,6 @@ func (db *Database) buildLikesFrom() {
 	}
 }
 
-func (db *Database) BuildIndexes() {
-	log.Println("Build Indexes, lastInserted", db.lastInserted)
-	db.buildLikesFrom()
-	db.buildLikesFrom()
-	db.buildLikesFrom()
-	db.buildLikesFrom()
-	db.buildLikesFrom()
-	db.buildLikesFrom()
-	db.buildLikesFrom()
-	db.buildLikesFrom()
-}
-
 func (db *Database) updateLastInserted(inserted uint32) {
 	lastInserted := atomic.LoadUint32(&db.lastInserted)
 	if inserted > lastInserted {
