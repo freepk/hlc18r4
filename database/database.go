@@ -92,20 +92,41 @@ func (db *Database) NewAccount(src *proto.Account) error {
 	// Status
 	dst.PremiumStart = uint32(src.Premium.Start)
 	dst.PremiumFinish = uint32(src.Premium.Finish)
-	dst.Interests = make([]uint8, len(src.Interests))
-	for i := 0; i < len(src.Interests); i++ {
-		if interest, err := db.interests.GetKey(src.Interests[i]); err == nil {
-			dst.Interests[i] = uint8(interest)
-		}
+	dst.Interests = make([]uint8, 0, len(src.Interests))
+	for _, interest := range src.Interests {
+		interest, _ := db.interests.GetKey(interest)
+		dst.Interests = append(dst.Interests, uint8(interest))
 	}
-	dst.LikesTo = make([]Like, len(src.Likes))
-	for i := 0; i < len(src.Likes); i++ {
-		dst.LikesTo[i].ID = uint32(src.Likes[i].ID)
-		dst.LikesTo[i].TS = uint32(src.Likes[i].TS)
+	dst.LikesTo = make([]Like, 0, len(src.Likes))
+	for _, like := range src.Likes {
+		dst.LikesTo = append(dst.LikesTo, Like{uint32(like.ID), uint32(like.TS)})
 	}
 	inserted := uint32(src.ID)
 	db.updateLastInserted(inserted)
 	return nil
+}
+
+func (db *Database) buildLikesFrom() {
+	counters := make([]int, db.lastInserted)
+	for _, liker := range db.accounts {
+		for _, like := range liker.LikesTo {
+			counters[like.ID]++
+		}
+	}
+	for id, count := range counters {
+		likee := db.accounts[id]
+		if count > len(likee.LikesFrom) {
+			likee.LikesFrom = make([]Like, 0, count)
+		} else {
+			likee.LikesFrom = likee.LikesFrom[:0]
+		}
+	}
+	for id, liker := range db.accounts {
+		for _, like := range liker.LikesTo {
+			likee := db.accounts[like.ID]
+			likee.LikesFrom = append(likee.LikesFrom, Like{uint32(id), uint32(like.TS)})
+		}
+	}
 }
 
 func (db *Database) BuildIndexes() {
