@@ -28,7 +28,7 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}
-			if err := svc.Create(acc); err != nil {
+			if !svc.Create(acc) {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}
@@ -45,7 +45,7 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}
-			if err := svc.Update(id, acc); err != nil {
+			if !svc.Update(id, acc) {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}
@@ -58,16 +58,16 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 
 func main() {
 	log.Println("Restore service")
-	svc, err := service.RestoreAccountsService("tmp/data/data.zip")
-	if err != nil {
-		log.Fatal(err)
-	}
-	handler := func(ctx *fasthttp.RequestCtx) {
-		AccountsHandler(ctx, svc)
-	}
+	//svc, err := service.RestoreAccountsService("tmp/data/data.zip")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//handler := func(ctx *fasthttp.RequestCtx) {
+	//	AccountsHandler(ctx, svc)
+	//}
 	log.Println("Start listen")
-	err = fasthttp.ListenAndServe(":80", handler)
-	if err != nil {
-		log.Fatal(err)
-	}
+	//err = fasthttp.ListenAndServe(":80", handler)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 }
