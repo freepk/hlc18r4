@@ -56,47 +56,47 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 		tail = parse.ParseSpaces(tail)
 		switch {
 		case len(tail) > IdLen && string(tail[:IdLen]) == IdKey:
-			if a.ID, tail, ok = parse.ParseInt(tail[IdLen:]); !ok {
+			if tail, a.ID, ok = parse.ParseInt(tail[IdLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > BirthLen && string(tail[:BirthLen]) == BirthKey:
-			if a.Birth, tail, ok = parse.ParseInt(tail[BirthLen:]); !ok {
+			if tail, a.Birth, ok = parse.ParseInt(tail[BirthLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > JoinedLen && string(tail[:JoinedLen]) == JoinedKey:
-			if a.Joined, tail, ok = parse.ParseInt(tail[JoinedLen:]); !ok {
+			if tail, a.Joined, ok = parse.ParseInt(tail[JoinedLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > EmailLen && string(tail[:EmailLen]) == EmailKey:
-			if a.Email, tail, ok = parse.ParseQuoted(tail[EmailLen:]); !ok {
+			if tail, a.Email, ok = parse.ParseQuoted(tail[EmailLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > FnameLen && string(tail[:FnameLen]) == FnameKey:
-			if a.Fname, tail, ok = parse.ParseQuoted(tail[FnameLen:]); !ok {
+			if tail, a.Fname, ok = parse.ParseQuoted(tail[FnameLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > SnameLen && string(tail[:SnameLen]) == SnameKey:
-			if a.Sname, tail, ok = parse.ParseQuoted(tail[SnameLen:]); !ok {
+			if tail, a.Sname, ok = parse.ParseQuoted(tail[SnameLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > PhoneLen && string(tail[:PhoneLen]) == PhoneKey:
-			if a.Phone, tail, ok = parse.ParseQuoted(tail[PhoneLen:]); !ok {
+			if tail, a.Phone, ok = parse.ParseQuoted(tail[PhoneLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > SexLen && string(tail[:SexLen]) == SexKey:
-			if a.Sex, tail, ok = parse.ParseQuoted(tail[SexLen:]); !ok {
+			if tail, a.Sex, ok = parse.ParseQuoted(tail[SexLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > CountryLen && string(tail[:CountryLen]) == CountryKey:
-			if a.Country, tail, ok = parse.ParseQuoted(tail[CountryLen:]); !ok {
+			if tail, a.Country, ok = parse.ParseQuoted(tail[CountryLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > CityLen && string(tail[:CityLen]) == CityKey:
-			if a.City, tail, ok = parse.ParseQuoted(tail[CityLen:]); !ok {
+			if tail, a.City, ok = parse.ParseQuoted(tail[CityLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > StatusLen && string(tail[:StatusLen]) == StatusKey:
-			if a.Status, tail, ok = parse.ParseQuoted(tail[StatusLen:]); !ok {
+			if tail, a.Status, ok = parse.ParseQuoted(tail[StatusLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > PremiumLen && string(tail[:PremiumLen]) == PremiumKey:
@@ -111,11 +111,11 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				tail = parse.ParseSpaces(tail)
 				switch {
 				case len(tail) > StartLen && string(tail[:StartLen]) == StartKey:
-					if premium.Start, tail, ok = parse.ParseInt(tail[StartLen:]); !ok {
+					if tail, premium.Start, ok = parse.ParseInt(tail[StartLen:]); !ok {
 						return buf, false
 					}
 				case len(tail) > FinishLen && string(tail[:FinishLen]) == FinishKey:
-					if premium.Finish, tail, ok = parse.ParseInt(tail[FinishLen:]); !ok {
+					if tail, premium.Finish, ok = parse.ParseInt(tail[FinishLen:]); !ok {
 						return buf, false
 					}
 				}
@@ -133,7 +133,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			}
 			for {
 				var interest []byte
-				if interest, tail, ok = parse.ParseQuoted(tail); !ok {
+				if tail, interest, ok = parse.ParseQuoted(tail); !ok {
 					return buf, false
 				}
 				a.Interests = append(a.Interests, interest)
@@ -160,11 +160,11 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 					tail = parse.ParseSpaces(tail)
 					switch {
 					case len(tail) > IdLen && string(tail[:IdLen]) == IdKey:
-						if like.ID, tail, ok = parse.ParseInt(tail[IdLen:]); !ok {
+						if tail, like.ID, ok = parse.ParseInt(tail[IdLen:]); !ok {
 							return buf, false
 						}
 					case len(tail) > TsLen && string(tail[:TsLen]) == TsKey:
-						if like.TS, tail, ok = parse.ParseInt(tail[TsLen:]); !ok {
+						if tail, like.TS, ok = parse.ParseInt(tail[TsLen:]); !ok {
 							return buf, false
 						}
 					}

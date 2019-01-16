@@ -57,7 +57,7 @@ func (svc *AccountsService) ReadFrom(src io.Reader) error {
 				if !ok {
 					break
 				}
-				err = svc.Add(acc)
+				err = svc.Create(acc)
 				if err != nil {
 					return err
 				}

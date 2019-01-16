@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/valyala/fasthttp"
-	//"gitlab.com/freepk/hlc18r4/parse"
-	//"gitlab.com/freepk/hlc18r4/proto"
+	"gitlab.com/freepk/hlc18r4/parse"
+	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/service"
 )
 
@@ -20,10 +20,40 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 	case `POST`:
 		switch string(path) {
 		case `likes/`:
+			ctx.SetStatusCode(fasthttp.StatusAccepted)
+			return
 		case `new/`:
+			acc := &proto.Account{}
+			if _, ok := acc.UnmarshalJSON(ctx.PostBody()); !ok {
+				ctx.SetStatusCode(fasthttp.StatusBadRequest)
+				return
+			}
+			if err := svc.Create(acc); err != nil {
+				ctx.SetStatusCode(fasthttp.StatusBadRequest)
+				return
+			}
+			ctx.SetStatusCode(fasthttp.StatusCreated)
+			return
 		default:
+			_, id, ok := parse.ParseInt(path)
+			if !ok || !svc.Exists(id) {
+				ctx.SetStatusCode(fasthttp.StatusNotFound)
+				return
+			}
+			acc := &proto.Account{}
+			if _, ok := acc.UnmarshalJSON(ctx.PostBody()); !ok {
+				ctx.SetStatusCode(fasthttp.StatusBadRequest)
+				return
+			}
+			if err := svc.Update(id, acc); err != nil {
+				ctx.SetStatusCode(fasthttp.StatusBadRequest)
+				return
+			}
+			ctx.SetStatusCode(fasthttp.StatusAccepted)
+			return
 		}
 	}
+	ctx.SetStatusCode(fasthttp.StatusNotFound)
 }
 
 func main() {

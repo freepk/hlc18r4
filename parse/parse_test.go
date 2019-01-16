@@ -50,43 +50,43 @@ func TestParseSymbol(t *testing.T) {
 }
 
 func TestParseInt(t *testing.T) {
-	if x, b, ok := ParseInt([]byte("")); x != 0 || ok || string(b) != "" {
+	if x, v, ok := ParseInt([]byte("")); v != 0 || ok || string(x) != "" {
 		t.Fail()
 	}
-	if x, b, ok := ParseInt([]byte(" ")); x != 0 || ok || string(b) != " " {
+	if x, v, ok := ParseInt([]byte(" ")); v != 0 || ok || string(x) != " " {
 		t.Fail()
 	}
-	if x, b, ok := ParseInt([]byte(" a1")); x != 0 || ok || string(b) != " a1" {
+	if x, v, ok := ParseInt([]byte(" a1")); v != 0 || ok || string(x) != " a1" {
 		t.Fail()
 	}
-	if x, b, ok := ParseInt([]byte(" 1")); x != 1 || !ok || string(b) != "" {
+	if x, v, ok := ParseInt([]byte(" 1")); v != 1 || !ok || string(x) != "" {
 		t.Fail()
 	}
-	if x, b, ok := ParseInt([]byte(" 1 ")); x != 1 || !ok || string(b) != " " {
+	if x, v, ok := ParseInt([]byte(" 1 ")); v != 1 || !ok || string(x) != " " {
 		t.Fail()
 	}
-	if x, b, ok := ParseInt([]byte(" 12")); x != 12 || !ok || string(b) != "" {
+	if x, v, ok := ParseInt([]byte(" 12")); v != 12 || !ok || string(x) != "" {
 		t.Fail()
 	}
-	if x, b, ok := ParseInt([]byte(" 12 ")); x != 12 || !ok || string(b) != " " {
+	if x, v, ok := ParseInt([]byte(" 12 ")); v != 12 || !ok || string(x) != " " {
 		t.Fail()
 	}
 }
 
 func TestParseQuoted(t *testing.T) {
-	if x, b, ok := ParseQuoted([]byte("")); x != nil || ok || string(b) != "" {
+	if x, v, ok := ParseQuoted([]byte("")); v != nil || ok || string(x) != "" {
 		t.Fail()
 	}
-	if x, b, ok := ParseQuoted([]byte(" ")); x != nil || ok || string(b) != " " {
+	if x, v, ok := ParseQuoted([]byte(" ")); v != nil || ok || string(x) != " " {
 		t.Fail()
 	}
-	if x, b, ok := ParseQuoted([]byte(" aa\"")); x != nil || ok || string(b) != " aa\"" {
+	if x, v, ok := ParseQuoted([]byte(" aa\"")); v != nil || ok || string(x) != " aa\"" {
 		t.Fail()
 	}
-	if x, b, ok := ParseQuoted([]byte(" \"aa\"")); string(x) != "aa" || !ok || string(b) != "" {
+	if x, v, ok := ParseQuoted([]byte(" \"aa\"")); string(v) != "aa" || !ok || string(x) != "" {
 		t.Fail()
 	}
-	if x, b, ok := ParseQuoted([]byte(" \"aa\" ")); string(x) != "aa" || !ok || string(b) != " " {
+	if x, v, ok := ParseQuoted([]byte(" \"aa\" ")); string(v) != "aa" || !ok || string(x) != " " {
 		t.Fail()
 	}
 }

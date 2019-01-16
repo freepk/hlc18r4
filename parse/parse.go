@@ -23,12 +23,12 @@ func ParseSymbol(b []byte, c byte) ([]byte, bool) {
 	return b, false
 }
 
-func ParseInt(b []byte) (int, []byte, bool) {
+func ParseInt(b []byte) ([]byte, int, bool) {
 	n := len(b)
 	for i := 0; i < n; i++ {
 		if b[i] > 0x20 {
 			if b[i] < 0x30 || b[i] > 0x39 {
-				return 0, b, false
+				return b, 0, false
 			}
 			x := int(b[i]) - 0x30
 			i++
@@ -40,10 +40,10 @@ func ParseInt(b []byte) (int, []byte, bool) {
 				x += int(b[i]) - 0x30
 				i++
 			}
-			return x, b[i:], true
+			return b[i:], x, true
 		}
 	}
-	return 0, b, false
+	return b, 0, false
 }
 
 func ParseQuoted(b []byte) ([]byte, []byte, bool) {
@@ -51,7 +51,7 @@ func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 	for i := 0; i < n; i++ {
 		if b[i] > 0x20 {
 			if b[i] != 0x22 {
-				return nil, b, false
+				return b, nil, false
 			}
 			p := i + 1
 			i++
@@ -65,12 +65,12 @@ func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 						i += 1
 					}
 				case 0x22:
-					return b[p:i], b[j:], true
+					return b[j:], b[p:i], true
 				}
 				i++
 			}
-			return nil, b, false
+			return b, nil, false
 		}
 	}
-	return nil, b, false
+	return b, nil, false
 }
