@@ -27,6 +27,7 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 }
 
 func main() {
+	log.Println("Restore service")
 	svc, err := service.RestoreAccountsService("tmp/data/data.zip")
 	if err != nil {
 		log.Fatal(err)
@@ -34,6 +35,7 @@ func main() {
 	handler := func(ctx *fasthttp.RequestCtx) {
 		AccountsHandler(ctx, svc)
 	}
+	log.Println("Start listen")
 	err = fasthttp.ListenAndServe(":80", handler)
 	if err != nil {
 		log.Fatal(err)
