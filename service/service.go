@@ -11,8 +11,7 @@ type AccountsService struct {
 	rep *repo.AccountsRepo
 }
 
-func NewAccountsService(size uint32) *AccountsService {
-	rep := repo.NewAccountsRepo(size)
+func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 	return &AccountsService{rep: rep}
 }
 
@@ -63,3 +62,37 @@ func (svc *AccountsService) Update(id int, acc *proto.Account) bool {
 	}
 	return svc.rep.Set(id, tmp)
 }
+
+/*
+func (svc *AccountsService) ReadFrom(src io.Reader) error {
+	buf := make([]byte, 8192)
+	num, err := src.Read(buf[:14])
+	if err != nil {
+		return err
+	}
+	acc := &proto.Account{}
+	pos := 0
+	for {
+		if num, err = src.Read(buf[pos:]); num > 0 {
+			num += pos
+			tail, ok := buf[:num], true
+			for {
+				tail, _ = parse.ParseSymbol(tail, ',')
+				acc.Reset()
+				if tail, ok = acc.UnmarshalJSON(tail); !ok {
+					break
+				}
+				if !svc.Create(acc) {
+					return AccountsServiceReadFromError
+				}
+			}
+			pos = copy(buf, tail)
+		} else if err == io.EOF {
+			break
+		} else if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+*/
