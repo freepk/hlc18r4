@@ -6,29 +6,19 @@ import (
 )
 
 type AccountsService struct {
-	repo *repo.AccountsRepo
+	rep *repo.AccountsRepo
 }
 
-func (svc *AccountsService) Insert(src *proto.Account) error {
-	return nil
+func NewAccountsService() *AccountsService {
+	rep := repo.NewAccountsRepo()
+	return &AccountsService{rep: rep}
 }
 
-func (svc *AccountsService) Update(src *proto.Account) error {
-	return nil
-}
-
-func (svc *AccountsService) Exists(id int) bool {
-	return true
-}
-
-func (svc *AccountsService) Filter() {
-}
-
-func (svc *AccountsService) Group() {
-}
-
-func (svc *AccountsService) Suggest() {
-}
-
-func (svc *AccountsService) Recommend() {
+func (svc *AccountsService) Add(acc *proto.Account) error {
+	tmp := &repo.Account{}
+	tmp.Email = string(acc.Email)
+	tmp.Birth = uint32(acc.Birth)
+	tmp.Joined = uint32(acc.Joined)
+	tmp.Status = repo.FreeStatus
+	return svc.rep.Add(acc.ID, tmp)
 }
