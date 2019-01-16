@@ -27,13 +27,13 @@ type Account struct {
 	Email         string
 	Birth         uint32
 	Joined        uint32
-	Fname         uint8
-	Sname         uint16
-	Country       uint8
-	City          uint16
+	Fname         string
+	Sname         string
+	Country       string
+	City          string
 	Status        StatusEnum
 	PremiumFinish uint32
 	PremiumPeriod PeriodEnum
-	Interests     []uint8
+	Interests     []string
 	LikesTo       []Like
 }

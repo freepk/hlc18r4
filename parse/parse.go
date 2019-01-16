@@ -74,3 +74,13 @@ func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 	}
 	return b, nil, false
 }
+
+func ParseUint32(b []byte) ([]byte, uint32, bool) {
+	t, v, ok := ParseInt(b)
+	return t, uint32(v), ok
+}
+
+func ParseString(b []byte) ([]byte, string, bool) {
+	t, v, ok := ParseQuoted(b)
+	return t, string(v), ok
+}

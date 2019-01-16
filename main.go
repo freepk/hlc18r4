@@ -6,6 +6,7 @@ import (
 	"github.com/valyala/fasthttp"
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
+	"gitlab.com/freepk/hlc18r4/repo"
 	"gitlab.com/freepk/hlc18r4/service"
 )
 
@@ -58,16 +59,18 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 
 func main() {
 	log.Println("Restore service")
+	rep := repo.NewAccountsRepo(1300000)
+	_ = rep
 	//svc, err := service.RestoreAccountsService("tmp/data/data.zip")
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
-	//handler := func(ctx *fasthttp.RequestCtx) {
-	//	AccountsHandler(ctx, svc)
-	//}
+	handler := func(ctx *fasthttp.RequestCtx) {
+		AccountsHandler(ctx, nil)
+	}
 	log.Println("Start listen")
-	//err = fasthttp.ListenAndServe(":80", handler)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	err := fasthttp.ListenAndServe(":80", handler)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
