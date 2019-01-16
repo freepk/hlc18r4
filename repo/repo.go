@@ -65,11 +65,10 @@ func (rep *AccountsRepo) set(id int, acc *Account, checkExists bool) bool {
 		return false
 	}
 	hash := murmur3.Sum64([]byte(acc.Email))
-	owner, ok := rep.emails.Get(hash)
+	owner, ok := rep.emails.GetOrSet(hash, uint64(id))
 	if ok && owner != uint64(id) {
 		return false
 	}
-	rep.emails.Set(hash, uint64(id))
 	rep.accounts[id] = *acc
 	return true
 }
