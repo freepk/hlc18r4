@@ -13,31 +13,6 @@ var (
 	InterestDict = dictionary.NewDictionary(256)
 )
 
-type StatusEnum uint8
-
-const (
-	_          = iota
-	FreeStatus = StatusEnum(iota)
-	BusyStatus
-	ComplicatedStatus
-)
-
-type PeriodEnum uint8
-
-const (
-	_           = iota
-	MonthPeriod = PeriodEnum(iota)
-	QuarterPeriod
-	HalfYearPeriod
-)
-
-type SexEnum byte
-
-const (
-	MaleSex   = SexEnum('m')
-	FemaleSex = 'f'
-)
-
 type Like struct {
 	ID uint32
 	TS uint32
@@ -51,11 +26,11 @@ type Account struct {
 	Fname uint8
 	Sname uint16
 	//Phone     []byte
-	Sex       SexEnum
-	Country   uint8
-	City      uint16
-	Status    StatusEnum
-	Interests []uint8
+	Sex     SexEnum
+	Country uint8
+	City    uint16
+	Status  StatusEnum
+	//Interests []uint8
 	//PremiumFinish uint32
 	//PremiumPeriod
 	//Likes []Like
@@ -75,7 +50,7 @@ func (a *Account) Reset() {
 	a.Status = 0
 	//a.Premium.Start = 0
 	//a.Premium.Finish = 0
-	a.Interests = a.Interests[:0]
+	//a.Interests = a.Interests[:0]
 	//a.Likes = a.Likes[:0]
 }
 
@@ -104,18 +79,15 @@ func ParseSname(b []byte) ([]byte, uint16, bool) {
 }
 
 func ParseSex(b []byte) ([]byte, SexEnum, bool) {
-	t, v, ok := parse.ParseQuoted(b)
-	if !ok {
+	t := parse.ParseSpaces(b)
+	if len(t) < 3 {
 		return b, 0, false
 	}
-	if len(v) != 1 {
-		return b, 0, false
-	}
-	switch v[0] {
-	case 'm':
-		return t, MaleSex, true
-	case 'f':
-		return t, FemaleSex, true
+	switch string(t[:3]) {
+	case MaleSexStr:
+		return t[3:], MaleSex, true
+	case FemaleSexStr:
+		return t[3:], FemaleSex, true
 	}
 	return b, 0, false
 }
@@ -145,17 +117,14 @@ func ParseCity(b []byte) ([]byte, uint16, bool) {
 }
 
 func ParseStatus(b []byte) ([]byte, StatusEnum, bool) {
-	t, v, ok := parse.ParseQuoted(b)
-	if !ok {
-		return b, 0, false
-	}
-	switch string(v) {
-	case BusyStatusStr:
-		return t, BusyStatus, true
-	case FreeStatusStr:
-		return t, FreeStatus, true
-	case ComplicatedStatusStr:
-		return t, ComplicatedStatus, true
+	t := parse.ParseSpaces(b)
+	switch {
+	case len(t) > BusyStatusLen && string(t[:BusyStatusLen]) == BusyStatusStr:
+		return t[BusyStatusLen:], BusyStatus, true
+	case len(t) > FreeStatusLen && string(t[:FreeStatusLen]) == FreeStatusStr:
+		return t[FreeStatusLen:], FreeStatus, true
+	case len(t) > ComplicatedStatusLen && string(t[:ComplicatedStatusLen]) == ComplicatedStatusStr:
+		return t[ComplicatedStatusLen:], ComplicatedStatus, true
 	}
 	return b, 0, false
 }
@@ -226,51 +195,51 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, a.Status, ok = ParseStatus(tail[StatusLen:]); !ok {
 				return buf, false
 			}
-		//case len(tail) > PremiumLen && string(tail[:PremiumLen]) == PremiumKey:
-		//	var premium struct {
-		//		Start  int
-		//		Finish int
-		//	}
-		//	if tail, ok = parse.ParseSymbol(tail[PremiumLen:], '{'); !ok {
-		//		return buf, false
-		//	}
-		//	for {
-		//		tail = parse.ParseSpaces(tail)
-		//		switch {
-		//		case len(tail) > StartLen && string(tail[:StartLen]) == StartKey:
-		//			if tail, premium.Start, ok = parse.ParseInt(tail[StartLen:]); !ok {
-		//				return buf, false
-		//			}
-		//		case len(tail) > FinishLen && string(tail[:FinishLen]) == FinishKey:
-		//			if tail, premium.Finish, ok = parse.ParseInt(tail[FinishLen:]); !ok {
-		//				return buf, false
-		//			}
-		//		}
-		//		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-		//			break
-		//		}
-		//	}
-		//	if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
-		//		return buf, false
-		//	}
-		//	a.Premium = premium
-		case len(tail) > InterestsLen && string(tail[:InterestsLen]) == InterestsKey:
-			if tail, ok = parse.ParseSymbol(tail[InterestsLen:], '['); !ok {
-				return buf, false
-			}
-			for {
-				var interest uint8
-				if tail, interest, ok = ParseInterest(tail); !ok {
-					return buf, false
-				}
-				a.Interests = append(a.Interests, interest)
-				if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-					break
-				}
-			}
-			if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
-				return buf, false
-			}
+			//case len(tail) > PremiumLen && string(tail[:PremiumLen]) == PremiumKey:
+			//	var premium struct {
+			//		Start  int
+			//		Finish int
+			//	}
+			//	if tail, ok = parse.ParseSymbol(tail[PremiumLen:], '{'); !ok {
+			//		return buf, false
+			//	}
+			//	for {
+			//		tail = parse.ParseSpaces(tail)
+			//		switch {
+			//		case len(tail) > StartLen && string(tail[:StartLen]) == StartKey:
+			//			if tail, premium.Start, ok = parse.ParseInt(tail[StartLen:]); !ok {
+			//				return buf, false
+			//			}
+			//		case len(tail) > FinishLen && string(tail[:FinishLen]) == FinishKey:
+			//			if tail, premium.Finish, ok = parse.ParseInt(tail[FinishLen:]); !ok {
+			//				return buf, false
+			//			}
+			//		}
+			//		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+			//			break
+			//		}
+			//	}
+			//	if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
+			//		return buf, false
+			//	}
+			//	a.Premium = premium
+			//case len(tail) > InterestsLen && string(tail[:InterestsLen]) == InterestsKey:
+			//	if tail, ok = parse.ParseSymbol(tail[InterestsLen:], '['); !ok {
+			//		return buf, false
+			//	}
+			//	for {
+			//		var interest uint8
+			//		if tail, interest, ok = ParseInterest(tail); !ok {
+			//			return buf, false
+			//		}
+			//		a.Interests = append(a.Interests, interest)
+			//		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+			//			break
+			//		}
+			//	}
+			//	if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
+			//		return buf, false
+			//	}
 			//case len(tail) > LikesLen && string(tail[:LikesLen]) == LikesKey:
 			//	if tail, ok = parse.ParseSymbol(tail[LikesLen:], '['); !ok {
 			//		return buf, false
@@ -310,6 +279,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			//	if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
 			//		return buf, false
 			//	}
+		default:
 		}
 		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
 			break
