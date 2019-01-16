@@ -3,9 +3,13 @@ package repo
 import (
 	"errors"
 	"sync"
+
+	"github.com/freepk/hashtab"
+	"github.com/spaolacci/murmur3"
 )
 
 var (
+	AccountsRepoSizeOverflow   = errors.New("Size overflow")
 	AccountsRepoExistsError    = errors.New("Account exists")
 	AccountsRepoNotExistsError = errors.New("Account not exists")
 	AccountsRepoEmailError     = errors.New("Account Email error")
@@ -15,33 +19,53 @@ var (
 	AccountsRepoPremiumError   = errors.New("Account Premium error")
 )
 
+const (
+	accountsPerBucket = 10000
+)
+
 type AccountsRepo struct {
 	sync.RWMutex
-	emails   map[string]int
-	accounts map[int]Account
+	emails   *hashtab.HashTab
+	accounts []Account
+	locks    []sync.RWMutex
 }
 
-func NewAccountsRepo() *AccountsRepo {
-	emails := make(map[string]int)
-	accounts := make(map[int]Account)
-	return &AccountsRepo{emails: emails, accounts: accounts}
+func NewAccountsRepo(size uint32) *AccountsRepo {
+	emails := hashtab.NewHashTab(size)
+	accounts := make([]Account, size)
+	locksSize := (size / accountsPerBucket) + 1
+	locks := make([]sync.RWMutex, locksSize)
+	return &AccountsRepo{emails: emails, accounts: accounts, locks: locks}
+}
+
+func (rep *AccountsRepo) lock(id int) *sync.RWMutex {
+	bucket := id / accountsPerBucket
+	return &rep.locks[bucket]
 }
 
 func (rep *AccountsRepo) Exists(id int) bool {
-	rep.RLock()
-	_, ok := rep.accounts[id]
-	rep.RUnlock()
+	if id >= len(rep.accounts) {
+		return false
+	}
+	lock := rep.lock(id)
+	lock.RLock()
+	ok := (rep.accounts[id].Joined > 0)
+	lock.RUnlock()
 	return ok
 }
 
-func (rep *AccountsRepo) Get(id int) (*Account, error) {
-	rep.RLock()
-	acc, ok := rep.accounts[id]
-	rep.RUnlock()
-	if !ok {
-		return nil, AccountsRepoNotExistsError
+func (rep *AccountsRepo) Get(id int) *Account {
+	if id >= len(rep.accounts) {
+		return nil
 	}
-	return &acc, nil
+	lock := rep.lock(id)
+	lock.RLock()
+	acc := &rep.accounts[id]
+	lock.RUnlock()
+	if acc.Joined > 0 {
+		return acc
+	}
+	return nil
 }
 
 func (rep *AccountsRepo) validate(acc *Account) error {
@@ -64,23 +88,28 @@ func (rep *AccountsRepo) validate(acc *Account) error {
 }
 
 func (rep *AccountsRepo) set(id int, acc *Account, checkExists bool) error {
+	if id >= len(rep.accounts) {
+		return AccountsRepoSizeOverflow
+	}
 	if err := rep.validate(acc); err != nil {
 		return err
 	}
-	rep.Lock()
-	if checkExists {
-		if _, ok := rep.accounts[id]; ok {
-			rep.Unlock()
-			return AccountsRepoExistsError
-		}
+	hash := murmur3.Sum64([]byte(acc.Email))
+	lock := rep.lock(id)
+	lock.Lock()
+	original := &rep.accounts[id]
+	if checkExists && original.Joined > 0 {
+		lock.Unlock()
+		return AccountsRepoExistsError
 	}
-	if emailID, ok := rep.emails[acc.Email]; ok && emailID != id {
-		rep.Unlock()
+	owner, ok := rep.emails.Get(hash)
+	if ok && owner != uint64(id) {
+		lock.Unlock()
 		return AccountsRepoEmailError
 	}
-	rep.emails[acc.Email] = id
+	rep.emails.Set(hash, uint64(id))
 	rep.accounts[id] = *acc
-	rep.Unlock()
+	lock.Unlock()
 	return nil
 }
 

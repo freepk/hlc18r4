@@ -5,7 +5,7 @@ import (
 )
 
 func TestAccountsRepo(t *testing.T) {
-	rep := NewAccountsRepo()
+	rep := NewAccountsRepo(1024)
 	if rep.Exists(512) {
 		t.Fail()
 	}
@@ -24,7 +24,7 @@ func TestAccountsRepo(t *testing.T) {
 }
 
 func BenchmarkAccountsRepoExists(b *testing.B) {
-	rep := NewAccountsRepo()
+	rep := NewAccountsRepo(1024)
 	rep.Add(101, &Account{Joined: 1, Birth: 1, Status: BusyStatus, Email: "test@mail.ru"})
 	for i := 0; i < b.N; i++ {
 		_ = rep.Exists(101)
@@ -32,9 +32,9 @@ func BenchmarkAccountsRepoExists(b *testing.B) {
 }
 
 func BenchmarkAccountsGet(b *testing.B) {
-	rep := NewAccountsRepo()
+	rep := NewAccountsRepo(1024)
 	rep.Add(101, &Account{Joined: 1, Birth: 1, Status: BusyStatus, Email: "test@mail.ru"})
 	for i := 0; i < b.N; i++ {
-		_, _ = rep.Get(101)
+		rep.Get(101)
 	}
 }

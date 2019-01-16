@@ -18,8 +18,8 @@ type AccountsService struct {
 	rep *repo.AccountsRepo
 }
 
-func NewAccountsService() *AccountsService {
-	rep := repo.NewAccountsRepo()
+func NewAccountsService(size uint32) *AccountsService {
+	rep := repo.NewAccountsRepo(size)
 	return &AccountsService{rep: rep}
 }
 
