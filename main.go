@@ -29,7 +29,7 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}
-			if !svc.Create(acc) {
+			if !svc.Create(int(acc.ID), acc) {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}
@@ -60,13 +60,9 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 func main() {
 	log.Println("Restore service")
 	rep := repo.NewAccountsRepo(1300000)
-	_ = rep
-	//svc, err := service.RestoreAccountsService("tmp/data/data.zip")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	svc := service.NewAccountsService(rep)
 	handler := func(ctx *fasthttp.RequestCtx) {
-		AccountsHandler(ctx, nil)
+		AccountsHandler(ctx, svc)
 	}
 	log.Println("Start listen")
 	err := fasthttp.ListenAndServe(":80", handler)
