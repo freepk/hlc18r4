@@ -195,34 +195,31 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, a.Status, ok = ParseStatus(tail[StatusLen:]); !ok {
 				return buf, false
 			}
-		//case len(tail) > PremiumLen && string(tail[:PremiumLen]) == PremiumKey:
-		//	var premium struct {
-		//		Start  int
-		//		Finish int
-		//	}
-		//	if tail, ok = parse.ParseSymbol(tail[PremiumLen:], '{'); !ok {
-		//		return buf, false
-		//	}
-		//	for {
-		//		tail = parse.ParseSpaces(tail)
-		//		switch {
-		//		case len(tail) > StartLen && string(tail[:StartLen]) == StartKey:
-		//			if tail, premium.Start, ok = parse.ParseInt(tail[StartLen:]); !ok {
-		//				return buf, false
-		//			}
-		//		case len(tail) > FinishLen && string(tail[:FinishLen]) == FinishKey:
-		//			if tail, premium.Finish, ok = parse.ParseInt(tail[FinishLen:]); !ok {
-		//				return buf, false
-		//			}
-		//		}
-		//		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-		//			break
-		//		}
-		//	}
-		//	if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
-		//		return buf, false
-		//	}
-		//	a.Premium = premium
+		case len(tail) > PremiumLen && string(tail[:PremiumLen]) == PremiumKey:
+			// ...
+			if tail, ok = parse.ParseSymbol(tail[PremiumLen:], '{'); !ok {
+				return buf, false
+			}
+			for {
+				tail = parse.ParseSpaces(tail)
+				switch {
+				case len(tail) > StartLen && string(tail[:StartLen]) == StartKey:
+					if tail, _, ok = parse.ParseInt(tail[StartLen:]); !ok {
+						return buf, false
+					}
+				case len(tail) > FinishLen && string(tail[:FinishLen]) == FinishKey:
+					if tail, _, ok = parse.ParseInt(tail[FinishLen:]); !ok {
+						return buf, false
+					}
+				}
+				if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+					break
+				}
+			}
+			if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
+				return buf, false
+			}
+			// ...
 		case len(tail) > InterestsLen && string(tail[:InterestsLen]) == InterestsKey:
 			if tail, ok = parse.ParseSymbol(tail[InterestsLen:], '['); !ok {
 				return buf, false
@@ -240,45 +237,42 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
 				return buf, false
 			}
-			//case len(tail) > LikesLen && string(tail[:LikesLen]) == LikesKey:
-			//	if tail, ok = parse.ParseSymbol(tail[LikesLen:], '['); !ok {
-			//		return buf, false
-			//	}
-			//	for {
-			//		var like struct {
-			//			ID int
-			//			TS int
-			//		}
-			//		if tail, ok = parse.ParseSymbol(tail, '{'); !ok {
-			//			return buf, false
-			//		}
-			//		for {
-			//			tail = parse.ParseSpaces(tail)
-			//			switch {
-			//			case len(tail) > IdLen && string(tail[:IdLen]) == IdKey:
-			//				if tail, like.ID, ok = parse.ParseInt(tail[IdLen:]); !ok {
-			//					return buf, false
-			//				}
-			//			case len(tail) > TsLen && string(tail[:TsLen]) == TsKey:
-			//				if tail, like.TS, ok = parse.ParseInt(tail[TsLen:]); !ok {
-			//					return buf, false
-			//				}
-			//			}
-			//			if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-			//				break
-			//			}
-			//		}
-			//		if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
-			//			return buf, false
-			//		}
-			//		a.Likes = append(a.Likes, like)
-			//		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-			//			break
-			//		}
-			//	}
-			//	if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
-			//		return buf, false
-			//	}
+		case len(tail) > LikesLen && string(tail[:LikesLen]) == LikesKey:
+			if tail, ok = parse.ParseSymbol(tail[LikesLen:], '['); !ok {
+				return buf, false
+			}
+			for {
+				// ...
+				if tail, ok = parse.ParseSymbol(tail, '{'); !ok {
+					return buf, false
+				}
+				for {
+					tail = parse.ParseSpaces(tail)
+					switch {
+					case len(tail) > IdLen && string(tail[:IdLen]) == IdKey:
+						if tail, _, ok = parse.ParseInt(tail[IdLen:]); !ok {
+							return buf, false
+						}
+					case len(tail) > TsLen && string(tail[:TsLen]) == TsKey:
+						if tail, _, ok = parse.ParseInt(tail[TsLen:]); !ok {
+							return buf, false
+						}
+					}
+					if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+						break
+					}
+				}
+				if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
+					return buf, false
+				}
+				// ...
+				if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+					break
+				}
+			}
+			if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
+				return buf, false
+			}
 		}
 		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
 			break
