@@ -11,9 +11,9 @@ type AccountsRepo struct {
 	accounts []proto.Account
 }
 
-func NewAccountsRepo(size int) *AccountsRepo {
-	emails := hashtab.NewHashTab(size)
-	accounts := make([]proto.Account, size)
+func NewAccountsRepo(num int) *AccountsRepo {
+	emails := hashtab.NewHashTab(num * 150 / 100)
+	accounts := make([]proto.Account, num)
 	return &AccountsRepo{emails: emails, accounts: accounts}
 }
 
