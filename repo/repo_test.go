@@ -35,6 +35,6 @@ func BenchmarkAccountsGet(b *testing.B) {
 	rep := NewAccountsRepo(1024)
 	rep.Add(101, &Account{Joined: 1, Birth: 1, Status: BusyStatus, Email: "test@mail.ru"})
 	for i := 0; i < b.N; i++ {
-		rep.Get(101)
+		_, _ = rep.Get(101)
 	}
 }
