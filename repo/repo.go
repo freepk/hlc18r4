@@ -2,6 +2,7 @@ package repo
 
 import (
 	"errors"
+	"sync"
 )
 
 var (
@@ -15,6 +16,7 @@ var (
 )
 
 type AccountsRepo struct {
+	sync.RWMutex
 	emails   map[string]int
 	accounts map[int]Account
 }
@@ -25,20 +27,20 @@ func NewAccountsRepo() *AccountsRepo {
 	return &AccountsRepo{emails: emails, accounts: accounts}
 }
 
-func (rep *AccountsRepo) exists(id int) bool {
+func (rep *AccountsRepo) Exists(id int) bool {
+	rep.RLock()
 	_, ok := rep.accounts[id]
+	rep.RUnlock()
 	return ok
 }
 
-func (rep *AccountsRepo) Exists(id int) bool {
-	return rep.exists(id)
-}
-
 func (rep *AccountsRepo) Get(id int) (*Account, error) {
-	if !rep.exists(id) {
+	rep.RLock()
+	acc, ok := rep.accounts[id]
+	rep.RUnlock()
+	if !ok {
 		return nil, AccountsRepoNotExistsError
 	}
-	acc := rep.accounts[id]
 	return &acc, nil
 }
 
@@ -65,14 +67,20 @@ func (rep *AccountsRepo) set(id int, acc *Account, checkExists bool) error {
 	if err := rep.validate(acc); err != nil {
 		return err
 	}
-	if eid, ok := rep.emails[acc.Email]; ok && eid != id {
-		return AccountsRepoEmailError
+	rep.Lock()
+	if checkExists {
+		if _, ok := rep.accounts[id]; ok {
+			rep.Unlock()
+			return AccountsRepoExistsError
+		}
 	}
-	if checkExists && rep.exists(id) {
-		return AccountsRepoExistsError
+	if emailID, ok := rep.emails[acc.Email]; ok && emailID != id {
+		rep.Unlock()
+		return AccountsRepoEmailError
 	}
 	rep.emails[acc.Email] = id
 	rep.accounts[id] = *acc
+	rep.Unlock()
 	return nil
 }
 

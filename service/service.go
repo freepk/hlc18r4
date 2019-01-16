@@ -55,12 +55,12 @@ func (svc *AccountsService) Update(id int, acc *proto.Account) error {
 	if len(acc.Sex) > 1 || (len(acc.Sex) == 1 && acc.Sex[0] != 'm' && acc.Sex[0] != 'f') {
 		return AccountsServiceSexError
 	}
-        if len(acc.Status) > 0 &&
-                string(acc.Status) != `\u0432\u0441\u0451 \u0441\u043b\u043e\u0436\u043d\u043e` &&
-                string(acc.Status) != `\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b` &&
-                string(acc.Status) != `\u0437\u0430\u043d\u044f\u0442\u044b` {
-                return AccountsServiceStatusError
-        }
+	if len(acc.Status) > 0 &&
+		string(acc.Status) != `\u0432\u0441\u0451 \u0441\u043b\u043e\u0436\u043d\u043e` &&
+		string(acc.Status) != `\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b` &&
+		string(acc.Status) != `\u0437\u0430\u043d\u044f\u0442\u044b` {
+		return AccountsServiceStatusError
+	}
 	tmp, err := svc.rep.Get(id)
 	if err != nil {
 		return err
