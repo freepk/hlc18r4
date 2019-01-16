@@ -19,20 +19,20 @@ type Like struct {
 }
 
 type Account struct {
-	ID     uint32
-	Birth  uint32
-	Joined uint32
-	//Email  string
-	Fname uint8
-	Sname uint16
-	//Phone     []byte
+	ID      uint32
+	Birth   uint32
+	Joined  uint32
+	Email   string
+	Fname   uint8
+	Sname   uint16
+	Phone   string
 	Sex     SexEnum
 	Country uint8
 	City    uint16
 	Status  StatusEnum
-	//Interests []uint8
+	//PremiumStart uint32
 	//PremiumFinish uint32
-	//PremiumPeriod
+	Interests []uint8
 	//Likes []Like
 }
 
@@ -40,17 +40,17 @@ func (a *Account) Reset() {
 	a.ID = 0
 	a.Birth = 0
 	a.Joined = 0
-	//a.Email = ""
+	a.Email = ""
 	a.Fname = 0
 	a.Sname = 0
-	//a.Phone = a.Phone[:0]
+	a.Phone = ""
 	a.Sex = 0
 	a.Country = 0
 	a.City = 0
 	a.Status = 0
 	//a.Premium.Start = 0
 	//a.Premium.Finish = 0
-	//a.Interests = a.Interests[:0]
+	a.Interests = a.Interests[:0]
 	//a.Likes = a.Likes[:0]
 }
 
@@ -163,10 +163,10 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, a.Joined, ok = parse.ParseUint32(tail[JoinedLen:]); !ok {
 				return buf, false
 			}
-		//case len(tail) > EmailLen && string(tail[:EmailLen]) == EmailKey:
-		//	if tail, a.Email, ok = parse.ParseString(tail[EmailLen:]); !ok {
-		//		return buf, false
-		//	}
+		case len(tail) > EmailLen && string(tail[:EmailLen]) == EmailKey:
+			if tail, a.Email, ok = parse.ParseString(tail[EmailLen:]); !ok {
+				return buf, false
+			}
 		case len(tail) > FnameLen && string(tail[:FnameLen]) == FnameKey:
 			if tail, a.Fname, ok = ParseFname(tail[FnameLen:]); !ok {
 				return buf, false
@@ -175,10 +175,10 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, a.Sname, ok = ParseSname(tail[SnameLen:]); !ok {
 				return buf, false
 			}
-		//case len(tail) > PhoneLen && string(tail[:PhoneLen]) == PhoneKey:
-		//	if tail, a.Phone, ok = parse.ParseQuoted(tail[PhoneLen:]); !ok {
-		//		return buf, false
-		//	}
+		case len(tail) > PhoneLen && string(tail[:PhoneLen]) == PhoneKey:
+			if tail, a.Phone, ok = parse.ParseString(tail[PhoneLen:]); !ok {
+				return buf, false
+			}
 		case len(tail) > SexLen && string(tail[:SexLen]) == SexKey:
 			if tail, a.Sex, ok = ParseSex(tail[SexLen:]); !ok {
 				return buf, false
@@ -195,51 +195,51 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, a.Status, ok = ParseStatus(tail[StatusLen:]); !ok {
 				return buf, false
 			}
-			//case len(tail) > PremiumLen && string(tail[:PremiumLen]) == PremiumKey:
-			//	var premium struct {
-			//		Start  int
-			//		Finish int
-			//	}
-			//	if tail, ok = parse.ParseSymbol(tail[PremiumLen:], '{'); !ok {
-			//		return buf, false
-			//	}
-			//	for {
-			//		tail = parse.ParseSpaces(tail)
-			//		switch {
-			//		case len(tail) > StartLen && string(tail[:StartLen]) == StartKey:
-			//			if tail, premium.Start, ok = parse.ParseInt(tail[StartLen:]); !ok {
-			//				return buf, false
-			//			}
-			//		case len(tail) > FinishLen && string(tail[:FinishLen]) == FinishKey:
-			//			if tail, premium.Finish, ok = parse.ParseInt(tail[FinishLen:]); !ok {
-			//				return buf, false
-			//			}
-			//		}
-			//		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-			//			break
-			//		}
-			//	}
-			//	if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
-			//		return buf, false
-			//	}
-			//	a.Premium = premium
-			//case len(tail) > InterestsLen && string(tail[:InterestsLen]) == InterestsKey:
-			//	if tail, ok = parse.ParseSymbol(tail[InterestsLen:], '['); !ok {
-			//		return buf, false
-			//	}
-			//	for {
-			//		var interest uint8
-			//		if tail, interest, ok = ParseInterest(tail); !ok {
-			//			return buf, false
-			//		}
-			//		a.Interests = append(a.Interests, interest)
-			//		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-			//			break
-			//		}
-			//	}
-			//	if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
-			//		return buf, false
-			//	}
+		//case len(tail) > PremiumLen && string(tail[:PremiumLen]) == PremiumKey:
+		//	var premium struct {
+		//		Start  int
+		//		Finish int
+		//	}
+		//	if tail, ok = parse.ParseSymbol(tail[PremiumLen:], '{'); !ok {
+		//		return buf, false
+		//	}
+		//	for {
+		//		tail = parse.ParseSpaces(tail)
+		//		switch {
+		//		case len(tail) > StartLen && string(tail[:StartLen]) == StartKey:
+		//			if tail, premium.Start, ok = parse.ParseInt(tail[StartLen:]); !ok {
+		//				return buf, false
+		//			}
+		//		case len(tail) > FinishLen && string(tail[:FinishLen]) == FinishKey:
+		//			if tail, premium.Finish, ok = parse.ParseInt(tail[FinishLen:]); !ok {
+		//				return buf, false
+		//			}
+		//		}
+		//		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+		//			break
+		//		}
+		//	}
+		//	if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
+		//		return buf, false
+		//	}
+		//	a.Premium = premium
+		case len(tail) > InterestsLen && string(tail[:InterestsLen]) == InterestsKey:
+			if tail, ok = parse.ParseSymbol(tail[InterestsLen:], '['); !ok {
+				return buf, false
+			}
+			for {
+				var interest uint8
+				if tail, interest, ok = ParseInterest(tail); !ok {
+					return buf, false
+				}
+				a.Interests = append(a.Interests, interest)
+				if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+					break
+				}
+			}
+			if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
+				return buf, false
+			}
 			//case len(tail) > LikesLen && string(tail[:LikesLen]) == LikesKey:
 			//	if tail, ok = parse.ParseSymbol(tail[LikesLen:], '['); !ok {
 			//		return buf, false
@@ -279,7 +279,6 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			//	if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
 			//		return buf, false
 			//	}
-		default:
 		}
 		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
 			break
