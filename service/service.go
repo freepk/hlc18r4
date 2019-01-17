@@ -53,7 +53,6 @@ func (svc *AccountsService) Update(id int, acc *proto.Account) bool {
 	if len(acc.Interests) > 0 {
 		dst.Interests = append(dst.Interests, acc.Interests...)
 	}
-	println("Update done", id)
 	// etc...
 	return true
 }
