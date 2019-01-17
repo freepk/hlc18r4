@@ -22,10 +22,12 @@ type Account struct {
 	ID        uint32
 	Birth     uint32
 	Joined    uint32
-	Email     string
+	EmailSize uint8
+	Email     [40]byte
 	Fname     uint8
 	Sname     uint16
-	Phone     string
+	PhoneSize uint8
+	Phone     [14]byte
 	Sex       SexEnum
 	Country   uint8
 	City      uint16
@@ -38,10 +40,12 @@ func (a *Account) reset() {
 	a.ID = 0
 	a.Birth = 0
 	a.Joined = 0
-	a.Email = ""
+	a.EmailSize = 0
+	a.Email = [40]byte{}
 	a.Fname = 0
 	a.Sname = 0
-	a.Phone = ""
+	a.PhoneSize = 0
+	a.Phone = [14]byte{}
 	a.Sex = 0
 	a.Country = 0
 	a.City = 0
@@ -181,7 +185,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, email, ok = parse.ParseQuoted(tail[EmailLen:]); !ok {
 				return buf, false
 			}
-			a.Email = string(email)
+			a.EmailSize = uint8(copy(a.Email[:], email))
 		case len(tail) > FnameLen && string(tail[:FnameLen]) == FnameKey:
 			if tail, a.Fname, ok = ParseFname(tail[FnameLen:]); !ok {
 				return buf, false
@@ -195,7 +199,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, phone, ok = parse.ParseQuoted(tail[PhoneLen:]); !ok {
 				return buf, false
 			}
-			a.Phone = string(phone)
+			a.PhoneSize = uint8(copy(a.Phone[:], phone))
 		case len(tail) > SexLen && string(tail[:SexLen]) == SexKey:
 			if tail, a.Sex, ok = ParseSex(tail[SexLen:]); !ok {
 				return buf, false

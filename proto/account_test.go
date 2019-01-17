@@ -74,9 +74,9 @@ func TestAccountUnmarshalJSON(t *testing.T) {
 		t.Fail()
 	}
 
-	t.Log("a", a.Phone)
-	t.Log("b", b.Phone)
-	t.Log("c", c.Phone)
+	t.Log("a", string(a.Phone[:]))
+	t.Log("b", string(b.Phone[:]))
+	t.Log("c", string(c.Phone[:]))
 }
 
 func BenchmarkAccountUnmarshalJSON(b *testing.B) {

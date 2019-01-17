@@ -17,8 +17,8 @@ type AccountsService struct {
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 	emails := hashtab.NewHashTab(rep.Size())
 	rep.ForEach(func(acc *proto.Account) {
-		if len(acc.Email) > 0 {
-			hash := murmur3.Sum64(s2b(acc.Email))
+		if acc.EmailSize > 0 {
+			hash := murmur3.Sum64(acc.Email[:acc.EmailSize])
 			emails.Set(hash, uint64(acc.ID))
 		}
 	})
@@ -38,11 +38,11 @@ func (svc *AccountsService) Create(acc *proto.Account) bool {
 	if id == 0 || svc.Exists(id) {
 		return false
 	}
-	if len(acc.Email) == 0 || bytes.IndexByte(s2b(acc.Email), 0x40) == -1 {
+	if acc.EmailSize == 0 || bytes.IndexByte(acc.Email[:acc.EmailSize], 0x40) == -1 {
 		return false
 	}
 	// hold new
-	hash := murmur3.Sum64(s2b(acc.Email))
+	hash := murmur3.Sum64(acc.Email[:acc.EmailSize])
 	if _, ok := svc.emails.GetOrSet(hash, uint64(id)); ok {
 		return false
 	}
@@ -52,16 +52,16 @@ func (svc *AccountsService) Create(acc *proto.Account) bool {
 }
 
 func (svc *AccountsService) Update(id int, acc *proto.Account) bool {
-	if len(acc.Email) > 0 && bytes.IndexByte(s2b(acc.Email), 0x40) == -1 {
+	if acc.EmailSize > 0 && bytes.IndexByte(acc.Email[:acc.EmailSize], 0x40) == -1 {
 		return false
 	}
 	dst := svc.rep.Get(id)
 	if dst == nil {
 		return false
 	}
-	if len(acc.Email) > 0 {
+	if acc.EmailSize > 0 {
 		// hold new
-		hash := murmur3.Sum64(s2b(acc.Email))
+		hash := murmur3.Sum64(acc.Email[:acc.EmailSize])
 		if _, ok := svc.emails.GetOrSet(hash, uint64(id)); ok {
 			return false
 		}
