@@ -62,7 +62,6 @@ func readFrom(rep *repo.AccountsRepo, src io.Reader) error {
 			tail, ok := buf[:num], true
 			for {
 				tail, _ = parse.ParseSymbol(tail, ',')
-				acc.Reset()
 				if tail, ok = acc.UnmarshalJSON(tail); !ok {
 					break
 				}

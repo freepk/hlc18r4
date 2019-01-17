@@ -19,39 +19,33 @@ type Like struct {
 }
 
 type Account struct {
-	ID      uint32
-	Birth   uint32
-	Joined  uint32
-	Email   string
-	Fname   uint8
-	Sname   uint16
-	Phone   string
-	Sex     SexEnum
-	Country uint8
-	City    uint16
-	Status  StatusEnum
-	//PremiumStart uint32
-	//PremiumFinish uint32
+	ID        uint32
+	Birth     uint32
+	Joined    uint32
+	Email     []byte
+	Fname     uint8
+	Sname     uint16
+	Phone     []byte
+	Sex       SexEnum
+	Country   uint8
+	City      uint16
+	Status    StatusEnum
 	Interests []uint8
-	//Likes []Like
 }
 
-func (a *Account) Reset() {
+func (a *Account) reset() {
 	a.ID = 0
 	a.Birth = 0
 	a.Joined = 0
-	a.Email = ""
+	a.Email = a.Email[:0]
 	a.Fname = 0
 	a.Sname = 0
-	a.Phone = ""
+	a.Phone = a.Phone[:0]
 	a.Sex = 0
 	a.Country = 0
 	a.City = 0
 	a.Status = 0
-	//a.Premium.Start = 0
-	//a.Premium.Finish = 0
 	a.Interests = a.Interests[:0]
-	//a.Likes = a.Likes[:0]
 }
 
 func ParseFname(b []byte) ([]byte, uint8, bool) {
@@ -145,6 +139,8 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 	var tail []byte
 	var ok bool
 
+	a.reset()
+
 	if tail, ok = parse.ParseSymbol(buf, '{'); !ok {
 		return buf, false
 	}
@@ -164,7 +160,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				return buf, false
 			}
 		case len(tail) > EmailLen && string(tail[:EmailLen]) == EmailKey:
-			if tail, a.Email, ok = parse.ParseString(tail[EmailLen:]); !ok {
+			if tail, a.Email, ok = parse.ParseQuoted(tail[EmailLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > FnameLen && string(tail[:FnameLen]) == FnameKey:
@@ -176,7 +172,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				return buf, false
 			}
 		case len(tail) > PhoneLen && string(tail[:PhoneLen]) == PhoneKey:
-			if tail, a.Phone, ok = parse.ParseString(tail[PhoneLen:]); !ok {
+			if tail, a.Phone, ok = parse.ParseQuoted(tail[PhoneLen:]); !ok {
 				return buf, false
 			}
 		case len(tail) > SexLen && string(tail[:SexLen]) == SexKey:

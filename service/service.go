@@ -32,6 +32,9 @@ func (svc *AccountsService) Update(id int, src *proto.Account) bool {
 	if len(src.Phone) > 0 {
 		dst.Phone = src.Phone
 	}
+	if len(src.Interests) > 0 {
+		dst.Interests = src.Interests
+	}
 	// etc...
 	return svc.rep.Set(id, dst)
 }

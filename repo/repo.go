@@ -1,8 +1,8 @@
 package repo
 
 import (
+	"bytes"
 	"log"
-	"strings"
 
 	"github.com/freepk/hashtab"
 	"github.com/spaolacci/murmur3"
@@ -40,7 +40,7 @@ func (rep *AccountsRepo) Get(id int) (*proto.Account, bool) {
 }
 
 func (rep *AccountsRepo) validate(acc *proto.Account) bool {
-	if len(acc.Email) == 0 || !strings.ContainsRune(acc.Email, '@'){
+	if len(acc.Email) == 0 || bytes.IndexByte(acc.Email, '@') == -1 {
 		return false
 	}
 	if acc.Joined == 0 {
@@ -62,12 +62,24 @@ func (rep *AccountsRepo) set(id int, acc *proto.Account, checkExists bool) bool 
 	if checkExists && rep.accounts[id].Joined > 0 {
 		return false
 	}
-	hash := murmur3.Sum64([]byte(acc.Email))
+	hash := murmur3.Sum64(acc.Email)
 	owner, ok := rep.emails.GetOrSet(hash, uint64(id))
 	if ok && owner != uint64(id) {
 		return false
 	}
-	rep.accounts[id] = *acc
+	dst := &rep.accounts[id]
+	dst.ID = acc.ID
+	dst.Birth = acc.Birth
+	dst.Joined = acc.Joined
+	dst.Email = append(dst.Email[:0], acc.Email...)
+	dst.Fname = acc.Fname
+	dst.Sname = acc.Sname
+	dst.Phone = append(dst.Phone[:0], acc.Phone...)
+	dst.Sex = acc.Sex
+	dst.Country = acc.Country
+	dst.City = acc.City
+	dst.Status = acc.Status
+	dst.Interests = append(dst.Interests[:0], acc.Interests...)
 	return true
 }
 
