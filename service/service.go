@@ -41,6 +41,7 @@ func (svc *AccountsService) Create(acc *proto.Account) bool {
 	if len(acc.Email) == 0 || bytes.IndexByte(acc.Email, 0x40) == -1 {
 		return false
 	}
+	// hold new
 	hash := murmur3.Sum64(acc.Email)
 	if _, ok := svc.emails.GetOrSet(hash, uint64(id)); ok {
 		return false
@@ -59,19 +60,21 @@ func (svc *AccountsService) Update(id int, acc *proto.Account) bool {
 		return false
 	}
 	if len(acc.Email) > 0 {
+		// hold new
 		hash := murmur3.Sum64(acc.Email)
 		if _, ok := svc.emails.GetOrSet(hash, uint64(id)); ok {
 			return false
 		}
-		//hash = murmur3.Sum64(dst.Email)
-		//svc.emails.Del(hash)
-		dst.Email = append(dst.Email, acc.Email...)
+		// release old
+		// hash = murmur3.Sum64(dst.Email)
+		// svc.emails.Del(hash)
+		dst.Email = append(dst.Email[:0], acc.Email...)
 	}
 	if len(acc.Phone) > 0 {
-		dst.Phone = append(dst.Phone, acc.Phone...)
+		dst.Phone = append(dst.Phone[:0], acc.Phone...)
 	}
 	if len(acc.Interests) > 0 {
-		dst.Interests = append(dst.Interests, acc.Interests...)
+		dst.Interests = append(dst.Interests[:0], acc.Interests...)
 	}
 	// etc...
 	return true
