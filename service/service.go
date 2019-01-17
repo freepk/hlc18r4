@@ -65,9 +65,11 @@ func (svc *AccountsService) Update(id int, acc *proto.Account) bool {
 		if _, ok := svc.emails.GetOrSet(hash, uint64(id)); ok {
 			return false
 		}
+		dst.EmailSize = acc.EmailSize
 		dst.Email = acc.Email
 	}
-	if len(acc.Phone) > 0 {
+	if acc.PhoneSize > 0 {
+		dst.PhoneSize = acc.PhoneSize
 		dst.Phone = acc.Phone
 	}
 	if len(acc.Interests) > 0 {
