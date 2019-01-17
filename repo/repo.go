@@ -1,6 +1,9 @@
 package repo
 
 import (
+	"log"
+	"strings"
+
 	"github.com/freepk/hashtab"
 	"github.com/spaolacci/murmur3"
 	"gitlab.com/freepk/hlc18r4/proto"
@@ -12,7 +15,8 @@ type AccountsRepo struct {
 }
 
 func NewAccountsRepo(num int) *AccountsRepo {
-	emails := hashtab.NewHashTab(num * 150 / 100)
+	emails := hashtab.NewHashTab(num * 120 / 100)
+	log.Println("Emails", emails.Size())
 	accounts := make([]proto.Account, num)
 	return &AccountsRepo{emails: emails, accounts: accounts}
 }
@@ -36,7 +40,7 @@ func (rep *AccountsRepo) Get(id int) (*proto.Account, bool) {
 }
 
 func (rep *AccountsRepo) validate(acc *proto.Account) bool {
-	if acc.Email == "" {
+	if len(acc.Email) == 0 || !strings.ContainsRune(acc.Email, '@'){
 		return false
 	}
 	if acc.Joined == 0 {
