@@ -76,6 +76,9 @@ func (svc *AccountsService) Update(id int, acc *proto.Account) bool {
 	if len(acc.Interests) > 0 {
 		dst.Interests = append(dst.Interests[:0], acc.Interests...)
 	}
+	if len(acc.LikesTo) > 0 {
+		dst.LikesTo = append(dst.LikesTo[:0], acc.LikesTo...)
+	}
 	// etc...
 	return true
 }

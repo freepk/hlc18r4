@@ -31,6 +31,7 @@ type Account struct {
 	City      uint16
 	Status    StatusEnum
 	Interests []uint8
+	LikesTo   []Like
 }
 
 func (a *Account) reset() {
@@ -46,6 +47,7 @@ func (a *Account) reset() {
 	a.City = 0
 	a.Status = 0
 	a.Interests = a.Interests[:0]
+	a.LikesTo = a.LikesTo[:0]
 }
 
 func (a *Account) Clone() *Account {
@@ -56,6 +58,7 @@ func (a *Account) Clone() *Account {
 	t.Email = append([]byte{}, t.Email...)
 	t.Phone = append([]byte{}, t.Phone...)
 	t.Interests = append([]byte{}, t.Interests...)
+	t.LikesTo = append([]Like{}, t.LikesTo...)
 	return &t
 }
 
@@ -249,7 +252,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				return buf, false
 			}
 			for {
-				// ...
+				like := Like{}
 				if tail, ok = parse.ParseSymbol(tail, '{'); !ok {
 					return buf, false
 				}
@@ -257,11 +260,11 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 					tail = parse.ParseSpaces(tail)
 					switch {
 					case len(tail) > IdLen && string(tail[:IdLen]) == IdKey:
-						if tail, _, ok = parse.ParseInt(tail[IdLen:]); !ok {
+						if tail, like.ID, ok = parse.ParseUint32(tail[IdLen:]); !ok {
 							return buf, false
 						}
 					case len(tail) > TsLen && string(tail[:TsLen]) == TsKey:
-						if tail, _, ok = parse.ParseInt(tail[TsLen:]); !ok {
+						if tail, like.TS, ok = parse.ParseUint32(tail[TsLen:]); !ok {
 							return buf, false
 						}
 					}
@@ -272,7 +275,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
 					return buf, false
 				}
-				// ...
+				a.LikesTo = append(a.LikesTo, like)
 				if tail, ok = parse.ParseSymbol(tail, ','); !ok {
 					break
 				}
