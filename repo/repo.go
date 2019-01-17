@@ -25,3 +25,14 @@ func (rep *AccountsRepo) Add(acc *proto.Account) {
 		*dst = *acc
 	}
 }
+
+func (rep *AccountsRepo) ForEach(fn func(acc *proto.Account)) {
+	for id := range rep.accounts {
+		acc := &rep.accounts[id]
+		fn(acc)
+	}
+}
+
+func (rep *AccountsRepo) Size() int {
+	return len(rep.accounts)
+}
