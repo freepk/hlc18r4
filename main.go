@@ -18,6 +18,14 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 	}
 	path = path[httpBaseLen:]
 	switch string(ctx.Method()) {
+	case `GET`:
+		//args := ctx.QueryArgs()
+		//query_id, _ := args.GetUint(`query_id`)
+		//_ = query_id
+		switch string(path) {
+		case `filter/`:
+		case `group`:
+		}
 	case `POST`:
 		switch string(path) {
 		case `likes/`:
