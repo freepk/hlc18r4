@@ -26,7 +26,7 @@ import (
 */
 
 var testAccount = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390 , "email": "ogradonwefutmidy@me.com",
-	"status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b", "sex": "f", "phone": "8(903)1122345",
+	"status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b", "sex": "f", "phone": "1(903)1122345",
 	"country": "\u0420\u0443\u043c\u0430\u043d\u0438\u044f", "city": "\u0410\u043c\u0441\u0442\u0435\u0440\u043e\u0431\u0438\u0440\u0441\u043a",
 	"sname": "\u041a\u043e\u043b\u0435\u0442\u0430\u043a\u0438\u0439", "fname": "\u041c\u0438\u043b\u0430\u043d\u0430",
 	"interests": ["\u041f\u0440\u043e\u0433\u0443\u043b\u043a\u0438 \u043f\u043e \u043f\u043b\u044f\u0436\u0443", "\u0412\u044b\u0445\u043e\u0434\u043d\u044b\u0435",
@@ -34,14 +34,6 @@ var testAccount = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390 
         "\u041f\u0438\u0432\u043e"]}`)
 
 var testAccount1 = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390 , "email": "second@me.com",
-        "status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b", "sex": "f", "phone": "1(903)1122345",
-        "country": "\u0420\u0443\u043c\u0430\u043d\u0438\u044f", "city": "\u0410\u043c\u0441\u0442\u0435\u0440\u043e\u0431\u0438\u0440\u0441\u043a",
-        "sname": "\u041a\u043e\u043b\u0435\u0442\u0430\u043a\u0438\u0439", "fname": "\u041c\u0438\u043b\u0430\u043d\u0430",
-        "interests": ["\u041f\u0440\u043e\u0433\u0443\u043b\u043a\u0438 \u043f\u043e \u043f\u043b\u044f\u0436\u0443", "\u0412\u044b\u0445\u043e\u0434\u043d\u044b\u0435",
-        "\u0422\u044f\u0436\u0451\u043b\u0430\u044f \u0430\u0442\u043b\u0435\u0442\u0438\u043a\u0430", "\u041a\u043e\u043c\u043f\u044c\u044e\u0442\u0435\u0440\u044b",
-        "\u041f\u0438\u0432\u043e"]}`)
-
-var testAccount2 = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390 , "email": "third@me.com",
         "status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b", "sex": "f", "phone": "2(903)1122345",
         "country": "\u0420\u0443\u043c\u0430\u043d\u0438\u044f", "city": "\u0410\u043c\u0441\u0442\u0435\u0440\u043e\u0431\u0438\u0440\u0441\u043a",
         "sname": "\u041a\u043e\u043b\u0435\u0442\u0430\u043a\u0438\u0439", "fname": "\u041c\u0438\u043b\u0430\u043d\u0430",
@@ -49,27 +41,42 @@ var testAccount2 = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390
         "\u0422\u044f\u0436\u0451\u043b\u0430\u044f \u0430\u0442\u043b\u0435\u0442\u0438\u043a\u0430", "\u041a\u043e\u043c\u043f\u044c\u044e\u0442\u0435\u0440\u044b",
         "\u041f\u0438\u0432\u043e"]}`)
 
+var testAccount2 = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390 , "email": "third@me.com",
+        "status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b", "sex": "f", "phone": "3(903)1122345",
+        "country": "\u0420\u0443\u043c\u0430\u043d\u0438\u044f", "city": "\u0410\u043c\u0441\u0442\u0435\u0440\u043e\u0431\u0438\u0440\u0441\u043a",
+        "sname": "\u041a\u043e\u043b\u0435\u0442\u0430\u043a\u0438\u0439", "fname": "\u041c\u0438\u043b\u0430\u043d\u0430",
+        "interests": ["\u041f\u0440\u043e\u0433\u0443\u043b\u043a\u0438 \u043f\u043e \u043f\u043b\u044f\u0436\u0443", "\u0412\u044b\u0445\u043e\u0434\u043d\u044b\u0435",
+        "\u0422\u044f\u0436\u0451\u043b\u0430\u044f \u0430\u0442\u043b\u0435\u0442\u0438\u043a\u0430", "\u041a\u043e\u043c\u043f\u044c\u044e\u0442\u0435\u0440\u044b",
+        "\u041f\u0438\u0432\u043e"]}`)
+
 func TestAccountUnmarshalJSON(t *testing.T) {
+
+	buf := make([]byte, 0, 4096)
 	a := &Account{}
-	_, ok := a.UnmarshalJSON(testAccount)
+
+	buf = append(buf[:0], testAccount...)
+	_, ok := a.UnmarshalJSON(buf)
 	if !ok {
 		t.Fail()
 	}
 	b := *a
-	//b.Phone = append(b.Phone[:0], a.Phone...)
-	_, ok = a.UnmarshalJSON(testAccount1)
+
+	buf = append(buf[:0], testAccount1...)
+	_, ok = a.UnmarshalJSON(buf)
 	if !ok {
 		t.Fail()
 	}
 	c := *a
-	//c.Phone = append(c.Phone[:0], a.Phone...)
-	_, ok = a.UnmarshalJSON(testAccount2)
+
+	buf = append(buf[:0], testAccount2...)
+	_, ok = a.UnmarshalJSON(buf)
 	if !ok {
 		t.Fail()
 	}
-	t.Log("a", string(a.Email))
-	t.Log("b", string(b.Email))
-	t.Log("c", string(c.Email))
+
+	t.Log("a", string(a.Phone))
+	t.Log("b", string(b.Phone))
+	t.Log("c", string(c.Phone))
 }
 
 func BenchmarkAccountUnmarshalJSON(b *testing.B) {
