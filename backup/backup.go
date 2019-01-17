@@ -65,14 +65,11 @@ func readFrom(rep *repo.AccountsRepo, src io.Reader) error {
 				if tail, ok = acc.UnmarshalJSON(tail); !ok {
 					break
 				}
-				if !rep.Add(int(acc.ID), acc) {
-					return ReadError
-				}
+				rep.Add(acc.Clone())
 			}
-			if len(tail)+1 > len(buf) {
+			if pos = copy(buf, tail); pos == len(buf) {
 				return ReadError
 			}
-			pos = copy(buf, tail)
 		} else if err == io.EOF {
 			break
 		} else if err != nil {

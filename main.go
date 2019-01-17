@@ -29,7 +29,7 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}
-			if !svc.Create(int(acc.ID), acc) {
+			if !svc.Create(acc) {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}

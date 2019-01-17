@@ -48,6 +48,17 @@ func (a *Account) reset() {
 	a.Interests = a.Interests[:0]
 }
 
+func (a *Account) Clone() *Account {
+	if a == nil {
+		return nil
+	}
+	t := *a
+	t.Email = append([]byte{}, t.Email...)
+	t.Phone = append([]byte{}, t.Phone...)
+	t.Interests = append([]byte{}, t.Interests...)
+	return &t
+}
+
 func ParseFname(b []byte) ([]byte, uint8, bool) {
 	t, v, ok := parse.ParseQuoted(b)
 	if !ok {

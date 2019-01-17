@@ -1,6 +1,8 @@
 package service
 
 import (
+	"bytes"
+
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
 )
@@ -14,27 +16,44 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 }
 
 func (svc *AccountsService) Exists(id int) bool {
-	return svc.rep.Exists(id)
-}
-
-func (svc *AccountsService) Create(id int, src *proto.Account) bool {
-	return svc.rep.Add(id, src)
-}
-
-func (svc *AccountsService) Update(id int, src *proto.Account) bool {
-	dst, ok := svc.rep.Get(id)
-	if !ok {
+	acc := svc.rep.Get(id)
+	if acc == nil {
 		return false
 	}
-	if len(src.Email) > 0 {
-		dst.Email = src.Email
+	return (acc.Joined > 0)
+}
+
+func (svc *AccountsService) Create(acc *proto.Account) bool {
+	id := int(acc.ID)
+	if id == 0 || svc.Exists(id) {
+		return false
 	}
-	if len(src.Phone) > 0 {
-		dst.Phone = src.Phone
+	if len(acc.Email) == 0 || bytes.IndexByte(acc.Email, 0x40) == -1 {
+		return false
 	}
-	if len(src.Interests) > 0 {
-		dst.Interests = src.Interests
+	dst := acc.Clone()
+	svc.rep.Add(dst)
+	return true
+}
+
+func (svc *AccountsService) Update(id int, acc *proto.Account) bool {
+	if len(acc.Email) > 0 && bytes.IndexByte(acc.Email, 0x40) == -1 {
+		return false
 	}
+	dst := svc.rep.Get(id)
+	if dst == nil {
+		return false
+	}
+	if len(acc.Email) > 0 {
+		dst.Email = append(dst.Email, acc.Email...)
+	}
+	if len(acc.Phone) > 0 {
+		dst.Phone = append(dst.Phone, acc.Phone...)
+	}
+	if len(acc.Interests) > 0 {
+		dst.Interests = append(dst.Interests, acc.Interests...)
+	}
+	println("Update done", id)
 	// etc...
-	return svc.rep.Set(id, dst)
+	return true
 }

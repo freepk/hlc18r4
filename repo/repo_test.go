@@ -1,46 +1,34 @@
 package repo
 
 import (
-	"bytes"
-	"gitlab.com/freepk/hlc18r4/proto"
 	"testing"
+
+	"gitlab.com/freepk/hlc18r4/proto"
 )
 
 func TestAccountsRepo(t *testing.T) {
 	rep := NewAccountsRepo(1024)
-	if rep.Exists(512) {
+	if rep.Get(-1) != nil {
 		t.Fail()
 	}
-	if rep.Exists(4096) {
+	if rep.Get(4096) != nil {
 		t.Fail()
 	}
-	if ok := rep.Add(101, &proto.Account{Joined: 1, Birth: 1, Status: proto.BusyStatus, Email: []byte("test@mail.ru")}); !ok {
-		t.Fail()
-	}
-	if ok := rep.Add(102, &proto.Account{Joined: 1, Birth: 1, Status: proto.BusyStatus, Email: []byte("test@mail.ru")}); ok {
-		t.Fail()
-	}
-	if ok := rep.Add(101, &proto.Account{Joined: 1, Birth: 1, Status: proto.BusyStatus, Email: []byte("test1@mail.ru")}); ok {
-		t.Fail()
-	}
-}
+	acc := &proto.Account{ID: 10, Email: []byte("test@mail.ru"), Interests: []uint8{1, 2, 3, 4, 5}}
+	rep.Add(acc)
+	acc.Email[0] = 'f'
+	acc.Interests[0] = 10
+	tmp := rep.Get(10)
+	t.Log(string(tmp.Email), tmp.Interests)
+	acc.Interests = acc.Interests[:0]
+	acc.Interests = append(acc.Interests, 50)
+	acc.Interests = append(acc.Interests, 60)
+	t.Log(string(tmp.Email), tmp.Interests)
+	tmp.Email = append([]byte{}, tmp.Email...)
+	tmp.Interests = append([]uint8{}, tmp.Interests...)
 
-func BenchmarkAccountsRepoExists(b *testing.B) {
-	rep := NewAccountsRepo(1024)
-	rep.Add(101, &proto.Account{Joined: 1, Birth: 1, Status: proto.BusyStatus, Email: []byte("test@mail.ru")})
-	for i := 0; i < b.N; i++ {
-		if ok := rep.Exists(101); !ok {
-			b.Fail()
-		}
-	}
-}
+	acc.Email[0] = 'r'
+	acc.Interests[0] = 20
+	t.Log(string(tmp.Email), tmp.Interests)
 
-func BenchmarkAccountsGet(b *testing.B) {
-	rep := NewAccountsRepo(1024)
-	rep.Add(101, &proto.Account{Joined: 1, Birth: 1, Status: proto.BusyStatus, Email: []byte("test@mail.ru")})
-	for i := 0; i < b.N; i++ {
-		if acc, ok := rep.Get(101); !ok || !bytes.Equal(acc.Email, []byte("test@mail.ru")) {
-			b.Fail()
-		}
-	}
 }
