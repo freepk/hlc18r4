@@ -22,11 +22,10 @@ type Account struct {
 	ID        uint32
 	Birth     uint32
 	Joined    uint32
-	Email     []byte
+	Email     string
 	Fname     uint8
 	Sname     uint16
-	Phone     []byte
-	PhoneStr  string
+	Phone     string
 	Sex       SexEnum
 	Country   uint8
 	City      uint16
@@ -39,11 +38,10 @@ func (a *Account) reset() {
 	a.ID = 0
 	a.Birth = 0
 	a.Joined = 0
-	a.Email = a.Email[:0]
+	a.Email = ""
 	a.Fname = 0
 	a.Sname = 0
-	a.Phone = a.Phone[:0]
-	a.PhoneStr = ""
+	a.Phone = ""
 	a.Sex = 0
 	a.Country = 0
 	a.City = 0
@@ -56,12 +54,15 @@ func (a *Account) Clone() *Account {
 	if a == nil {
 		return nil
 	}
-	t := *a
-	t.Email = append([]byte{}, t.Email...)
-	t.Phone = append([]byte{}, t.Phone...)
-	t.Interests = append([]byte{}, t.Interests...)
-	t.LikesTo = append([]Like{}, t.LikesTo...)
-	return &t
+	interests := make([]uint8, len(a.Interests))
+	copy(interests, a.Interests)
+	likesTo := make([]Like, len(a.LikesTo))
+	copy(likesTo, a.LikesTo)
+	c := *a
+	c.Interests = interests
+	c.LikesTo = likesTo
+	return &c
+
 }
 
 func ParseFname(b []byte) ([]byte, uint8, bool) {
@@ -176,9 +177,11 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				return buf, false
 			}
 		case len(tail) > EmailLen && string(tail[:EmailLen]) == EmailKey:
-			if tail, a.Email, ok = parse.ParseQuoted(tail[EmailLen:]); !ok {
+			var email []byte
+			if tail, email, ok = parse.ParseQuoted(tail[EmailLen:]); !ok {
 				return buf, false
 			}
+			a.Email = string(email)
 		case len(tail) > FnameLen && string(tail[:FnameLen]) == FnameKey:
 			if tail, a.Fname, ok = ParseFname(tail[FnameLen:]); !ok {
 				return buf, false
@@ -188,10 +191,11 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				return buf, false
 			}
 		case len(tail) > PhoneLen && string(tail[:PhoneLen]) == PhoneKey:
-			if tail, a.Phone, ok = parse.ParseQuoted(tail[PhoneLen:]); !ok {
+			var phone []byte
+			if tail, phone, ok = parse.ParseQuoted(tail[PhoneLen:]); !ok {
 				return buf, false
 			}
-			a.PhoneStr = string(a.Phone)
+			a.Phone = string(phone)
 		case len(tail) > SexLen && string(tail[:SexLen]) == SexKey:
 			if tail, a.Sex, ok = ParseSex(tail[SexLen:]); !ok {
 				return buf, false

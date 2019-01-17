@@ -59,14 +59,14 @@ func TestAccountUnmarshalJSON(t *testing.T) {
 	if !ok {
 		t.Fail()
 	}
-	b := *a
+	b := a.Clone()
 
 	buf = append(buf[:0], testAccount1...)
 	_, ok = a.UnmarshalJSON(buf)
 	if !ok {
 		t.Fail()
 	}
-	c := *a
+	c := a.Clone()
 
 	buf = append(buf[:0], testAccount2...)
 	_, ok = a.UnmarshalJSON(buf)
@@ -74,9 +74,9 @@ func TestAccountUnmarshalJSON(t *testing.T) {
 		t.Fail()
 	}
 
-	t.Log("a", string(a.Phone))
-	t.Log("b", string(b.Phone))
-	t.Log("c", string(c.Phone))
+	t.Log("a", a.Phone)
+	t.Log("b", b.Phone)
+	t.Log("c", c.Phone)
 }
 
 func BenchmarkAccountUnmarshalJSON(b *testing.B) {
