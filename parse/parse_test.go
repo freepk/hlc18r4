@@ -73,6 +73,21 @@ func TestParseInt(t *testing.T) {
 	}
 }
 
+func TestParseNumber(t *testing.T) {
+	if x, v, ok := ParseNumber([]byte("")); v != nil || ok || string(x) != "" {
+		t.Fail()
+	}
+	if x, v, ok := ParseNumber([]byte(" ")); v != nil || ok || string(x) != " " {
+		t.Fail()
+	}
+	if x, v, ok := ParseNumber([]byte(" 12\"")); string(v) != "12" || !ok || string(x) != "\"" {
+		t.Fail()
+	}
+	if x, v, ok := ParseNumber([]byte(" \"12\"")); v != nil || ok || string(x) != " \"12\"" {
+		t.Fail()
+	}
+}
+
 func TestParseQuoted(t *testing.T) {
 	if x, v, ok := ParseQuoted([]byte("")); v != nil || ok || string(x) != "" {
 		t.Fail()
