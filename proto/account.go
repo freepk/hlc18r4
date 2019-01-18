@@ -69,6 +69,10 @@ func (a *Account) reset() {
 	a.LikesTo = a.LikesTo[:0]
 }
 
+func (a *Account) CopyTo(d *Account) {
+
+}
+
 func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 	var tail []byte
 	var temp []byte

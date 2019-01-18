@@ -49,13 +49,14 @@ func Restore(name string) (*repo.AccountsRepo, error) {
 }
 
 func readFrom(rep *repo.AccountsRepo, src io.Reader) error {
+	likes := make([]proto.Like, (accountsPerFile * likesPerAccount))
 	buf := make([]byte, 8192)
 	num, err := src.Read(buf[:14])
 	if err != nil {
 		return err
 	}
-	acc := &proto.Account{}
 	pos := 0
+	acc := &proto.Account{}
 	for {
 		if num, err = src.Read(buf[pos:]); num > 0 {
 			num += pos
@@ -65,7 +66,14 @@ func readFrom(rep *repo.AccountsRepo, src io.Reader) error {
 				if tail, ok = acc.UnmarshalJSON(tail); !ok {
 					break
 				}
-				//rep.Add(acc.Clone())
+				if _, id, ok := parse.ParseInt(acc.ID[:]); ok {
+					n := len(acc.LikesTo)
+					tmp := *acc
+					tmp.LikesTo, likes = append(likes[:0], acc.LikesTo...), likes[n:]
+					rep.Add(id, &tmp)
+				} else {
+					return ReadError
+				}
 			}
 			if pos = copy(buf, tail); pos == len(buf) {
 				return ReadError
