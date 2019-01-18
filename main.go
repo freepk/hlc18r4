@@ -21,6 +21,33 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 	case `GET`:
 		switch string(path) {
 		case `filter/`:
+			/*
+				sex_eq
+				country_eq
+				country_null
+				status_eq
+				status_neq
+				interests_contains
+				interests_any
+				likes_contains
+				city_eq
+				city_any
+				city_null
+				birth_gt
+				birth_lt
+				birth_year
+				premium_now
+				premium_null
+				email_gt
+				email_lt
+				email_domain
+				sname_starts
+				sname_null
+				fname_null
+				fname_any
+				phone_null
+				phone_code
+			*/
 		case `group`:
 		}
 	case `POST`:
