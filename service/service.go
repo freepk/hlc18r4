@@ -32,9 +32,6 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 
 func (svc *AccountsService) Reindex() {
 	log.Println("Rebuilding interests")
-	svc.interests.Rebuild()
-	svc.interests.Rebuild()
-	svc.interests.Rebuild()
 }
 
 func (svc *AccountsService) Exists(id int) bool {
@@ -87,6 +84,7 @@ func (svc *AccountsService) Update(id int, acc *proto.Account) bool {
 		tmp.Interests = acc.Interests
 	}
 	if len(acc.LikesTo) > 0 {
+		println("likes")
 		tmp.LikesTo = append(tmp.LikesTo[:0], acc.LikesTo...)
 	}
 	// etc...

@@ -55,25 +55,24 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 			ctx.SetStatusCode(fasthttp.StatusNotFound)
 			return
 		}
+		if ctx.IsPost() {
+			if !svc.Exists(id) {
+				ctx.SetStatusCode(fasthttp.StatusNotFound)
+				return
+			}
+			acc := &proto.Account{}
+			if _, ok = acc.UnmarshalJSON(ctx.PostBody()); !ok {
+				ctx.SetStatusCode(fasthttp.StatusBadRequest)
+				return
+			}
+			if !svc.Update(id, acc) {
+				ctx.SetStatusCode(fasthttp.StatusBadRequest)
+				return
+			}
+			ctx.SetStatusCode(fasthttp.StatusAccepted)
+			return
+		}
 	}
-	/*
-		_, id, ok := parse.ParseInt(path)
-		if !ok || !svc.Exists(id) {
-			ctx.SetStatusCode(fasthttp.StatusNotFound)
-			return
-		}
-		acc := &proto.Account{}
-		if _, ok := acc.UnmarshalJSON(ctx.PostBody()); !ok {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
-			return
-		}
-		if !svc.Update(id, acc) {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
-			return
-		}
-		ctx.SetStatusCode(fasthttp.StatusAccepted)
-		return
-	*/
 }
 
 func main() {
