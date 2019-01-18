@@ -12,8 +12,9 @@ import (
 )
 
 type AccountsService struct {
-	rep    *repo.AccountsRepo
-	emails *hashtab.HashTab
+	rep       *repo.AccountsRepo
+	emails    *hashtab.HashTab
+	interests *inverted.InvertedIndex
 }
 
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
@@ -24,14 +25,15 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 			emails.Set(hash, uint64(acc.ID))
 		}
 	})
-	return &AccountsService{rep: rep, emails: emails}
+	interests := inverted.NewInvertedIndex(rep, inverted.InterestToken)
+	return &AccountsService{rep: rep, emails: emails, interests: interests}
 }
 
 func (svc *AccountsService) Reindex() {
 	log.Println("Rebuilding interests")
-	ii := inverted.NewInvertedIndex(svc.rep, inverted.InterestToken)
-	ii.Rebuild()
-	log.Println("IndexedAccountsTotal", inverted.IndexedAccountsTotal)
+	svc.interests.Rebuild()
+	svc.interests.Rebuild()
+	svc.interests.Rebuild()
 }
 
 func (svc *AccountsService) Exists(id int) bool {

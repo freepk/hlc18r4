@@ -32,6 +32,7 @@ func NewInvertedIndex(rep *repo.AccountsRepo, handler TokenFunc) *InvertedIndex 
 }
 
 func (ii *InvertedIndex) Rebuild() {
+	id := uint32(0)
 	parts := make([]int, 0, partsPerIndex)
 	tokens := make([]int, 0, tokensPerPart)
 	counters := make([][]int, len(ii.tokens))
@@ -59,6 +60,14 @@ func (ii *InvertedIndex) Rebuild() {
 			}
 		}
 	}
+	ii.rep.ForEach(func(acc *proto.Account) {
+		id, parts, tokens = ii.handler(acc, parts, tokens)
+		for _, part := range parts {
+			for _, token := range tokens {
+				ii.tokens[part][token] = append(ii.tokens[part][token], id)
+			}
+		}
+	})
 }
 
 func InterestToken(acc *proto.Account, inParts, inTokens []int) (id uint32, outParts, outTokens []int) {

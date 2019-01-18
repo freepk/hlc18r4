@@ -112,7 +112,9 @@ func main() {
 	svc := service.NewAccountsService(rep)
 	svc.Reindex()
 	svc.Reindex()
-	return
+	svc.Reindex()
+	svc.Reindex()
+	svc.Reindex()
 	handler := func(ctx *fasthttp.RequestCtx) {
 		AccountsHandler(ctx, svc)
 	}
