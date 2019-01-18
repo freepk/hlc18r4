@@ -8,7 +8,7 @@ type AccountsRepo struct {
 	accounts []proto.Account
 }
 
-type ForEachFunc func(acc *proto.Account)
+type ForEachFunc func(id int, acc *proto.Account)
 
 func NewAccountsRepo(num int) *AccountsRepo {
 	accounts := make([]proto.Account, num)
@@ -22,8 +22,8 @@ func (rep *AccountsRepo) Get(id int) *proto.Account {
 	return nil
 }
 
-func (rep *AccountsRepo) Add(acc *proto.Account) {
-	if dst := rep.Get(int(acc.ID)); dst != nil {
+func (rep *AccountsRepo) Add(id int, acc *proto.Account) {
+	if dst := rep.Get(id); dst != nil {
 		*dst = *acc
 	}
 }
@@ -31,9 +31,7 @@ func (rep *AccountsRepo) Add(acc *proto.Account) {
 func (rep *AccountsRepo) ForEach(handler ForEachFunc) {
 	for id := range rep.accounts {
 		acc := &rep.accounts[id]
-		if acc.ID > 0 {
-			handler(acc)
-		}
+		handler(id, acc)
 	}
 }
 

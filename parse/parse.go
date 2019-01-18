@@ -46,6 +46,27 @@ func ParseInt(b []byte) ([]byte, int, bool) {
 	return b, 0, false
 }
 
+func ParseNumber(b []byte) ([]byte, []byte, bool) {
+	n := len(b)
+	for i := 0; i < n; i++ {
+		if b[i] > 0x20 {
+			if b[i] < 0x30 || b[i] > 0x39 {
+				return b, nil, false
+			}
+			p := i
+			i++
+			for i < n {
+				if b[i] < 0x30 || b[i] > 0x39 {
+					break
+				}
+				i++
+			}
+			return b[i:], b[p:i], true
+		}
+	}
+	return b, nil, false
+}
+
 func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 	n := len(b)
 	for i := 0; i < n; i++ {
@@ -53,8 +74,8 @@ func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 			if b[i] != 0x22 {
 				return b, nil, false
 			}
-			p := i + 1
 			i++
+			p := i
 			for i < n {
 				j := i + 1
 				switch b[i] {
@@ -73,9 +94,4 @@ func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 		}
 	}
 	return b, nil, false
-}
-
-func ParseUint32(b []byte) ([]byte, uint32, bool) {
-	t, v, ok := ParseInt(b)
-	return t, uint32(v), ok
 }
