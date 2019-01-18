@@ -4,6 +4,30 @@ import (
 	"testing"
 )
 
+var (
+	testAccount = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390 , "email": "ogradonwefutmidy@me.com",
+        "status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b", "sex": "f", "phone": "1(903)1122345",
+        "country": "\u0420\u0443\u043c\u0430\u043d\u0438\u044f", "city": "\u0410\u043c\u0441\u0442\u0435\u0440\u043e\u0431\u0438\u0440\u0441\u043a",
+        "sname": "\u041a\u043e\u043b\u0435\u0442\u0430\u043a\u0438\u0439", "fname": "\u041c\u0438\u043b\u0430\u043d\u0430"}`)
+)
+
+func BenchmarkAccountReset(b *testing.B) {
+	a := &Account{}
+	for i := 0; i < b.N; i++ {
+		a.reset()
+	}
+}
+
+func BenchmarkAccountUnmarshalJSON(b *testing.B) {
+	a := &Account{}
+	for i := 0; i < b.N; i++ {
+		_, ok := a.UnmarshalJSON(testAccount)
+		if !ok {
+			b.Fatal()
+		}
+	}
+}
+
 /*
 	, "likes":[{"id":484053,"ts":1476605353}, {"id":1055765,"ts":1467406524},{"id":793185,"ts":1534580707},{"id":955917,"ts":1493975640},
 	{"id":375379,"ts":1539985529},{"id":836773,"ts":1481693076},{"id":691655,"ts":1533981341},{"id":1299873,"ts":1524997142},{"id":179795,"ts":1522779391},
@@ -23,7 +47,6 @@ import (
 	{"id":185571,"ts":1492654210},{"id":853249,"ts":1501262537},{"id":627375,"ts":1501865401},{"id":567469,"ts":1523708266},{"id":179143,"ts":1538726433},
 	{"id":30491,"ts":1474338607},{"id":451121,"ts":1465475793},{"id":1110529,"ts":1505407844},{"id":33841,"ts":1520879410},{"id":1116037,"ts":1478847461}]
 
-*/
 
 var testAccount = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390 , "email": "ogradonwefutmidy@me.com",
 	"status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b", "sex": "f", "phone": "1(903)1122345",
@@ -48,6 +71,13 @@ var testAccount2 = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390
         "interests": ["\u041f\u0440\u043e\u0433\u0443\u043b\u043a\u0438 \u043f\u043e \u043f\u043b\u044f\u0436\u0443", "\u0412\u044b\u0445\u043e\u0434\u043d\u044b\u0435",
         "\u0422\u044f\u0436\u0451\u043b\u0430\u044f \u0430\u0442\u043b\u0435\u0442\u0438\u043a\u0430", "\u041a\u043e\u043c\u043f\u044c\u044e\u0442\u0435\u0440\u044b",
         "\u041f\u0438\u0432\u043e"]}`)
+
+func BenchmarkAccountReset(b *testing.B) {
+	a := &Account{}
+	for i := 0; i < b.N; i++ {
+		a.reset()
+	}
+}
 
 func TestAccountUnmarshalJSON(t *testing.T) {
 
@@ -87,4 +117,5 @@ func BenchmarkAccountUnmarshalJSON(b *testing.B) {
 			b.Fatal()
 		}
 	}
-}
+i}
+*/
