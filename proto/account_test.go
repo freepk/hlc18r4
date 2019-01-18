@@ -5,108 +5,62 @@ import (
 )
 
 var (
-	testAccount = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390 , "email": "ogradonwefutmidy@me.com",
-        "status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b", "sex": "f", "phone": "1(903)1122345",
-        "country": "\u0420\u0443\u043c\u0430\u043d\u0438\u044f", "city": "\u0410\u043c\u0441\u0442\u0435\u0440\u043e\u0431\u0438\u0440\u0441\u043a",
-        "sname": "\u041a\u043e\u043b\u0435\u0442\u0430\u043a\u0438\u0439", "fname": "\u041c\u0438\u043b\u0430\u043d\u0430"}`)
+	testAccount = []byte(`{"id":1300001,"status":"\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b","sname":"\u041b\u0435\u0431\u0435\u0442\u0430\u0442\u0435\u0432",
+		"joined":1327104000,"birth":569642191,"fname":"\u0424\u0451\u0434\u043e\u0440","phone":"8(944)2990268","sex":"m","country":"\u041c\u0430\u043b\u0438\u0437\u0438\u044f",
+		"city":"\u0420\u043e\u0441\u043e\u0440\u0438\u0436","email":"osrortir@yahoo.com"}`)
 )
 
-func BenchmarkAccountReset(b *testing.B) {
-	a := &Account{}
-	for i := 0; i < b.N; i++ {
-		a.reset()
-	}
-}
-
-func BenchmarkAccountUnmarshalJSON(b *testing.B) {
-	a := &Account{}
-	for i := 0; i < b.N; i++ {
-		_, ok := a.UnmarshalJSON(testAccount)
-		if !ok {
-			b.Fatal()
-		}
-	}
-}
-
-/*
-	, "likes":[{"id":484053,"ts":1476605353}, {"id":1055765,"ts":1467406524},{"id":793185,"ts":1534580707},{"id":955917,"ts":1493975640},
-	{"id":375379,"ts":1539985529},{"id":836773,"ts":1481693076},{"id":691655,"ts":1533981341},{"id":1299873,"ts":1524997142},{"id":179795,"ts":1522779391},
-	{"id":1126729,"ts":1514445485},{"id":206461,"ts":1482808241},{"id":991685,"ts":1530470598},{"id":1020737,"ts":1515144827},{"id":1173581,"ts":1515302882},
-	{"id":1261119,"ts":1463651782},{"id":885573,"ts":1485624715},{"id":919053,"ts":1470545613},{"id":1271139,"ts":1506959707},{"id":702175,"ts":1454866547},
-	{"id":561969,"ts":1490090604},{"id":553607,"ts":1476342851},{"id":1219173,"ts":1511964110},{"id":1184959,"ts":1516403946},{"id":1047217,"ts":1520897805},
-	{"id":372333,"ts":1499389210},{"id":22407,"ts":1482159817},{"id":115595,"ts":1470196720},{"id":1237357,"ts":1482467303},{"id":332051,"ts":1530385062},
-	{"id":147429,"ts":1502689778},{"id":702575,"ts":1532061307},{"id":1018911,"ts":1512525241},{"id":898517,"ts":1473651435},{"id":1188903,"ts":1502156143},
-	{"id":153049,"ts":1517466016},{"id":1162483,"ts":1499023984},{"id":15269,"ts":1502187927},{"id":996347,"ts":1528218998},{"id":147613,"ts":1468601563},
-	{"id":392399,"ts":1510199233},{"id":736801,"ts":1463709303},{"id":1130559,"ts":1469541346},{"id":624079,"ts":1460211737},{"id":264859,"ts":1536663165},
-	{"id":64879,"ts":1514674199},{"id":353639,"ts":1531604504},{"id":1119055,"ts":1473334604},{"id":1089201,"ts":1530561229},{"id":279193,"ts":1503074606},
-	{"id":888793,"ts":1466196633},{"id":934971,"ts":1462351420},{"id":1094279,"ts":1531759443},{"id":861239,"ts":1522612147},{"id":920775,"ts":1453119149},
-	{"id":1125623,"ts":1517244991},{"id":280299,"ts":1513154136},{"id":991349,"ts":1466842610},{"id":627749,"ts":1481164079},{"id":673817,"ts":1482148311},
-	{"id":315959,"ts":1488954321},{"id":1149819,"ts":1504710243},{"id":154063,"ts":1514595923},{"id":1234339,"ts":1499566684},{"id":255459,"ts":1488352776},
-	{"id":662745,"ts":1481216775},{"id":213813,"ts":1532623824},{"id":220947,"ts":1539456021},{"id":343395,"ts":1466892947},{"id":426101,"ts":1508163208},
-	{"id":727005,"ts":1511899829},{"id":1075081,"ts":1535117975},{"id":328859,"ts":1492901718},{"id":141525,"ts":1491766730},{"id":1281457,"ts":1508215106},
-	{"id":185571,"ts":1492654210},{"id":853249,"ts":1501262537},{"id":627375,"ts":1501865401},{"id":567469,"ts":1523708266},{"id":179143,"ts":1538726433},
-	{"id":30491,"ts":1474338607},{"id":451121,"ts":1465475793},{"id":1110529,"ts":1505407844},{"id":33841,"ts":1520879410},{"id":1116037,"ts":1478847461}]
-
-
-var testAccount = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390 , "email": "ogradonwefutmidy@me.com",
-	"status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b", "sex": "f", "phone": "1(903)1122345",
-	"country": "\u0420\u0443\u043c\u0430\u043d\u0438\u044f", "city": "\u0410\u043c\u0441\u0442\u0435\u0440\u043e\u0431\u0438\u0440\u0441\u043a",
-	"sname": "\u041a\u043e\u043b\u0435\u0442\u0430\u043a\u0438\u0439", "fname": "\u041c\u0438\u043b\u0430\u043d\u0430",
-	"interests": ["\u041f\u0440\u043e\u0433\u0443\u043b\u043a\u0438 \u043f\u043e \u043f\u043b\u044f\u0436\u0443", "\u0412\u044b\u0445\u043e\u0434\u043d\u044b\u0435",
-        "\u0422\u044f\u0436\u0451\u043b\u0430\u044f \u0430\u0442\u043b\u0435\u0442\u0438\u043a\u0430", "\u041a\u043e\u043c\u043f\u044c\u044e\u0442\u0435\u0440\u044b",
-        "\u041f\u0438\u0432\u043e"]}`)
-
-var testAccount1 = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390 , "email": "second@me.com",
-        "status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b", "sex": "f", "phone": "2(903)1122345",
-        "country": "\u0420\u0443\u043c\u0430\u043d\u0438\u044f", "city": "\u0410\u043c\u0441\u0442\u0435\u0440\u043e\u0431\u0438\u0440\u0441\u043a",
-        "sname": "\u041a\u043e\u043b\u0435\u0442\u0430\u043a\u0438\u0439", "fname": "\u041c\u0438\u043b\u0430\u043d\u0430",
-        "interests": ["\u041f\u0440\u043e\u0433\u0443\u043b\u043a\u0438 \u043f\u043e \u043f\u043b\u044f\u0436\u0443", "\u0412\u044b\u0445\u043e\u0434\u043d\u044b\u0435",
-        "\u0422\u044f\u0436\u0451\u043b\u0430\u044f \u0430\u0442\u043b\u0435\u0442\u0438\u043a\u0430", "\u041a\u043e\u043c\u043f\u044c\u044e\u0442\u0435\u0440\u044b",
-        "\u041f\u0438\u0432\u043e"]}`)
-
-var testAccount2 = []byte(`{"id":1300026, "joined":1332115200, "birth":721360390 , "email": "third@me.com",
-        "status": "\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b", "sex": "f", "phone": "3(903)1122345",
-        "country": "\u0420\u0443\u043c\u0430\u043d\u0438\u044f", "city": "\u0410\u043c\u0441\u0442\u0435\u0440\u043e\u0431\u0438\u0440\u0441\u043a",
-        "sname": "\u041a\u043e\u043b\u0435\u0442\u0430\u043a\u0438\u0439", "fname": "\u041c\u0438\u043b\u0430\u043d\u0430",
-        "interests": ["\u041f\u0440\u043e\u0433\u0443\u043b\u043a\u0438 \u043f\u043e \u043f\u043b\u044f\u0436\u0443", "\u0412\u044b\u0445\u043e\u0434\u043d\u044b\u0435",
-        "\u0422\u044f\u0436\u0451\u043b\u0430\u044f \u0430\u0442\u043b\u0435\u0442\u0438\u043a\u0430", "\u041a\u043e\u043c\u043f\u044c\u044e\u0442\u0435\u0440\u044b",
-        "\u041f\u0438\u0432\u043e"]}`)
-
-func BenchmarkAccountReset(b *testing.B) {
-	a := &Account{}
-	for i := 0; i < b.N; i++ {
-		a.reset()
-	}
-}
-
 func TestAccountUnmarshalJSON(t *testing.T) {
-
-	buf := make([]byte, 0, 4096)
 	a := &Account{}
-
-	buf = append(buf[:0], testAccount...)
-	_, ok := a.UnmarshalJSON(buf)
-	if !ok {
-		t.Fail()
-	}
-	b := a.Clone()
-
-	buf = append(buf[:0], testAccount1...)
-	_, ok = a.UnmarshalJSON(buf)
-	if !ok {
-		t.Fail()
-	}
-	c := a.Clone()
-
-	buf = append(buf[:0], testAccount2...)
-	_, ok = a.UnmarshalJSON(buf)
+	_, ok := a.UnmarshalJSON(testAccount)
 	if !ok {
 		t.Fail()
 	}
 
-	t.Log("a", string(a.Phone[:]))
-	t.Log("b", string(b.Phone[:]))
-	t.Log("c", string(c.Phone[:]))
+	fname, _ := FnameDict.Value(uint64(a.Fname))
+	sname, _ := SnameDict.Value(uint64(a.Sname))
+	country, _ := CountryDict.Value(uint64(a.Country))
+	city, _ := CityDict.Value(uint64(a.City))
+
+	status := ""
+	switch a.Status {
+	case FreeStatus:
+		status = "Свободны"
+	case BusyStatus:
+		status = "Заняты"
+	case ComplicatedStatus:
+		status = "Все сложно"
+	}
+
+	sex := ""
+	switch a.Sex {
+	case MaleSex:
+		status = "m"
+	case FemaleSex:
+		status = "f"
+	}
+
+	t.Log(
+		string(a.ID[:]),
+		string(a.Joined[:]),
+		string(a.Birth[:]),
+		string(fname),
+		string(sname),
+		string(country),
+		string(city),
+		status,
+		sex,
+		string(a.Email.Bytes[:a.Email.Size]),
+		string(a.Phone[:]),
+		string(a.PremiumStart[:]),
+		string(a.PremiumFinish[:]))
+}
+
+func BenchmarkAccountReset(b *testing.B) {
+	a := &Account{}
+	for i := 0; i < b.N; i++ {
+		a.reset()
+	}
 }
 
 func BenchmarkAccountUnmarshalJSON(b *testing.B) {
@@ -117,5 +71,39 @@ func BenchmarkAccountUnmarshalJSON(b *testing.B) {
 			b.Fatal()
 		}
 	}
-i}
-*/
+}
+
+func BenchmarkAccountMarshalJSON(b *testing.B) {
+	a := &Account{}
+	_, ok := a.UnmarshalJSON(testAccount)
+	if !ok {
+		b.Fatal("UnmarshalJSON error")
+	}
+	for i := 0; i < b.N; i++ {
+		_, _ = FnameDict.Value(uint64(a.Fname))
+		_, _ = SnameDict.Value(uint64(a.Sname))
+		_, _ = CountryDict.Value(uint64(a.Country))
+		_, _ = CityDict.Value(uint64(a.City))
+		switch a.Status {
+		case FreeStatus:
+			_ = "Свободны"
+		case BusyStatus:
+			_ = "Заняты"
+		case ComplicatedStatus:
+			_ = "Все сложно"
+		}
+		switch a.Sex {
+		case MaleSex:
+			_ = "m"
+		case FemaleSex:
+			_ = "f"
+		}
+		_ = a.ID[:]
+		_ = a.Joined[:]
+		_ = a.Birth[:]
+		_ = a.Email.Bytes[:a.Email.Size]
+		_ = a.Phone[:]
+		_ = a.PremiumStart[:]
+		_ = a.PremiumFinish[:]
+	}
+}

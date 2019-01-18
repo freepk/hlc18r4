@@ -6,7 +6,7 @@ import (
 
 const EmailBytesMaxSize = 40
 
-const PhoneBytesMaxSize = 12
+const PhoneBytesMaxSize = 13
 
 const NumberBytesMaxSize = 10
 
@@ -131,85 +131,87 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, a.Status, ok = parseStatus(tail[StatusLen:]); !ok {
 				return buf, false
 			}
+		case len(tail) > PremiumLen && string(tail[:PremiumLen]) == PremiumKey:
+			// ...
+			if tail, ok = parse.ParseSymbol(tail[PremiumLen:], '{'); !ok {
+				return buf, false
+			}
+			for {
+				tail = parse.ParseSpaces(tail)
+				switch {
+				case len(tail) > StartLen && string(tail[:StartLen]) == StartKey:
+					if tail, temp, ok = parse.ParseNumber(tail[StartLen:]); !ok {
+						return buf, false
+					}
+					copy(a.PremiumStart[:], temp)
+				case len(tail) > FinishLen && string(tail[:FinishLen]) == FinishKey:
+					if tail, temp, ok = parse.ParseNumber(tail[FinishLen:]); !ok {
+						return buf, false
+					}
+					copy(a.PremiumFinish[:], temp)
+				}
+				if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+					break
+				}
+			}
+			if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
+				return buf, false
+			}
+			// ...
 			/*
-				case len(tail) > PremiumLen && string(tail[:PremiumLen]) == PremiumKey:
-					// ...
-					if tail, ok = parse.ParseSymbol(tail[PremiumLen:], '{'); !ok {
+				case len(tail) > InterestsLen && string(tail[:InterestsLen]) == InterestsKey:
+					if tail, ok = parse.ParseSymbol(tail[InterestsLen:], '['); !ok {
 						return buf, false
 					}
 					for {
-						tail = parse.ParseSpaces(tail)
-						switch {
-						case len(tail) > StartLen && string(tail[:StartLen]) == StartKey:
-							if tail, _, ok = parse.ParseInt(tail[StartLen:]); !ok {
-								return buf, false
-							}
-						case len(tail) > FinishLen && string(tail[:FinishLen]) == FinishKey:
-							if tail, _, ok = parse.ParseInt(tail[FinishLen:]); !ok {
-								return buf, false
-							}
+						var interest uint8
+						if tail, interest, ok = ParseInterest(tail); !ok {
+							return buf, false
 						}
+						a.Interests = append(a.Interests, interest)
 						if tail, ok = parse.ParseSymbol(tail, ','); !ok {
 							break
 						}
 					}
-					if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
+					if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
 						return buf, false
 					}
-					// ...
-						case len(tail) > InterestsLen && string(tail[:InterestsLen]) == InterestsKey:
-							if tail, ok = parse.ParseSymbol(tail[InterestsLen:], '['); !ok {
-								return buf, false
-							}
-							for {
-								var interest uint8
-								if tail, interest, ok = ParseInterest(tail); !ok {
+				case len(tail) > LikesLen && string(tail[:LikesLen]) == LikesKey:
+					if tail, ok = parse.ParseSymbol(tail[LikesLen:], '['); !ok {
+						return buf, false
+					}
+					for {
+						like := Like{}
+						if tail, ok = parse.ParseSymbol(tail, '{'); !ok {
+							return buf, false
+						}
+						for {
+							tail = parse.ParseSpaces(tail)
+							switch {
+							case len(tail) > IdLen && string(tail[:IdLen]) == IdKey:
+								if tail, like.ID, ok = parse.ParseUint32(tail[IdLen:]); !ok {
 									return buf, false
 								}
-								a.Interests = append(a.Interests, interest)
-								if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-									break
-								}
-							}
-							if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
-								return buf, false
-							}
-						case len(tail) > LikesLen && string(tail[:LikesLen]) == LikesKey:
-							if tail, ok = parse.ParseSymbol(tail[LikesLen:], '['); !ok {
-								return buf, false
-							}
-							for {
-								like := Like{}
-								if tail, ok = parse.ParseSymbol(tail, '{'); !ok {
+							case len(tail) > TsLen && string(tail[:TsLen]) == TsKey:
+								if tail, like.TS, ok = parse.ParseUint32(tail[TsLen:]); !ok {
 									return buf, false
 								}
-								for {
-									tail = parse.ParseSpaces(tail)
-									switch {
-									case len(tail) > IdLen && string(tail[:IdLen]) == IdKey:
-										if tail, like.ID, ok = parse.ParseUint32(tail[IdLen:]); !ok {
-											return buf, false
-										}
-									case len(tail) > TsLen && string(tail[:TsLen]) == TsKey:
-										if tail, like.TS, ok = parse.ParseUint32(tail[TsLen:]); !ok {
-											return buf, false
-										}
-									}
-									if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-										break
-									}
-								}
-								if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
-									return buf, false
-								}
-								a.LikesTo = append(a.LikesTo, like)
-								if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-									break
-								}
 							}
-							if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
-								return buf, false
+							if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+								break
 							}
+						}
+						if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
+							return buf, false
+						}
+						a.LikesTo = append(a.LikesTo, like)
+						if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+							break
+						}
+					}
+					if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
+						return buf, false
+					}
 			*/
 		}
 		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
