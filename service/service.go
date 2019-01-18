@@ -2,9 +2,11 @@ package service
 
 import (
 	"bytes"
+	"log"
 
 	"github.com/freepk/hashtab"
 	"github.com/spaolacci/murmur3"
+	"gitlab.com/freepk/hlc18r4/inverted"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
 )
@@ -23,6 +25,13 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 		}
 	})
 	return &AccountsService{rep: rep, emails: emails}
+}
+
+func (svc *AccountsService) Reindex() {
+	log.Println("Rebuilding interests")
+	ii := inverted.NewInvertedIndex(svc.rep, inverted.InterestToken)
+	ii.Rebuild()
+	log.Println("IndexedAccountsTotal", inverted.IndexedAccountsTotal)
 }
 
 func (svc *AccountsService) Exists(id int) bool {

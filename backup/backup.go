@@ -26,7 +26,7 @@ func Restore(name string) (*repo.AccountsRepo, error) {
 		return nil, err
 	}
 	defer arch.Close()
-	num := accountsPerFile * len(arch.File) * 110 / 100
+	num := accountsPerFile * len(arch.File) * 105 / 100
 	log.Println("New AccountsRepo", num)
 	rep := repo.NewAccountsRepo(num)
 	grp := &sync.WaitGroup{}
