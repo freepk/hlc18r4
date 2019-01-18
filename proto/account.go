@@ -4,24 +4,24 @@ import (
 	"gitlab.com/freepk/hlc18r4/parse"
 )
 
-const EmailBytesMaxSize = 40
+const EmailBufMaxLen = 40
 
-const PhoneBytesMaxSize = 13
+const PhoneBufMaxLen = 13
 
-const NumberBytesMaxSize = 10
+const NumberBufMaxLen = 10
 
-const InterestsMaxSize = 10
+const InterestsMaxLen = 10
 
-type EmailBytes struct {
-	Size  uint8
-	Bytes [EmailBytesMaxSize]byte
+type EmailBuf struct {
+	Len uint8
+	Buf [EmailBufMaxLen]byte
 }
 
-type PhoneBytes [PhoneBytesMaxSize]byte
+type PhoneBuf [PhoneBufMaxLen]byte
 
-type NumberBytes [NumberBytesMaxSize]byte
+type NumberBuf [NumberBufMaxLen]byte
 
-type InterestsBytes [InterestsMaxSize]byte
+type InterestsBuf [InterestsMaxLen]uint8
 
 type Like struct {
 	ID uint32
@@ -29,28 +29,28 @@ type Like struct {
 }
 
 type Account struct {
-	ID            NumberBytes
-	Birth         NumberBytes
-	Joined        NumberBytes
-	Email         EmailBytes
+	ID            NumberBuf
+	Birth         NumberBuf
+	Joined        NumberBuf
+	Email         EmailBuf
 	Fname         uint8
 	Sname         uint16
-	Phone         PhoneBytes
+	Phone         PhoneBuf
 	Sex           SexEnum
 	Country       uint8
 	City          uint16
 	Status        StatusEnum
-	PremiumStart  NumberBytes
-	PremiumFinish NumberBytes
-	Interests     InterestsBytes
+	PremiumStart  NumberBuf
+	PremiumFinish NumberBuf
+	Interests     InterestsBuf
 	LikesTo       []Like
 }
 
 func (a *Account) reset() {
-	var number NumberBytes
-	var email EmailBytes
-	var phone PhoneBytes
-	var interests InterestsBytes
+	var number NumberBuf
+	var email EmailBuf
+	var phone PhoneBuf
+	var interests InterestsBuf
 
 	a.ID = number
 	a.Birth = number
@@ -101,7 +101,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, temp, ok = parse.ParseQuoted(tail[EmailLen:]); !ok {
 				return buf, false
 			}
-			a.Email.Size = uint8(copy(a.Email.Bytes[:], temp))
+			a.Email.Len = uint8(copy(a.Email.Buf[:], temp))
 		case len(tail) > FnameLen && string(tail[:FnameLen]) == FnameKey:
 			if tail, a.Fname, ok = parseFname(tail[FnameLen:]); !ok {
 				return buf, false
@@ -132,7 +132,6 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				return buf, false
 			}
 		case len(tail) > PremiumLen && string(tail[:PremiumLen]) == PremiumKey:
-			// ...
 			if tail, ok = parse.ParseSymbol(tail[PremiumLen:], '{'); !ok {
 				return buf, false
 			}
@@ -157,25 +156,26 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
 				return buf, false
 			}
-			// ...
+		case len(tail) > InterestsLen && string(tail[:InterestsLen]) == InterestsKey:
+			if tail, ok = parse.ParseSymbol(tail[InterestsLen:], '['); !ok {
+				return buf, false
+			}
+			var i uint8
+			var interest uint8
+			for {
+				if tail, interest, ok = parseInterest(tail); !ok {
+					return buf, false
+				}
+				a.Interests[i] = interest
+				i++
+				if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+					break
+				}
+			}
+			if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
+				return buf, false
+			}
 			/*
-				case len(tail) > InterestsLen && string(tail[:InterestsLen]) == InterestsKey:
-					if tail, ok = parse.ParseSymbol(tail[InterestsLen:], '['); !ok {
-						return buf, false
-					}
-					for {
-						var interest uint8
-						if tail, interest, ok = ParseInterest(tail); !ok {
-							return buf, false
-						}
-						a.Interests = append(a.Interests, interest)
-						if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-							break
-						}
-					}
-					if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
-						return buf, false
-					}
 				case len(tail) > LikesLen && string(tail[:LikesLen]) == LikesKey:
 					if tail, ok = parse.ParseSymbol(tail[LikesLen:], '['); !ok {
 						return buf, false
@@ -217,7 +217,6 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
 			break
 		}
-
 	}
 	if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
 		return buf, false

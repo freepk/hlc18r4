@@ -88,14 +88,14 @@ func parseStatus(b []byte) ([]byte, StatusEnum, bool) {
 	return b, 0, false
 }
 
-//func parseInterest(b []byte) ([]byte, byte, bool) {
-//	t, v, ok := parse.ParseQuoted(b)
-//	if !ok {
-//		return b, 0, false
-//	}
-//	x, err := InterestDict.Identify(v)
-//	if err != nil {
-//		return b, 0, false
-//	}
-//	return t, byte(x), true
-//}
+func parseInterest(b []byte) ([]byte, uint8, bool) {
+	t, v, ok := parse.ParseQuoted(b)
+	if !ok {
+		return b, 0, false
+	}
+	x, err := InterestDict.Identify(v)
+	if err != nil {
+		return b, 0, false
+	}
+	return t, uint8(x), true
+}
