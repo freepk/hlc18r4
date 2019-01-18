@@ -14,6 +14,7 @@ import (
 
 const (
 	accountsPerFile = 10000
+	likesPerAccount = 35
 )
 
 var (
@@ -27,7 +28,6 @@ func Restore(name string) (*repo.AccountsRepo, error) {
 	}
 	defer arch.Close()
 	num := accountsPerFile * len(arch.File) * 105 / 100
-	log.Println("New AccountsRepo", num)
 	rep := repo.NewAccountsRepo(num)
 	grp := &sync.WaitGroup{}
 	for _, file := range arch.File {
@@ -65,7 +65,7 @@ func readFrom(rep *repo.AccountsRepo, src io.Reader) error {
 				if tail, ok = acc.UnmarshalJSON(tail); !ok {
 					break
 				}
-				rep.Add(acc.Clone())
+				//rep.Add(acc.Clone())
 			}
 			if pos = copy(buf, tail); pos == len(buf) {
 				return ReadError

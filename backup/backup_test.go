@@ -1,7 +1,6 @@
 package backup
 
 import (
-	"gitlab.com/freepk/hlc18r4/service"
 	"testing"
 )
 
@@ -10,6 +9,5 @@ func TestRestore(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-	svc := service.NewAccountsService(rep)
-	_ = svc
+	_ = rep
 }
