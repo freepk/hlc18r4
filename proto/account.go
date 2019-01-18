@@ -175,44 +175,43 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
 				return buf, false
 			}
-			/*
-				case len(tail) > LikesLen && string(tail[:LikesLen]) == LikesKey:
-					if tail, ok = parse.ParseSymbol(tail[LikesLen:], '['); !ok {
-						return buf, false
-					}
-					for {
-						like := Like{}
-						if tail, ok = parse.ParseSymbol(tail, '{'); !ok {
+		case len(tail) > LikesLen && string(tail[:LikesLen]) == LikesKey:
+			if tail, ok = parse.ParseSymbol(tail[LikesLen:], '['); !ok {
+				return buf, false
+			}
+			for {
+				ID := 0
+				TS := 0
+				if tail, ok = parse.ParseSymbol(tail, '{'); !ok {
+					return buf, false
+				}
+				for {
+					tail = parse.ParseSpaces(tail)
+					switch {
+					case len(tail) > IdLen && string(tail[:IdLen]) == IdKey:
+						if tail, ID, ok = parse.ParseInt(tail[IdLen:]); !ok {
 							return buf, false
 						}
-						for {
-							tail = parse.ParseSpaces(tail)
-							switch {
-							case len(tail) > IdLen && string(tail[:IdLen]) == IdKey:
-								if tail, like.ID, ok = parse.ParseUint32(tail[IdLen:]); !ok {
-									return buf, false
-								}
-							case len(tail) > TsLen && string(tail[:TsLen]) == TsKey:
-								if tail, like.TS, ok = parse.ParseUint32(tail[TsLen:]); !ok {
-									return buf, false
-								}
-							}
-							if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-								break
-							}
-						}
-						if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
+					case len(tail) > TsLen && string(tail[:TsLen]) == TsKey:
+						if tail, TS, ok = parse.ParseInt(tail[TsLen:]); !ok {
 							return buf, false
 						}
-						a.LikesTo = append(a.LikesTo, like)
-						if tail, ok = parse.ParseSymbol(tail, ','); !ok {
-							break
-						}
 					}
-					if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
-						return buf, false
+					if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+						break
 					}
-			*/
+				}
+				if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
+					return buf, false
+				}
+				a.LikesTo = append(a.LikesTo, Like{ID: uint32(ID), TS: uint32(TS)})
+				if tail, ok = parse.ParseSymbol(tail, ','); !ok {
+					break
+				}
+			}
+			if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
+				return buf, false
+			}
 		}
 		if tail, ok = parse.ParseSymbol(tail, ','); !ok {
 			break
