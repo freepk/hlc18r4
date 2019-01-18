@@ -69,6 +69,12 @@ func (svc *AccountsService) Update(id int, acc *proto.Account) bool {
 	if tmp == nil {
 		return false
 	}
+	// ID
+	// Birth
+	// Joined
+	if acc.ID[0] > 0 || acc.Birth[0] > 0 || acc.Joined[0] > 0 {
+		log.Fatal("Update ID, Birth, Joined")
+	}
 	if acc.Email.Len > 0 {
 		// hold new
 		hash := murmur3.Sum64(acc.Email.Buf[:acc.Email.Len])
@@ -77,16 +83,39 @@ func (svc *AccountsService) Update(id int, acc *proto.Account) bool {
 		}
 		tmp.Email = acc.Email
 	}
+	if acc.Fname > 0 {
+		tmp.Fname = acc.Fname
+	}
+	if acc.Sname > 0 {
+		tmp.Sname = acc.Sname
+	}
 	if acc.Phone[0] > 0 {
 		tmp.Phone = acc.Phone
+	}
+	// Sex
+	if acc.Sex > 0 {
+		log.Fatal("Update Sex")
+	}
+	if acc.Country > 0 {
+		tmp.Country = acc.Country
+	}
+	if acc.City > 0 {
+		tmp.City = acc.City
+	}
+	if acc.Status > 0 {
+		tmp.Status = acc.Status
+	}
+	if acc.PremiumStart[0] > 0 {
+		tmp.PremiumStart = acc.PremiumStart
+	}
+	if acc.PremiumFinish[0] > 0 {
+		tmp.PremiumFinish = acc.PremiumFinish
 	}
 	if acc.Interests[0] > 0 {
 		tmp.Interests = acc.Interests
 	}
 	if len(acc.LikesTo) > 0 {
-		println("likes")
 		tmp.LikesTo = append(tmp.LikesTo[:0], acc.LikesTo...)
 	}
-	// etc...
 	return true
 }
