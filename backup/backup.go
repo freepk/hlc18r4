@@ -70,7 +70,7 @@ func readFrom(rep *repo.AccountsRepo, src io.Reader) error {
 					n := len(acc.LikesTo)
 					tmp := *acc
 					tmp.LikesTo, likes = append(likes[:0], acc.LikesTo...), likes[n:]
-					rep.Add(id, &tmp)
+					rep.Set(id, &tmp)
 				} else {
 					return ReadError
 				}

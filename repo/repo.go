@@ -17,22 +17,25 @@ func NewAccountsRepo(num int) *AccountsRepo {
 
 func (rep *AccountsRepo) Get(id int) *proto.Account {
 	if id > 0 && id < len(rep.accounts) {
-		return &rep.accounts[id]
+		acc := rep.accounts[id]
+		return &acc
 	}
 	return nil
 }
 
-func (rep *AccountsRepo) Add(id int, acc *proto.Account) {
-	if dst := rep.Get(id); dst != nil {
-		*dst = *acc
+func (rep *AccountsRepo) Set(id int, acc *proto.Account) bool {
+	if id > 0 && id < len(rep.accounts) {
+		rep.accounts[id] = *acc
+		return true
 	}
+	return false
 }
 
 func (rep *AccountsRepo) ForEach(handler ForEachFunc) {
 	for id := range rep.accounts {
-		acc := &rep.accounts[id]
+		acc := rep.accounts[id]
 		if acc.Email.Len > 0 {
-			handler(id, acc)
+			handler(id, &acc)
 		}
 	}
 }

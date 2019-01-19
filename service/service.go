@@ -59,7 +59,7 @@ func (svc *AccountsService) Create(id int, acc *proto.Account) bool {
 	tmp := *acc
 	tmp.LikesTo = make([]proto.Like, len(acc.LikesTo))
 	copy(tmp.LikesTo, acc.LikesTo)
-	svc.rep.Add(id, &tmp)
+	svc.rep.Set(id, &tmp)
 	return true
 }
 
@@ -119,5 +119,6 @@ func (svc *AccountsService) Update(id int, acc *proto.Account) bool {
 	if len(acc.LikesTo) > 0 {
 		tmp.LikesTo = append(tmp.LikesTo[:0], acc.LikesTo...)
 	}
+	svc.rep.Set(id, tmp)
 	return true
 }
