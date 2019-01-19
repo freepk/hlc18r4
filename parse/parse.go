@@ -74,8 +74,9 @@ func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 			if b[i] != 0x22 {
 				return b, nil, false
 			}
-			i++
 			p := i
+			i++
+			//p := i
 			for i < n {
 				j := i + 1
 				switch b[i] {
@@ -86,7 +87,7 @@ func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 						i += 1
 					}
 				case 0x22:
-					return b[j:], b[p:i], true
+					return b[j:], b[p:j], true
 				}
 				i++
 			}

@@ -6,7 +6,7 @@ import (
 
 const EmailBufMaxLen = 40
 
-const PhoneBufMaxLen = 13
+const PhoneBufMaxLen = 15
 
 const NumberBufMaxLen = 10
 
@@ -69,8 +69,99 @@ func (a *Account) reset() {
 	a.LikesTo = a.LikesTo[:0]
 }
 
-func (a *Account) CopyTo(d *Account) {
+const (
+	IDField        = 1
+	BirthField     = 2
+	JoinedField    = 4
+	EmailField     = 8
+	FnameField     = 16
+	SnameField     = 32
+	PhoneField     = 64
+	SexField       = 128
+	CountryField   = 256
+	CityField      = 512
+	StatusField    = 1024
+	PremiumField   = 2048
+	InterestsField = 4096
+	LikesToField   = 8192
+)
 
+func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
+	fields = (1 << 20) - 1
+	buf = append(buf, '{')
+	buf = append(buf, IdKey...)
+	buf = append(buf, string(a.ID[:])...)
+	if (fields & BirthField) == BirthField {
+		buf = append(buf, ',')
+		buf = append(buf, BirthKey...)
+		buf = append(buf, string(a.Birth[:])...)
+	}
+	if (fields & JoinedField) == JoinedField {
+		buf = append(buf, ',')
+		buf = append(buf, JoinedKey...)
+		buf = append(buf, string(a.Joined[:])...)
+	}
+	if (fields & EmailField) == EmailField {
+		buf = append(buf, ',')
+		buf = append(buf, EmailKey...)
+		buf = append(buf, a.Email.Buf[:a.Email.Len]...)
+	}
+	if (fields&FnameField) == FnameField && a.Fname > 0 {
+		fname, _ := FnameDict.Value(uint64(a.Fname))
+		buf = append(buf, ',')
+		buf = append(buf, FnameKey...)
+		buf = append(buf, fname...)
+	}
+	if (fields&SnameField) == SnameField && a.Sname > 0 {
+		sname, _ := SnameDict.Value(uint64(a.Fname))
+		buf = append(buf, ',')
+		buf = append(buf, SnameKey...)
+		buf = append(buf, sname...)
+	}
+	if (fields&PhoneField) == PhoneField && a.Phone[0] > 0 {
+		buf = append(buf, ',')
+		buf = append(buf, PhoneKey...)
+		buf = append(buf, a.Phone[:]...)
+	}
+	if (fields & SexField) == SexField {
+		switch a.Sex {
+		case MaleSex:
+			buf = append(buf, `,"sex":"m"`...)
+		case FemaleSex:
+			buf = append(buf, `,"sex":"f"`...)
+		}
+	}
+	if (fields&CountryField) == CountryField && a.Country > 0 {
+		country, _ := CountryDict.Value(uint64(a.Country))
+		buf = append(buf, ',')
+		buf = append(buf, CountryKey...)
+		buf = append(buf, country...)
+	}
+	if (fields&CityField) == CityField && a.City > 0 {
+		city, _ := CountryDict.Value(uint64(a.City))
+		buf = append(buf, ',')
+		buf = append(buf, CityKey...)
+		buf = append(buf, city...)
+	}
+	if (fields & StatusField) == StatusField {
+		switch a.Status {
+		case FreeStatus:
+			buf = append(buf, `,"status":"свободны"`...)
+		case BusyStatus:
+			buf = append(buf, `,"status":"заняты"`...)
+		case ComplicatedStatus:
+			buf = append(buf, `,"status":"всё сложно"`...)
+		}
+	}
+	if (fields&PremiumField) == PremiumField && a.PremiumFinish[0] > 0 {
+		buf = append(buf, `',"premium":{"finish":`...)
+		buf = append(buf, string(a.PremiumFinish[:])...)
+		buf = append(buf, `,"start":`...)
+		buf = append(buf, string(a.PremiumStart[:])...)
+		buf = append(buf, '}')
+	}
+	buf = append(buf, '}')
+	return buf
 }
 
 func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {

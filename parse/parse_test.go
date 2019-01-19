@@ -98,10 +98,10 @@ func TestParseQuoted(t *testing.T) {
 	if x, v, ok := ParseQuoted([]byte(" aa\"")); v != nil || ok || string(x) != " aa\"" {
 		t.Fail()
 	}
-	if x, v, ok := ParseQuoted([]byte(" \"aa\"")); string(v) != "aa" || !ok || string(x) != "" {
+	if x, v, ok := ParseQuoted([]byte(" \"aa\"")); string(v) != "\"aa\"" || !ok || string(x) != "" {
 		t.Fail()
 	}
-	if x, v, ok := ParseQuoted([]byte(" \"aa\" ")); string(v) != "aa" || !ok || string(x) != " " {
+	if x, v, ok := ParseQuoted([]byte(" \"aa\" ")); string(v) != "\"aa\"" || !ok || string(x) != " " {
 		t.Fail()
 	}
 }

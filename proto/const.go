@@ -2,6 +2,7 @@ package proto
 
 const (
 	BirthKey             = `"birth":`
+	BirthKeyWC           = `,` + BirthKey
 	BirthLen             = len(BirthKey)
 	CityKey              = `"city":`
 	CityLen              = len(CityKey)
@@ -41,11 +42,8 @@ const (
 	FreeStatusLen        = len(FreeStatusStr)
 	ComplicatedStatusStr = `"\u0432\u0441\u0451 \u0441\u043b\u043e\u0436\u043d\u043e"`
 	ComplicatedStatusLen = len(ComplicatedStatusStr)
-)
-
-const (
-	MaleSexStr   = `"m"`
-	FemaleSexStr = `"f"`
+	MaleSexStr           = `"m"`
+	FemaleSexStr         = `"f"`
 )
 
 type StatusEnum uint8

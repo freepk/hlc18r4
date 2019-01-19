@@ -17,71 +17,27 @@ var (
 )
 
 func TestAccountUnmarshalJSON(t *testing.T) {
-	a := &Account{}
-	_, ok := a.UnmarshalJSON(testAccount)
+	acc := &Account{}
+	_, ok := acc.UnmarshalJSON(testAccount)
 	if !ok {
 		t.Fail()
 	}
-
-	fname, _ := FnameDict.Value(uint64(a.Fname))
-	sname, _ := SnameDict.Value(uint64(a.Sname))
-	country, _ := CountryDict.Value(uint64(a.Country))
-	city, _ := CityDict.Value(uint64(a.City))
-
-	status := ""
-	switch a.Status {
-	case FreeStatus:
-		status = "Свободны"
-	case BusyStatus:
-		status = "Заняты"
-	case ComplicatedStatus:
-		status = "Все сложно"
-	}
-
-	sex := ""
-	switch a.Sex {
-	case MaleSex:
-		status = "m"
-	case FemaleSex:
-		status = "f"
-	}
-
-	t.Log(
-		string(a.ID[:]),
-		string(a.Joined[:]),
-		string(a.Birth[:]),
-		string(fname),
-		string(sname),
-		string(country),
-		string(city),
-		status,
-		sex,
-		string(a.Email.Buf[:a.Email.Len]),
-		string(a.Phone[:]),
-		string(a.PremiumStart[:]),
-		string(a.PremiumFinish[:]))
-
-	for _, v := range a.Interests[:] {
-		if v == 0 {
-			break
-		}
-		interest, _ := InterestDict.Value(uint64(v))
-		t.Log(string(interest))
-	}
-
+	buf := make([]byte, 8192)
+	buf = acc.MarshalToJSON(1, buf[:0])
+	t.Log(string(buf))
 }
 
 func BenchmarkAccountReset(b *testing.B) {
-	a := &Account{}
+	acc := &Account{}
 	for i := 0; i < b.N; i++ {
-		a.reset()
+		acc.reset()
 	}
 }
 
 func BenchmarkAccountUnmarshalJSON(b *testing.B) {
-	a := &Account{}
+	acc := &Account{}
 	for i := 0; i < b.N; i++ {
-		_, ok := a.UnmarshalJSON(testAccount)
+		_, ok := acc.UnmarshalJSON(testAccount)
 		if !ok {
 			b.Fatal()
 		}
@@ -89,44 +45,13 @@ func BenchmarkAccountUnmarshalJSON(b *testing.B) {
 }
 
 func BenchmarkAccountMarshalJSON(b *testing.B) {
-	a := &Account{}
-	_, ok := a.UnmarshalJSON(testAccount)
+	acc := &Account{}
+	_, ok := acc.UnmarshalJSON(testAccount)
 	if !ok {
 		b.Fatal("UnmarshalJSON error")
 	}
+	buf := make([]byte, 8192)
 	for i := 0; i < b.N; i++ {
-		_, _ = FnameDict.Value(uint64(a.Fname))
-		_, _ = SnameDict.Value(uint64(a.Sname))
-		_, _ = CountryDict.Value(uint64(a.Country))
-		_, _ = CityDict.Value(uint64(a.City))
-		switch a.Status {
-		case FreeStatus:
-			_ = "Свободны"
-		case BusyStatus:
-			_ = "Заняты"
-		case ComplicatedStatus:
-			_ = "Все сложно"
-		}
-		switch a.Sex {
-		case MaleSex:
-			_ = "m"
-		case FemaleSex:
-			_ = "f"
-		}
-		_ = a.ID[:]
-		_ = a.Joined[:]
-		_ = a.Birth[:]
-		_ = a.Email.Buf[:a.Email.Len]
-		_ = a.Phone[:]
-		_ = a.PremiumStart[:]
-		_ = a.PremiumFinish[:]
-
-		//for _, v := range a.Interests[:] {
-		//	if v == 0 {
-		//		break
-		//	}
-		//	_, _ = InterestDict.Value(uint64(v))
-		//}
-
+		buf = acc.MarshalToJSON(1, buf[:0])
 	}
 }
