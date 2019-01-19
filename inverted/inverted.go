@@ -63,14 +63,12 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 	}
 	total := 0
 	ii.rep.ForEach(func(id int, acc *proto.Account) {
+		parts = ii.partsFunc(acc, parts)
 		tokens = ii.tokensFunc(acc, tokens)
-		if len(tokens) > 0 {
-			parts = ii.partsFunc(acc, parts)
-			for _, part := range parts {
-				for _, token := range tokens {
-					total++
-					want[part][token]++
-				}
+		for _, part := range parts {
+			for _, token := range tokens {
+				total++
+				want[part][token]++
 			}
 		}
 	})
@@ -95,13 +93,11 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 		}
 	}
 	ii.rep.ForEach(func(id int, acc *proto.Account) {
+		parts = ii.partsFunc(acc, parts)
 		tokens = ii.tokensFunc(acc, tokens)
-		if len(tokens) > 0 {
-			parts = ii.partsFunc(acc, parts)
-			for _, part := range parts {
-				for _, token := range tokens {
-					ii.tokens[part][token] = append(ii.tokens[part][token], uint32(id))
-				}
+		for _, part := range parts {
+			for _, token := range tokens {
+				ii.tokens[part][token] = append(ii.tokens[part][token], uint32(id))
 			}
 		}
 	})

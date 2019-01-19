@@ -173,7 +173,7 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 		buf = append(buf, fname...)
 	}
 	if (fields&SnameField) == SnameField && a.Sname > 0 {
-		sname, _ := SnameDict.Value(uint64(a.Fname))
+		sname, _ := SnameDict.Value(uint64(a.Sname))
 		buf = append(buf, ',')
 		buf = append(buf, SnameKey...)
 		buf = append(buf, sname...)
@@ -198,7 +198,7 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 		buf = append(buf, country...)
 	}
 	if (fields&CityField) == CityField && a.City > 0 {
-		city, _ := CountryDict.Value(uint64(a.City))
+		city, _ := CityDict.Value(uint64(a.City))
 		buf = append(buf, ',')
 		buf = append(buf, CityKey...)
 		buf = append(buf, city...)
