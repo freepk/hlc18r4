@@ -13,9 +13,9 @@ func TestRebuild(t *testing.T) {
 	}
 	t.Log("Rebuilding interests")
 	ii := NewInvertedIndex(rep, InterestToken)
-	ii.Rebuild()
-	t.Log("IndexedAccountsTotal", IndexedAccountsTotal)
-	ii.Rebuild()
-	t.Log("IndexedAccountsTotal", IndexedAccountsTotal)
+	total := ii.Rebuild()
+	t.Log("IndexedAccountsTotal", total)
+	total = ii.Rebuild()
+	t.Log("IndexedAccountsTotal", total)
 
 }
