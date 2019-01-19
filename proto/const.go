@@ -2,7 +2,6 @@ package proto
 
 const (
 	BirthKey             = `"birth":`
-	BirthKeyWC           = `,` + BirthKey
 	BirthLen             = len(BirthKey)
 	CityKey              = `"city":`
 	CityLen              = len(CityKey)
