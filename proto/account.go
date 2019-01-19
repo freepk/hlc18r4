@@ -148,7 +148,6 @@ func (a *Account) reset() {
 }
 
 func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
-	fields = (1 << 20) - 1
 	buf = append(buf, '{')
 	buf = append(buf, IdKey...)
 	buf = append(buf, string(a.ID[:])...)

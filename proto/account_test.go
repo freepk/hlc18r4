@@ -23,8 +23,9 @@ func TestAccountUnmarshalJSON(t *testing.T) {
 	if !ok {
 		t.Fail()
 	}
+	fields := (1 << 20) - 1
 	buf := make([]byte, 8192)
-	buf = acc.MarshalToJSON(1, buf[:0])
+	buf = acc.MarshalToJSON(fields, buf[:0])
 	t.Log(string(buf))
 }
 
@@ -51,9 +52,10 @@ func BenchmarkAccountMarshalJSON(b *testing.B) {
 	if !ok {
 		b.Fatal("UnmarshalJSON error")
 	}
+	fields := (1 << 20) - 1
 	buf := make([]byte, 8192)
 	for i := 0; i < b.N; i++ {
-		buf = acc.MarshalToJSON(1, buf[:0])
+		buf = acc.MarshalToJSON(fields, buf[:0])
 	}
 }
 
