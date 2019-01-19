@@ -1,8 +1,9 @@
 package proto
 
 import (
-	"github.com/valyala/fastjson"
 	"testing"
+
+	"github.com/valyala/fastjson"
 )
 
 var (
