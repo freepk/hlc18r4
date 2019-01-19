@@ -36,13 +36,16 @@ func (svc *AccountsService) AddInvertedIndex(parts inverted.PartsFunc, tokens in
 }
 
 func (svc *AccountsService) RebuildIndexes() {
-	log.Println("Rebuild indexes", len(svc.indexes))
+	num := len(svc.indexes)
+	log.Println("Rebuild indexes", num)
 	wait := &sync.WaitGroup{}
-	wait.Add(len(svc.indexes))
-	for _, index := range svc.indexes {
+	wait.Add(num)
+	for i := range svc.indexes {
+		index := svc.indexes[i]
 		go func() {
 			defer wait.Done()
-			index.Rebuild()
+			total, grow := index.Rebuild()
+			log.Println("Total", total, "grow", grow)
 		}()
 	}
 	wait.Wait()
