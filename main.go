@@ -5,6 +5,7 @@ import (
 
 	"github.com/valyala/fasthttp"
 	"gitlab.com/freepk/hlc18r4/backup"
+	"gitlab.com/freepk/hlc18r4/inverted"
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/service"
@@ -86,7 +87,12 @@ func main() {
 	handler := func(ctx *fasthttp.RequestCtx) {
 		AccountsHandler(ctx, svc)
 	}
-	svc.Reindex()
+	svc.AddInvertedIndex(inverted.DefaultParts, inverted.InterestsTokens)
+	svc.AddInvertedIndex(inverted.DefaultParts, inverted.FnamesTokens)
+	svc.AddInvertedIndex(inverted.DefaultParts, inverted.SnamesTokens)
+	svc.AddInvertedIndex(inverted.DefaultParts, inverted.CountriesTokens)
+	svc.AddInvertedIndex(inverted.DefaultParts, inverted.CitiesTokens)
+	svc.RebuildIndexes()
 	log.Println("Start listen")
 	if err := fasthttp.ListenAndServe(":80", handler); err != nil {
 		log.Fatal(err)

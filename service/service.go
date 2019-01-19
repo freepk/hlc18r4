@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"log"
+	"sync"
 
 	"github.com/freepk/hashtab"
 	"github.com/spaolacci/murmur3"
@@ -12,9 +13,9 @@ import (
 )
 
 type AccountsService struct {
-	rep       *repo.AccountsRepo
-	emails    *hashtab.HashTab
-	interests *inverted.InvertedIndex
+	rep     *repo.AccountsRepo
+	emails  *hashtab.HashTab
+	indexes []*inverted.InvertedIndex
 }
 
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
@@ -26,14 +27,25 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 			emails.Set(hash, uint64(id))
 		}
 	})
-	interests := inverted.NewInvertedIndex(rep, inverted.DefaultParts, inverted.InterestsTokens)
-	return &AccountsService{rep: rep, emails: emails, interests: interests}
+	return &AccountsService{rep: rep, emails: emails}
 }
 
-func (svc *AccountsService) Reindex() {
-	log.Println("Reindex")
-	total, grow := svc.interests.Rebuild()
-	log.Println("Interests", total, grow)
+func (svc *AccountsService) AddInvertedIndex(parts inverted.PartsFunc, tokens inverted.TokensFunc) {
+	index := inverted.NewInvertedIndex(svc.rep, parts, tokens)
+	svc.indexes = append(svc.indexes, index)
+}
+
+func (svc *AccountsService) RebuildIndexes() {
+	log.Println("Rebuild indexes", len(svc.indexes))
+	wait := &sync.WaitGroup{}
+	wait.Add(len(svc.indexes))
+	for _, index := range svc.indexes {
+		go func() {
+			defer wait.Done()
+			index.Rebuild()
+		}()
+	}
+	wait.Wait()
 }
 
 func (svc *AccountsService) Exists(id int) bool {

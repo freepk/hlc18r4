@@ -35,23 +35,23 @@ const (
 	CountryPart              = 100
 )
 
-type PartsHandlerFunc func(*proto.Account, []uint8) []uint8
+type PartsFunc func(*proto.Account, []uint8) []uint8
 
-type TokensHandlerFunc func(*proto.Account, []uint16) []uint16
+type TokensFunc func(*proto.Account, []uint16) []uint16
 
 type InvertedIndex struct {
 	rep           *repo.AccountsRepo
 	tokens        [][][]uint32
-	partsHandler  PartsHandlerFunc
-	tokensHandler TokensHandlerFunc
+	partsFunc  PartsFunc
+	tokensFunc TokensFunc
 }
 
-func NewInvertedIndex(rep *repo.AccountsRepo, partsHandler PartsHandlerFunc, tokensHandler TokensHandlerFunc) *InvertedIndex {
+func NewInvertedIndex(rep *repo.AccountsRepo, partsFunc PartsFunc, tokensFunc TokensFunc) *InvertedIndex {
 	tokens := make([][][]uint32, partsPerIndex)
 	for i := 0; i < partsPerIndex; i++ {
 		tokens[i] = make([][]uint32, tokensPerPart)
 	}
-	return &InvertedIndex{rep: rep, tokens: tokens, partsHandler: partsHandler, tokensHandler: tokensHandler}
+	return &InvertedIndex{rep: rep, tokens: tokens, partsFunc: partsFunc, tokensFunc: tokensFunc}
 }
 
 func (ii *InvertedIndex) Rebuild() (int, int) {
@@ -63,9 +63,9 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 	}
 	total := 0
 	ii.rep.ForEach(func(id int, acc *proto.Account) {
-		tokens = ii.tokensHandler(acc, tokens)
+		tokens = ii.tokensFunc(acc, tokens)
 		if len(tokens) > 0 {
-			parts = ii.partsHandler(acc, parts)
+			parts = ii.partsFunc(acc, parts)
 			for _, part := range parts {
 				for _, token := range tokens {
 					total++
@@ -95,9 +95,9 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 		}
 	}
 	ii.rep.ForEach(func(id int, acc *proto.Account) {
-		tokens = ii.tokensHandler(acc, tokens)
+		tokens = ii.tokensFunc(acc, tokens)
 		if len(tokens) > 0 {
-			parts = ii.partsHandler(acc, parts)
+			parts = ii.partsFunc(acc, parts)
 			for _, part := range parts {
 				for _, token := range tokens {
 					ii.tokens[part][token] = append(ii.tokens[part][token], uint32(id))
