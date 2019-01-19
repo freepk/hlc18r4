@@ -81,6 +81,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println("Accounts", rep.Len())
 	svc := service.NewAccountsService(rep)
 	handler := func(ctx *fasthttp.RequestCtx) {
 		AccountsHandler(ctx, svc)

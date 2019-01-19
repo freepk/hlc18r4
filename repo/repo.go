@@ -35,6 +35,6 @@ func (rep *AccountsRepo) ForEach(handler ForEachFunc) {
 	}
 }
 
-func (rep *AccountsRepo) Size() int {
+func (rep *AccountsRepo) Len() int {
 	return len(rep.accounts)
 }

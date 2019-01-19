@@ -18,7 +18,7 @@ type AccountsService struct {
 }
 
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
-	emails := hashtab.NewHashTab(rep.Size())
+	emails := hashtab.NewHashTab(rep.Len())
 	rep.ForEach(func(id int, acc *proto.Account) {
 		if acc.Email.Len > 0 {
 			email := acc.Email.Buf[:acc.Email.Len]
