@@ -1,8 +1,6 @@
 package inverted
 
 import (
-	"fmt"
-
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
 )
@@ -56,7 +54,7 @@ func NewInvertedIndex(rep *repo.AccountsRepo, partsHandler PartsHandlerFunc, tok
 	return &InvertedIndex{rep: rep, tokens: tokens, partsHandler: partsHandler, tokensHandler: tokensHandler}
 }
 
-func (ii *InvertedIndex) Rebuild() int {
+func (ii *InvertedIndex) Rebuild() (int, int) {
 	parts := make([]uint8, 0, partsPerIndex)
 	tokens := make([]uint16, 0, tokensPerPart)
 	want := make([][]int, len(ii.tokens))
@@ -83,7 +81,6 @@ func (ii *InvertedIndex) Rebuild() int {
 		}
 	}
 	buffer := make([]uint32, grow)
-	fmt.Println("grow", grow)
 	for part, tokens := range ii.tokens {
 		for token, ids := range tokens {
 			// grow if needed
@@ -95,7 +92,16 @@ func (ii *InvertedIndex) Rebuild() int {
 			ii.tokens[part][token] = ii.tokens[part][token][:0]
 		}
 	}
-	return total
+	ii.rep.ForEach(func(id int, acc *proto.Account) {
+		parts = ii.partsHandler(acc, parts)
+		tokens = ii.tokensHandler(acc, tokens)
+		for _, part := range parts {
+			for _, token := range tokens {
+				ii.tokens[part][token] = append(ii.tokens[part][token], uint32(id))
+			}
+		}
+	})
+	return total, grow
 }
 
 func InterestsTokens(acc *proto.Account, tokens []uint16) []uint16 {

@@ -86,6 +86,7 @@ func main() {
 	handler := func(ctx *fasthttp.RequestCtx) {
 		AccountsHandler(ctx, svc)
 	}
+	svc.Reindex()
 	log.Println("Start listen")
 	if err := fasthttp.ListenAndServe(":80", handler); err != nil {
 		log.Fatal(err)

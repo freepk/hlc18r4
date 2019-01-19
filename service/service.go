@@ -31,7 +31,9 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 }
 
 func (svc *AccountsService) Reindex() {
-	log.Println("Rebuilding interests")
+	log.Println("Reindex")
+	total, grow := svc.interests.Rebuild()
+	log.Println("Interests", total, grow)
 }
 
 func (svc *AccountsService) Exists(id int) bool {
