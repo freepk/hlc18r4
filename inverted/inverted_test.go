@@ -11,10 +11,37 @@ func TestRebuild(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log("Rebuilding interests")
-	ii := NewInvertedIndex(rep, DefaultParts, InterestsTokens)
-	total, grow := ii.Rebuild()
-	t.Log("total", total, grow)
-	total, grow = ii.Rebuild()
-	t.Log("total", total, grow)
+	interests := NewInvertedIndex(rep, DefaultParts, InterestsTokens)
+	fnames := NewInvertedIndex(rep, DefaultParts, FnamesTokens)
+	snames := NewInvertedIndex(rep, DefaultParts, SnamesTokens)
+	countries := NewInvertedIndex(rep, DefaultParts, CountriesTokens)
+	cities := NewInvertedIndex(rep, DefaultParts, CitiesTokens)
+
+	total, grow := 0, 0
+
+	t.Log("Frist pass")
+
+	total, grow = interests.Rebuild()
+	t.Log("Interests", total, grow)
+	total, grow = fnames.Rebuild()
+	t.Log("Fnames", total, grow)
+	total, grow = snames.Rebuild()
+	t.Log("Snames", total, grow)
+	total, grow = countries.Rebuild()
+	t.Log("Countries", total, grow)
+	total, grow = cities.Rebuild()
+	t.Log("Cities", total, grow)
+
+	t.Log("Second pass")
+
+	total, grow = interests.Rebuild()
+	t.Log("Interests", total, grow)
+	total, grow = fnames.Rebuild()
+	t.Log("Fnames", total, grow)
+	total, grow = snames.Rebuild()
+	t.Log("Snames", total, grow)
+	total, grow = countries.Rebuild()
+	t.Log("Countries", total, grow)
+	total, grow = cities.Rebuild()
+	t.Log("Cities", total, grow)
 }

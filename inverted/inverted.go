@@ -63,12 +63,14 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 	}
 	total := 0
 	ii.rep.ForEach(func(id int, acc *proto.Account) {
-		parts = ii.partsHandler(acc, parts)
 		tokens = ii.tokensHandler(acc, tokens)
-		for _, part := range parts {
-			for _, token := range tokens {
-				total++
-				want[part][token]++
+		if len(tokens) > 0 {
+			parts = ii.partsHandler(acc, parts)
+			for _, part := range parts {
+				for _, token := range tokens {
+					total++
+					want[part][token]++
+				}
 			}
 		}
 	})
@@ -93,15 +95,41 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 		}
 	}
 	ii.rep.ForEach(func(id int, acc *proto.Account) {
-		parts = ii.partsHandler(acc, parts)
 		tokens = ii.tokensHandler(acc, tokens)
-		for _, part := range parts {
-			for _, token := range tokens {
-				ii.tokens[part][token] = append(ii.tokens[part][token], uint32(id))
+		if len(tokens) > 0 {
+			parts = ii.partsHandler(acc, parts)
+			for _, part := range parts {
+				for _, token := range tokens {
+					ii.tokens[part][token] = append(ii.tokens[part][token], uint32(id))
+				}
 			}
 		}
 	})
 	return total, grow
+}
+
+func FnamesTokens(acc *proto.Account, tokens []uint16) []uint16 {
+	tokens = tokens[:0]
+	tokens = append(tokens, uint16(acc.Fname))
+	return tokens
+}
+
+func SnamesTokens(acc *proto.Account, tokens []uint16) []uint16 {
+	tokens = tokens[:0]
+	tokens = append(tokens, uint16(acc.Sname))
+	return tokens
+}
+
+func CountriesTokens(acc *proto.Account, tokens []uint16) []uint16 {
+	tokens = tokens[:0]
+	tokens = append(tokens, uint16(acc.Country))
+	return tokens
+}
+
+func CitiesTokens(acc *proto.Account, tokens []uint16) []uint16 {
+	tokens = tokens[:0]
+	tokens = append(tokens, uint16(acc.City))
+	return tokens
 }
 
 func InterestsTokens(acc *proto.Account, tokens []uint16) []uint16 {

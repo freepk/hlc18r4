@@ -32,10 +32,11 @@ func (rep *AccountsRepo) Set(id int, acc *proto.Account) bool {
 }
 
 func (rep *AccountsRepo) ForEach(handler ForEachFunc) {
+	acc := &proto.Account{}
 	for id := range rep.accounts {
-		acc := rep.accounts[id]
+		*acc = rep.accounts[id]
 		if acc.Email.Len > 0 {
-			handler(id, &acc)
+			handler(id, acc)
 		}
 	}
 }
