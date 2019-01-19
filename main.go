@@ -26,6 +26,9 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 
 	path := ctx.Path()
 	switch string(path) {
+	case `/accounts/info/`:
+		buf := svc.Info(842224, ctx.Response.Body())
+		ctx.Write(buf)
 	case httpNewPath:
 		acc := &proto.Account{}
 		if _, ok = acc.UnmarshalJSON(ctx.PostBody()); !ok {

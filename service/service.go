@@ -57,6 +57,15 @@ func (svc *AccountsService) Exists(id int) bool {
 	return (acc.Email.Len > 0)
 }
 
+func (svc *AccountsService) Info(id int, buf []byte) []byte {
+	acc := svc.rep.Get(id)
+	if acc == nil {
+		return nil
+	}
+	fields := (1 << 20) - 1
+	return acc.MarshalToJSON(fields, buf)
+}
+
 func (svc *AccountsService) Create(id int, acc *proto.Account) bool {
 	if id == 0 || svc.Exists(id) {
 		return false

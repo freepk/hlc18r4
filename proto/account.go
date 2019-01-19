@@ -147,19 +147,30 @@ func (a *Account) reset() {
 	a.LikesTo = a.LikesTo[:0]
 }
 
+func trim(b []byte) []byte {
+	n := len(b)
+	for n > 0 {
+		if b[n-1] > 0 {
+			break
+		}
+		n--
+	}
+	return b[:n]
+}
+
 func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 	buf = append(buf, '{')
 	buf = append(buf, IdKey...)
-	buf = append(buf, string(a.ID[:])...)
+	buf = append(buf, trim(a.ID[:])...)
 	if (fields & BirthField) == BirthField {
 		buf = append(buf, ',')
 		buf = append(buf, BirthKey...)
-		buf = append(buf, string(a.Birth[:])...)
+		buf = append(buf, trim(a.Birth[:])...)
 	}
 	if (fields & JoinedField) == JoinedField {
 		buf = append(buf, ',')
 		buf = append(buf, JoinedKey...)
-		buf = append(buf, string(a.Joined[:])...)
+		buf = append(buf, trim(a.Joined[:])...)
 	}
 	if (fields & EmailField) == EmailField {
 		buf = append(buf, ',')
@@ -181,7 +192,7 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 	if (fields&PhoneField) == PhoneField && a.Phone[0] > 0 {
 		buf = append(buf, ',')
 		buf = append(buf, PhoneKey...)
-		buf = append(buf, a.Phone[:]...)
+		buf = append(buf, trim(a.Phone[:])...)
 	}
 	if (fields & SexField) == SexField {
 		switch a.Sex {
@@ -215,9 +226,9 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 	}
 	if (fields&PremiumField) == PremiumField && a.PremiumFinish[0] > 0 {
 		buf = append(buf, `',"premium":{"finish":`...)
-		buf = append(buf, string(a.PremiumFinish[:])...)
+		buf = append(buf, trim(a.PremiumFinish[:])...)
 		buf = append(buf, `,"start":`...)
-		buf = append(buf, string(a.PremiumStart[:])...)
+		buf = append(buf, trim(a.PremiumStart[:])...)
 		buf = append(buf, '}')
 	}
 	buf = append(buf, '}')
