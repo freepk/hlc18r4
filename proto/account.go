@@ -4,13 +4,12 @@ import (
 	"gitlab.com/freepk/hlc18r4/parse"
 )
 
-const EmailBufMaxLen = 40
-
-const PhoneBufMaxLen = 15
-
-const NumberBufMaxLen = 10
-
-const InterestsMaxLen = 10
+const (
+	EmailBufMaxLen  = 40
+	PhoneBufMaxLen  = 15
+	NumberBufMaxLen = 10
+	InterestsMaxLen = 10
+)
 
 type EmailBuf struct {
 	Len uint8
