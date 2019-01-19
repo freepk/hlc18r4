@@ -1,6 +1,8 @@
 package inverted
 
 import (
+	"fmt"
+
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
 )
@@ -11,40 +13,42 @@ const (
 )
 
 const (
-	CommonPart = 0
-	MalePart
-	FemalePart
-	FreePart = 20
-	BusyPart
-	ComplicatedPart
-	NotFreePart = 30
-	NotBusyPart
-	NotComplicatedPart
-	MaleFreePart = 40
-	MaleBusyPart
-	MaleComplicatedPart
-	MaleNotFreePart = 50
-	MaleNotBusyPart
-	MaleNotComplicatedPart
-	FemaleFreePart = 60
-	FemaleBusyPart
-	FemaleComplicatedPart
-	FemaleNotFreePart = 70
-	FemaleNotBusyPart
-	FemaleNotComplicatedPart
-	CountryPart = 100
+	CommonPart               = 0
+	MalePart                 = 10
+	FemalePart               = 11
+	FreePart                 = 20
+	BusyPart                 = 21
+	ComplicatedPart          = 22
+	NotFreePart              = 30
+	NotBusyPart              = 31
+	NotComplicatedPart       = 32
+	MaleFreePart             = 40
+	MaleBusyPart             = 41
+	MaleComplicatedPart      = 42
+	MaleNotFreePart          = 50
+	MaleNotBusyPart          = 51
+	MaleNotComplicatedPart   = 52
+	FemaleFreePart           = 60
+	FemaleBusyPart           = 61
+	FemaleComplicatedPart    = 62
+	FemaleNotFreePart        = 70
+	FemaleNotBusyPart        = 71
+	FemaleNotComplicatedPart = 72
+	CountryPart              = 100
 )
+
+type PartsHandlerFunc func(*proto.Account, []uint8) []uint8
+
+type TokensHandlerFunc func(*proto.Account, []uint16) []uint16
 
 type InvertedIndex struct {
 	rep           *repo.AccountsRepo
-	tokens        [][][]uint32 // [part][token][]int
-	partsHandler  HandlerFunc
-	tokensHandler HandlerFunc
+	tokens        [][][]uint32
+	partsHandler  PartsHandlerFunc
+	tokensHandler TokensHandlerFunc
 }
 
-type HandlerFunc func(*proto.Account, []int) []int
-
-func NewInvertedIndex(rep *repo.AccountsRepo, partsHandler, tokensHandler HandlerFunc) *InvertedIndex {
+func NewInvertedIndex(rep *repo.AccountsRepo, partsHandler PartsHandlerFunc, tokensHandler TokensHandlerFunc) *InvertedIndex {
 	tokens := make([][][]uint32, partsPerIndex)
 	for i := 0; i < partsPerIndex; i++ {
 		tokens[i] = make([][]uint32, tokensPerPart)
@@ -53,8 +57,8 @@ func NewInvertedIndex(rep *repo.AccountsRepo, partsHandler, tokensHandler Handle
 }
 
 func (ii *InvertedIndex) Rebuild() int {
-	parts := make([]int, 0, partsPerIndex)
-	tokens := make([]int, 0, tokensPerPart)
+	parts := make([]uint8, 0, partsPerIndex)
+	tokens := make([]uint16, 0, tokensPerPart)
 	want := make([][]int, len(ii.tokens))
 	for i := range ii.tokens {
 		want[i] = make([]int, len(ii.tokens[i]))
@@ -70,21 +74,42 @@ func (ii *InvertedIndex) Rebuild() int {
 			}
 		}
 	})
+	grow := 0
+	for part, tokens := range ii.tokens {
+		for token, ids := range tokens {
+			if want[part][token] > cap(ids) {
+				grow += want[part][token]
+			}
+		}
+	}
+	buffer := make([]uint32, grow)
+	fmt.Println("grow", grow)
+	for part, tokens := range ii.tokens {
+		for token, ids := range tokens {
+			// grow if needed
+			if want[part][token] > cap(ids) {
+				grow := want[part][token]
+				ii.tokens[part][token], buffer = buffer[:grow], buffer[grow:]
+			}
+			// reset
+			ii.tokens[part][token] = ii.tokens[part][token][:0]
+		}
+	}
 	return total
 }
 
-func InterestsTokens(acc *proto.Account, tokens []int) []int {
+func InterestsTokens(acc *proto.Account, tokens []uint16) []uint16 {
 	tokens = tokens[:0]
 	for _, interest := range acc.Interests {
 		if interest == 0 {
 			break
 		}
-		tokens = append(tokens, int(interest))
+		tokens = append(tokens, uint16(interest))
 	}
 	return tokens
 }
 
-func DefaultParts(acc *proto.Account, parts []int) []int {
+func DefaultParts(acc *proto.Account, parts []uint8) []uint8 {
 	parts = parts[:0]
 	// Common
 	parts = append(parts, CommonPart)
@@ -120,7 +145,7 @@ func DefaultParts(acc *proto.Account, parts []int) []int {
 		parts = append(parts, FemaleComplicatedPart, FemaleNotFreePart, FemaleNotBusyPart)
 	}
 	// Country part
-	country := int(acc.Country) + CountryPart
-	parts = append(parts, country)
+	country := acc.Country + CountryPart
+	parts = append(parts, uint8(country))
 	return parts
 }

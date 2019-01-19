@@ -31,7 +31,9 @@ func (rep *AccountsRepo) Add(id int, acc *proto.Account) {
 func (rep *AccountsRepo) ForEach(handler ForEachFunc) {
 	for id := range rep.accounts {
 		acc := &rep.accounts[id]
-		handler(id, acc)
+		if acc.Email.Len > 0 {
+			handler(id, acc)
+		}
 	}
 }
 
