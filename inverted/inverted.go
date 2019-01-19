@@ -40,8 +40,8 @@ type PartsFunc func(*proto.Account, []uint8) []uint8
 type TokensFunc func(*proto.Account, []uint16) []uint16
 
 type InvertedIndex struct {
-	rep           *repo.AccountsRepo
-	tokens        [][][]uint32
+	rep        *repo.AccountsRepo
+	tokens     [][][]uint32
 	partsFunc  PartsFunc
 	tokensFunc TokensFunc
 }
