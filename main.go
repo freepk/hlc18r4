@@ -1,6 +1,7 @@
 package main
 
 import (
+	//"fmt"
 	"log"
 
 	"github.com/valyala/fasthttp"
@@ -26,6 +27,61 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 
 	path := ctx.Path()
 	switch string(path) {
+	case httpFilterPath:
+		args := ctx.QueryArgs()
+		if args.Len() < 3 {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		limit, err := args.GetUint(`limit`)
+		if err != nil || limit > 50 {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		correct := true
+		fields := proto.IDField
+		args.VisitAll(func(k, v []byte) {
+			switch string(k) {
+			case `sex_eq`:
+				fields |= proto.SexField
+			case `status_eq`:
+				fields |= proto.StatusField
+			case `status_neq`:
+				fields |= proto.StatusField
+			case `country_eq`:
+				fields |= proto.CountryField
+			case `country_null`:
+				fields |= proto.CountryField
+			case `city_eq`:
+				fields |= proto.CityField
+			case `city_null`:
+				fields |= proto.CityField
+			case `city_any`:
+				fields |= proto.CityField
+			case `interests_contains`:
+			case `interests_any`:
+			case `limit`:
+			case `query_id`:
+			default:
+				correct = false
+				return
+			}
+		})
+		if !correct {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+	case httpGroupPath:
+		args := ctx.QueryArgs()
+		if args.Len() < 3 {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		limit, err := args.GetUint(`limit`)
+		if err != nil || limit > 50 {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
 	case httpNewPath:
 		acc := &proto.Account{}
 		if _, ok = acc.UnmarshalJSON(ctx.PostBody()); !ok {
@@ -45,8 +101,6 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 	case httpLikesPath:
 		ctx.SetStatusCode(fasthttp.StatusAccepted)
 		return
-	case httpFilterPath:
-	case httpGroupPath:
 	default:
 		if len(path) < httpBaseLen || string(path[:httpBaseLen]) != httpBasePath {
 			ctx.SetStatusCode(fasthttp.StatusNotFound)
