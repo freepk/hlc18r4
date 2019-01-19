@@ -26,7 +26,7 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 			emails.Set(hash, uint64(id))
 		}
 	})
-	interests := inverted.NewInvertedIndex(rep, inverted.InterestToken)
+	interests := inverted.NewInvertedIndex(rep, inverted.DefaultParts, inverted.InterestsTokens)
 	return &AccountsService{rep: rep, emails: emails, interests: interests}
 }
 

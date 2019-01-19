@@ -1,6 +1,7 @@
 package proto
 
 import (
+	"github.com/valyala/fastjson"
 	"testing"
 )
 
@@ -53,5 +54,15 @@ func BenchmarkAccountMarshalJSON(b *testing.B) {
 	buf := make([]byte, 8192)
 	for i := 0; i < b.N; i++ {
 		buf = acc.MarshalToJSON(1, buf[:0])
+	}
+}
+
+func BenchmarkAccountUnmarshalFastJSON(b *testing.B) {
+	par := &fastjson.Parser{}
+	for i := 0; i < b.N; i++ {
+		_, err := par.ParseBytes(testAccount)
+		if err != nil {
+			b.Fatal(err)
+		}
 	}
 }
