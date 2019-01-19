@@ -5,6 +5,85 @@ import (
 )
 
 const (
+	IDField        = 1
+	BirthField     = 2
+	JoinedField    = 4
+	EmailField     = 8
+	FnameField     = 16
+	SnameField     = 32
+	PhoneField     = 64
+	SexField       = 128
+	CountryField   = 256
+	CityField      = 512
+	StatusField    = 1024
+	PremiumField   = 2048
+	InterestsField = 4096
+	LikesToField   = 8192
+)
+
+const (
+	BirthKey             = `"birth":`
+	BirthLen             = len(BirthKey)
+	CityKey              = `"city":`
+	CityLen              = len(CityKey)
+	CountryKey           = `"country":`
+	CountryLen           = len(CountryKey)
+	EmailKey             = `"email":`
+	EmailLen             = len(EmailKey)
+	IdKey                = `"id":`
+	IdLen                = len(IdKey)
+	JoinedKey            = `"joined":`
+	JoinedLen            = len(JoinedKey)
+	FnameKey             = `"fname":`
+	FnameLen             = len(FnameKey)
+	InterestsKey         = `"interests":`
+	InterestsLen         = len(InterestsKey)
+	LikesKey             = `"likes":`
+	LikesLen             = len(LikesKey)
+	PhoneKey             = `"phone":`
+	PhoneLen             = len(PhoneKey)
+	PremiumKey           = `"premium":`
+	PremiumLen           = len(PremiumKey)
+	SexKey               = `"sex":`
+	SexLen               = len(SexKey)
+	SnameKey             = `"sname":`
+	SnameLen             = len(SnameKey)
+	StatusKey            = `"status":`
+	StatusLen            = len(StatusKey)
+	TsKey                = `"ts":`
+	TsLen                = len(TsKey)
+	StartKey             = `"start":`
+	StartLen             = len(StartKey)
+	FinishKey            = `"finish":`
+	FinishLen            = len(FinishKey)
+	BusyStatusStr        = `"\u0437\u0430\u043d\u044f\u0442\u044b"`
+	BusyStatusLen        = len(BusyStatusStr)
+	FreeStatusStr        = `"\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b"`
+	FreeStatusLen        = len(FreeStatusStr)
+	ComplicatedStatusStr = `"\u0432\u0441\u0451 \u0441\u043b\u043e\u0436\u043d\u043e"`
+	ComplicatedStatusLen = len(ComplicatedStatusStr)
+	MaleSexStr           = `"m"`
+	FemaleSexStr         = `"f"`
+)
+
+type SexEnum byte
+
+const (
+	_          = iota
+	FreeStatus = StatusEnum(iota)
+	BusyStatus
+	ComplicatedStatus
+)
+
+type StatusEnum uint8
+
+const (
+	_       = iota
+	MaleSex = SexEnum(iota)
+	FemaleSex
+)
+
+const (
 	EmailBufMaxLen  = 40
 	PhoneBufMaxLen  = 15
 	NumberBufMaxLen = 10
@@ -68,23 +147,6 @@ func (a *Account) reset() {
 	a.LikesTo = a.LikesTo[:0]
 }
 
-const (
-	IDField        = 1
-	BirthField     = 2
-	JoinedField    = 4
-	EmailField     = 8
-	FnameField     = 16
-	SnameField     = 32
-	PhoneField     = 64
-	SexField       = 128
-	CountryField   = 256
-	CityField      = 512
-	StatusField    = 1024
-	PremiumField   = 2048
-	InterestsField = 4096
-	LikesToField   = 8192
-)
-
 func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 	fields = (1 << 20) - 1
 	buf = append(buf, '{')
@@ -145,11 +207,11 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 	if (fields & StatusField) == StatusField {
 		switch a.Status {
 		case FreeStatus:
-			buf = append(buf, `,"status":"свободны"`...)
+			buf = append(buf, `,"status":\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b"`...)
 		case BusyStatus:
-			buf = append(buf, `,"status":"заняты"`...)
+			buf = append(buf, `,"status":"\u0437\u0430\u043d\u044f\u0442\u044b"`...)
 		case ComplicatedStatus:
-			buf = append(buf, `,"status":"всё сложно"`...)
+			buf = append(buf, `,"status":"\u0432\u0441\u0451 \u0441\u043b\u043e\u0436\u043d\u043e"`...)
 		}
 	}
 	if (fields&PremiumField) == PremiumField && a.PremiumFinish[0] > 0 {
