@@ -88,10 +88,10 @@ func main() {
 		AccountsHandler(ctx, svc)
 	}
 	svc.AddInvertedIndex(inverted.DefaultParts, inverted.InterestsTokens)
-	svc.AddInvertedIndex(inverted.DefaultParts, inverted.FnamesTokens)
-	svc.AddInvertedIndex(inverted.DefaultParts, inverted.SnamesTokens)
-	svc.AddInvertedIndex(inverted.DefaultParts, inverted.CountriesTokens)
-	svc.AddInvertedIndex(inverted.DefaultParts, inverted.CitiesTokens)
+	svc.AddInvertedIndex(inverted.DefaultParts, inverted.FnameTokens)
+	svc.AddInvertedIndex(inverted.DefaultParts, inverted.SnameTokens)
+	svc.AddInvertedIndex(inverted.DefaultParts, inverted.CountryTokens)
+	svc.AddInvertedIndex(inverted.DefaultParts, inverted.CityTokens)
 	svc.RebuildIndexes()
 	log.Println("Start listen")
 	if err := fasthttp.ListenAndServe(":80", handler); err != nil {

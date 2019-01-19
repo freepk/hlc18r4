@@ -12,10 +12,10 @@ func TestRebuild(t *testing.T) {
 		t.Fatal(err)
 	}
 	interests := NewInvertedIndex(rep, DefaultParts, InterestsTokens)
-	fnames := NewInvertedIndex(rep, DefaultParts, FnamesTokens)
-	snames := NewInvertedIndex(rep, DefaultParts, SnamesTokens)
-	countries := NewInvertedIndex(rep, DefaultParts, CountriesTokens)
-	cities := NewInvertedIndex(rep, DefaultParts, CitiesTokens)
+	fnames := NewInvertedIndex(rep, DefaultParts, FnameTokens)
+	snames := NewInvertedIndex(rep, DefaultParts, SnameTokens)
+	countries := NewInvertedIndex(rep, DefaultParts, CountryTokens)
+	cities := NewInvertedIndex(rep, DefaultParts, CityTokens)
 
 	total, grow := 0, 0
 

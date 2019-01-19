@@ -63,8 +63,8 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 	}
 	total := 0
 	ii.rep.ForEach(func(id int, acc *proto.Account) {
-		parts = ii.partsFunc(acc, parts)
-		tokens = ii.tokensFunc(acc, tokens)
+		parts = ii.partsFunc(acc, parts[:0])
+		tokens = ii.tokensFunc(acc, tokens[:0])
 		for _, part := range parts {
 			for _, token := range tokens {
 				total++
@@ -93,8 +93,8 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 		}
 	}
 	ii.rep.ForEach(func(id int, acc *proto.Account) {
-		parts = ii.partsFunc(acc, parts)
-		tokens = ii.tokensFunc(acc, tokens)
+		parts = ii.partsFunc(acc, parts[:0])
+		tokens = ii.tokensFunc(acc, tokens[:0])
 		for _, part := range parts {
 			for _, token := range tokens {
 				ii.tokens[part][token] = append(ii.tokens[part][token], uint32(id))
@@ -104,32 +104,60 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 	return total, grow
 }
 
-func FnamesTokens(acc *proto.Account, tokens []uint16) []uint16 {
-	tokens = tokens[:0]
+// sex_eq - single?
+// status_eq - single?
+// status_neq - single?
+
+// email_domain
+// email_lt
+// email_gt
+func EmailTokens(acc *proto.Account, tokens []uint16) []uint16 {
+	return tokens
+}
+
+// +fname_eq
+// +fname_neq
+func FnameTokens(acc *proto.Account, tokens []uint16) []uint16 {
 	tokens = append(tokens, uint16(acc.Fname))
 	return tokens
 }
 
-func SnamesTokens(acc *proto.Account, tokens []uint16) []uint16 {
-	tokens = tokens[:0]
+// +sname_eq
+// sname_starts
+// +sname_null
+func SnameTokens(acc *proto.Account, tokens []uint16) []uint16 {
 	tokens = append(tokens, uint16(acc.Sname))
 	return tokens
 }
 
-func CountriesTokens(acc *proto.Account, tokens []uint16) []uint16 {
-	tokens = tokens[:0]
+// phone_code
+// phone_null
+func PhoneTokens(acc *proto.Account, tokens []uint16) []uint16 {
+	return tokens
+}
+
+// +country_eq
+// +country_null
+func CountryTokens(acc *proto.Account, tokens []uint16) []uint16 {
 	tokens = append(tokens, uint16(acc.Country))
 	return tokens
 }
 
-func CitiesTokens(acc *proto.Account, tokens []uint16) []uint16 {
-	tokens = tokens[:0]
+// city_eq
+// city_any
+// city_null
+func CityTokens(acc *proto.Account, tokens []uint16) []uint16 {
 	tokens = append(tokens, uint16(acc.City))
 	return tokens
 }
 
+// birth_lt
+// birth_gt
+// birth_year
+
+// interests_contains
+// interests_any
 func InterestsTokens(acc *proto.Account, tokens []uint16) []uint16 {
-	tokens = tokens[:0]
 	for _, interest := range acc.Interests {
 		if interest == 0 {
 			break
@@ -139,8 +167,15 @@ func InterestsTokens(acc *proto.Account, tokens []uint16) []uint16 {
 	return tokens
 }
 
+// likes_contains
+
+// premium_now
+// premium_null
+func PremiumTokens(acc *proto.Account, tokens []uint16) []uint16 {
+	return tokens
+}
+
 func DefaultParts(acc *proto.Account, parts []uint8) []uint8 {
-	parts = parts[:0]
 	// Common
 	parts = append(parts, CommonPart)
 	// Sex
