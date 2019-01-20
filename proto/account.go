@@ -163,11 +163,11 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 	if (fields & StatusField) == StatusField {
 		switch a.Status {
 		case FreeStatus:
-			buf = append(buf, `,"status":\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b"`...)
+			buf = append(buf, `,"status":"свободны"`...)
 		case BusyStatus:
-			buf = append(buf, `,"status":"\u0437\u0430\u043d\u044f\u0442\u044b"`...)
+			buf = append(buf, `,"status":"заняты"`...)
 		case ComplicatedStatus:
-			buf = append(buf, `,"status":"\u0432\u0441\u0451 \u0441\u043b\u043e\u0436\u043d\u043e"`...)
+			buf = append(buf, `,"status":"все сложно"`...)
 		}
 	}
 	if (fields&PremiumField) == PremiumField && a.PremiumFinish[0] > 0 {

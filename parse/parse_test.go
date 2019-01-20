@@ -82,19 +82,19 @@ func TestParseQuoted(t *testing.T) {
 	}
 }
 
-func BenchmarkUnquoteInplace(b *testing.B) {
-	x := []byte("\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b")
-	for i := 0; i < b.N; i++ {
-		UnquoteInplace(x)
-	}
-}
+//func BenchmarkUnquoteInplace(b *testing.B) {
+//	x := []byte("\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b")
+//	for i := 0; i < b.N; i++ {
+//		UnquoteInplace(x)
+//	}
+//}
 
-func BenchmarkAtoiNocheck(b *testing.B) {
-	x := []byte("1234567")
-	for i := 0; i < b.N; i++ {
-		AtoiNocheck(x)
-	}
-}
+//func BenchmarkAtoiNocheck(b *testing.B) {
+//	x := []byte("1234567")
+//	for i := 0; i < b.N; i++ {
+//		AtoiNocheck(x)
+//	}
+//}
 
 func BenchmarkParseSpaces(b *testing.B) {
 	x := []byte("         ")

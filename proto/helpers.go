@@ -18,7 +18,7 @@ func ParseFname(b []byte) ([]byte, uint8, bool) {
 	if !ok {
 		return b, 0, false
 	}
-	x, err := FnameDict.Identify(v)
+	x, err := FnameDict.Identify(parse.UnquoteInplace(v))
 	if err != nil {
 		return b, 0, false
 	}
@@ -30,7 +30,7 @@ func ParseSname(b []byte) ([]byte, uint16, bool) {
 	if !ok {
 		return b, 0, false
 	}
-	x, err := SnameDict.Identify(v)
+	x, err := SnameDict.Identify(parse.UnquoteInplace(v))
 	if err != nil {
 		return b, 0, false
 	}
@@ -56,7 +56,7 @@ func ParseCountry(b []byte) ([]byte, uint8, bool) {
 	if !ok {
 		return b, 0, false
 	}
-	x, err := CountryDict.Identify(v)
+	x, err := CountryDict.Identify(parse.UnquoteInplace(v))
 	if err != nil {
 		return b, 0, false
 	}
@@ -93,7 +93,7 @@ func ParseInterest(b []byte) ([]byte, uint8, bool) {
 	if !ok {
 		return b, 0, false
 	}
-	x, err := InterestDict.Identify(v)
+	x, err := InterestDict.Identify(parse.UnquoteInplace(v))
 	if err != nil {
 		return b, 0, false
 	}

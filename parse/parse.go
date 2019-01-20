@@ -40,9 +40,19 @@ func UnquoteInplace(b []byte) []byte {
 	return b[:j]
 }
 
+func AtoiNocheck(b []byte) int {
+	x := 0
+	for _, c := range b {
+		x *= 10
+		x += int(c) - 0x30
+	}
+	return x
+}
+
 func ParseSpaces(b []byte) []byte {
-	for i, c := range b {
-		if c > 0x20 {
+	n := len(b)
+	for i := 0; i < n; i++ {
+		if b[i] > 0x20 {
 			return b[i:]
 		}
 	}
@@ -50,9 +60,10 @@ func ParseSpaces(b []byte) []byte {
 }
 
 func ParseSymbol(b []byte, x byte) ([]byte, bool) {
-	for i, c := range b {
-		if c > 0x20 {
-			if c != x {
+	n := len(b)
+	for i := 0; i < n; i++ {
+		if b[i] > 0x20 {
+			if b[i] != x {
 				return b, false
 			}
 			return b[i+1:], true
@@ -62,14 +73,15 @@ func ParseSymbol(b []byte, x byte) ([]byte, bool) {
 }
 
 func ParseNumbers(b []byte) ([]byte, []byte, bool) {
-	for i, c := range b {
-		if c > 0x20 {
-			if c < 0x30 || c > 0x39 {
+	n := len(b)
+	for i := 0; i < n; i++ {
+		if b[i] > 0x20 {
+			if b[i] < 0x30 || b[i] > 0x39 {
 				return b, nil, false
 			}
-			for j, c := range b[i:] {
-				if c < 0x30 || c > 0x39 {
-					return b[i+j:], b[i : j+1], true
+			for j := i; j < n; j++ {
+				if b[j] < 0x30 || b[j] > 0x39 {
+					return b[j:], b[i:j], true
 				}
 			}
 			return nil, b[i:], true
@@ -79,28 +91,22 @@ func ParseNumbers(b []byte) ([]byte, []byte, bool) {
 }
 
 func ParseQuoted(b []byte) ([]byte, []byte, bool) {
-	for i, c := range b {
-		if c > 0x20 {
-			if c != 0x22 {
+	n := len(b)
+	for i := 0; i < n; i++ {
+		if b[i] > 0x20 {
+			if b[i] != 0x22 {
 				return b, nil, false
 			}
 			i++
-			for j, c := range b[i:] {
-				if c == 0x22 {
-					return b[i+j+1:], b[i : i+j], true
+			for j := i; j < n; j++ {
+				if (j+5) < n && b[j+1] == 0x5C && b[j+2] == 0x75 {
+					j += 5
+				} else if b[j] == 0x22 {
+					return b[j+1:], b[i:j], true
 				}
 			}
 			return b, nil, false
 		}
 	}
 	return b, nil, false
-}
-
-func AtoiNocheck(b []byte) int {
-	x := 0
-	for _, c := range b {
-		x *= 10
-		x += int(c) - 0x30
-	}
-	return x
 }
