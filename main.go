@@ -14,7 +14,6 @@ import (
 func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 	var id int
 	var ok bool
-	var nums []byte
 
 	path := ctx.Path()
 	switch string(path) {
@@ -46,7 +45,10 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 			ctx.SetStatusCode(fasthttp.StatusBadRequest)
 			return
 		}
-		id = parse.AtoiNocheck(acc.ID[:])
+		if _, id, ok = parse.ParseInt(acc.ID[:]); !ok {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
 		if !svc.Create(id, acc) {
 			ctx.SetStatusCode(fasthttp.StatusBadRequest)
 			return
@@ -61,11 +63,10 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 			ctx.SetStatusCode(fasthttp.StatusNotFound)
 			return
 		}
-		if path, nums, ok = parse.ParseNumbers(path[10:]); !ok {
+		if path, id, ok = parse.ParseInt(path[10:]); !ok {
 			ctx.SetStatusCode(fasthttp.StatusNotFound)
 			return
 		}
-		id = parse.AtoiNocheck(nums)
 		if ctx.IsPost() {
 			if !svc.Exists(id) {
 				ctx.SetStatusCode(fasthttp.StatusNotFound)
