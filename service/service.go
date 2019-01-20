@@ -5,7 +5,6 @@ import (
 	"log"
 	"sync"
 
-	"github.com/freepk/hashtab"
 	"github.com/spaolacci/murmur3"
 	"gitlab.com/freepk/hlc18r4/inverted"
 	"gitlab.com/freepk/hlc18r4/proto"
@@ -13,21 +12,23 @@ import (
 )
 
 type AccountsService struct {
-	rep     *repo.AccountsRepo
-	emails  *hashtab.HashTab
-	indexes []*inverted.InvertedIndex
+	rep        *repo.AccountsRepo
+	emailsLock *sync.Mutex
+	emails     map[uint64]int
+	indexes    []*inverted.InvertedIndex
 }
 
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
-	emails := hashtab.NewHashTab(rep.Len())
+	emailsLock := &sync.Mutex{}
+	emails := make(map[uint64]int, rep.Len())
 	rep.ForEach(func(id int, acc *proto.Account) {
 		if acc.Email.Len > 0 {
 			email := acc.Email.Buf[:acc.Email.Len]
 			hash := murmur3.Sum64(email)
-			emails.Set(hash, uint64(id))
+			emails[hash] = id
 		}
 	})
-	return &AccountsService{rep: rep, emails: emails}
+	return &AccountsService{rep: rep, emailsLock: emailsLock, emails: emails}
 }
 
 func (svc *AccountsService) AddInvertedIndex(parts inverted.PartsFunc, tokens inverted.TokensFunc) {
@@ -66,9 +67,13 @@ func (svc *AccountsService) Create(id int, acc *proto.Account) bool {
 	}
 	// hold new
 	hash := murmur3.Sum64(acc.Email.Buf[:acc.Email.Len])
-	if _, ok := svc.emails.GetOrSet(hash, uint64(id)); ok {
+	svc.emailsLock.Lock()
+	if _, ok := svc.emails[hash]; ok {
+		svc.emailsLock.Unlock()
 		return false
 	}
+	svc.emails[hash] = id
+	svc.emailsLock.Unlock()
 	tmp := *acc
 	tmp.LikesTo = make([]proto.Like, len(acc.LikesTo))
 	copy(tmp.LikesTo, acc.LikesTo)
@@ -93,9 +98,13 @@ func (svc *AccountsService) Update(id int, acc *proto.Account) bool {
 	if acc.Email.Len > 0 {
 		// hold new
 		hash := murmur3.Sum64(acc.Email.Buf[:acc.Email.Len])
-		if _, ok := svc.emails.GetOrSet(hash, uint64(id)); ok {
+		svc.emailsLock.Lock()
+		if _, ok := svc.emails[hash]; ok {
+			svc.emailsLock.Unlock()
 			return false
 		}
+		svc.emails[hash] = id
+		svc.emailsLock.Unlock()
 		tmp.Email = acc.Email
 	}
 	if acc.Fname > 0 {
