@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"fmt"
 	"log"
 
 	"github.com/valyala/fasthttp"
@@ -12,22 +11,13 @@ import (
 	"gitlab.com/freepk/hlc18r4/service"
 )
 
-const (
-	httpBasePath   = `/accounts/`
-	httpBaseLen    = len(httpBasePath)
-	httpNewPath    = `/accounts/new/`
-	httpLikesPath  = `/accounts/likes/`
-	httpFilterPath = `/accounts/filter/`
-	httpGroupPath  = `/accounts/group/`
-)
-
 func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 	var id int
 	var ok bool
 
 	path := ctx.Path()
 	switch string(path) {
-	case httpFilterPath:
+	case `/accounts/filter/`:
 		args := ctx.QueryArgs()
 		if args.Len() < 3 {
 			ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -38,40 +28,7 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 			ctx.SetStatusCode(fasthttp.StatusBadRequest)
 			return
 		}
-		correct := true
-		fields := proto.IDField
-		args.VisitAll(func(k, v []byte) {
-			switch string(k) {
-			case `sex_eq`:
-				fields |= proto.SexField
-			case `status_eq`:
-				fields |= proto.StatusField
-			case `status_neq`:
-				fields |= proto.StatusField
-			case `country_eq`:
-				fields |= proto.CountryField
-			case `country_null`:
-				fields |= proto.CountryField
-			case `city_eq`:
-				fields |= proto.CityField
-			case `city_null`:
-				fields |= proto.CityField
-			case `city_any`:
-				fields |= proto.CityField
-			case `interests_contains`:
-			case `interests_any`:
-			case `limit`:
-			case `query_id`:
-			default:
-				correct = false
-				return
-			}
-		})
-		if !correct {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
-			return
-		}
-	case httpGroupPath:
+	case `/accounts/group/`:
 		args := ctx.QueryArgs()
 		if args.Len() < 3 {
 			ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -82,7 +39,7 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 			ctx.SetStatusCode(fasthttp.StatusBadRequest)
 			return
 		}
-	case httpNewPath:
+	case `/accounts/new/`:
 		acc := &proto.Account{}
 		if _, ok = acc.UnmarshalJSON(ctx.PostBody()); !ok {
 			ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -98,15 +55,15 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 		}
 		ctx.SetStatusCode(fasthttp.StatusCreated)
 		return
-	case httpLikesPath:
+	case `/accounts/likes/`:
 		ctx.SetStatusCode(fasthttp.StatusAccepted)
 		return
 	default:
-		if len(path) < httpBaseLen || string(path[:httpBaseLen]) != httpBasePath {
+		if len(path) < 10 || string(path[:10]) != `/accounts/` {
 			ctx.SetStatusCode(fasthttp.StatusNotFound)
 			return
 		}
-		if path, id, ok = parse.ParseInt(path[httpBaseLen:]); !ok {
+		if path, id, ok = parse.ParseInt(path[10:]); !ok {
 			ctx.SetStatusCode(fasthttp.StatusNotFound)
 			return
 		}

@@ -20,7 +20,6 @@ func TestRebuild(t *testing.T) {
 	total, grow := 0, 0
 
 	t.Log("Frist pass")
-
 	total, grow = interests.Rebuild()
 	t.Log("Interests", total, grow)
 	total, grow = fnames.Rebuild()

@@ -13,7 +13,7 @@ var (
 	InterestDict = dictionary.NewDictionary(256)
 )
 
-func parseFname(b []byte) ([]byte, uint8, bool) {
+func ParseFname(b []byte) ([]byte, uint8, bool) {
 	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
@@ -25,7 +25,7 @@ func parseFname(b []byte) ([]byte, uint8, bool) {
 	return t, uint8(x), true
 }
 
-func parseSname(b []byte) ([]byte, uint16, bool) {
+func ParseSname(b []byte) ([]byte, uint16, bool) {
 	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
@@ -37,21 +37,21 @@ func parseSname(b []byte) ([]byte, uint16, bool) {
 	return t, uint16(x), true
 }
 
-func parseSex(b []byte) ([]byte, SexEnum, bool) {
+func ParseSex(b []byte) ([]byte, SexEnum, bool) {
 	t := parse.ParseSpaces(b)
 	if len(t) < 3 {
 		return b, 0, false
 	}
 	switch string(t[:3]) {
-	case MaleSexStr:
+	case `"m"`:
 		return t[3:], MaleSex, true
-	case FemaleSexStr:
+	case `"f"`:
 		return t[3:], FemaleSex, true
 	}
 	return b, 0, false
 }
 
-func parseCountry(b []byte) ([]byte, uint8, bool) {
+func ParseCountry(b []byte) ([]byte, uint8, bool) {
 	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
@@ -63,7 +63,7 @@ func parseCountry(b []byte) ([]byte, uint8, bool) {
 	return t, uint8(x), true
 }
 
-func parseCity(b []byte) ([]byte, uint16, bool) {
+func ParseCity(b []byte) ([]byte, uint16, bool) {
 	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
@@ -75,20 +75,20 @@ func parseCity(b []byte) ([]byte, uint16, bool) {
 	return t, uint16(x), true
 }
 
-func parseStatus(b []byte) ([]byte, StatusEnum, bool) {
+func ParseStatus(b []byte) ([]byte, StatusEnum, bool) {
 	t := parse.ParseSpaces(b)
 	switch {
-	case len(t) > BusyStatusLen && string(t[:BusyStatusLen]) == BusyStatusStr:
-		return t[BusyStatusLen:], BusyStatus, true
-	case len(t) > FreeStatusLen && string(t[:FreeStatusLen]) == FreeStatusStr:
-		return t[FreeStatusLen:], FreeStatus, true
-	case len(t) > ComplicatedStatusLen && string(t[:ComplicatedStatusLen]) == ComplicatedStatusStr:
-		return t[ComplicatedStatusLen:], ComplicatedStatus, true
+	case len(t) > 38 && string(t[:38]) == `"\u0437\u0430\u043d\u044f\u0442\u044b"`:
+		return t[38:], BusyStatus, true
+	case len(t) > 50 && string(t[:50]) == `"\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b"`:
+		return t[50:], FreeStatus, true
+	case len(t) > 57 && string(t[:57]) == `"\u0432\u0441\u0451 \u0441\u043b\u043e\u0436\u043d\u043e"`:
+		return t[57:], ComplicatedStatus, true
 	}
 	return b, 0, false
 }
 
-func parseInterest(b []byte) ([]byte, uint8, bool) {
+func ParseInterest(b []byte) ([]byte, uint8, bool) {
 	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false

@@ -21,51 +21,6 @@ const (
 	LikesToField   = 8192
 )
 
-const (
-	BirthKey             = `"birth":`
-	BirthLen             = len(BirthKey)
-	CityKey              = `"city":`
-	CityLen              = len(CityKey)
-	CountryKey           = `"country":`
-	CountryLen           = len(CountryKey)
-	EmailKey             = `"email":`
-	EmailLen             = len(EmailKey)
-	IdKey                = `"id":`
-	IdLen                = len(IdKey)
-	JoinedKey            = `"joined":`
-	JoinedLen            = len(JoinedKey)
-	FnameKey             = `"fname":`
-	FnameLen             = len(FnameKey)
-	InterestsKey         = `"interests":`
-	InterestsLen         = len(InterestsKey)
-	LikesKey             = `"likes":`
-	LikesLen             = len(LikesKey)
-	PhoneKey             = `"phone":`
-	PhoneLen             = len(PhoneKey)
-	PremiumKey           = `"premium":`
-	PremiumLen           = len(PremiumKey)
-	SexKey               = `"sex":`
-	SexLen               = len(SexKey)
-	SnameKey             = `"sname":`
-	SnameLen             = len(SnameKey)
-	StatusKey            = `"status":`
-	StatusLen            = len(StatusKey)
-	TsKey                = `"ts":`
-	TsLen                = len(TsKey)
-	StartKey             = `"start":`
-	StartLen             = len(StartKey)
-	FinishKey            = `"finish":`
-	FinishLen            = len(FinishKey)
-	BusyStatusStr        = `"\u0437\u0430\u043d\u044f\u0442\u044b"`
-	BusyStatusLen        = len(BusyStatusStr)
-	FreeStatusStr        = `"\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b"`
-	FreeStatusLen        = len(FreeStatusStr)
-	ComplicatedStatusStr = `"\u0432\u0441\u0451 \u0441\u043b\u043e\u0436\u043d\u043e"`
-	ComplicatedStatusLen = len(ComplicatedStatusStr)
-	MaleSexStr           = `"m"`
-	FemaleSexStr         = `"f"`
-)
-
 type SexEnum byte
 
 const (
@@ -159,39 +114,32 @@ func trim(b []byte) []byte {
 }
 
 func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
-	buf = append(buf, '{')
-	buf = append(buf, IdKey...)
+	buf = append(buf, `{"id":`...)
 	buf = append(buf, trim(a.ID[:])...)
 	if (fields & BirthField) == BirthField {
-		buf = append(buf, ',')
-		buf = append(buf, BirthKey...)
+		buf = append(buf, `,"birth":`...)
 		buf = append(buf, trim(a.Birth[:])...)
 	}
 	if (fields & JoinedField) == JoinedField {
-		buf = append(buf, ',')
-		buf = append(buf, JoinedKey...)
+		buf = append(buf, `,"joined":`...)
 		buf = append(buf, trim(a.Joined[:])...)
 	}
 	if (fields & EmailField) == EmailField {
-		buf = append(buf, ',')
-		buf = append(buf, EmailKey...)
+		buf = append(buf, `,"email":`...)
 		buf = append(buf, a.Email.Buf[:a.Email.Len]...)
 	}
 	if (fields&FnameField) == FnameField && a.Fname > 0 {
 		fname, _ := FnameDict.Value(uint64(a.Fname))
-		buf = append(buf, ',')
-		buf = append(buf, FnameKey...)
+		buf = append(buf, `,"fname":`...)
 		buf = append(buf, fname...)
 	}
 	if (fields&SnameField) == SnameField && a.Sname > 0 {
 		sname, _ := SnameDict.Value(uint64(a.Sname))
-		buf = append(buf, ',')
-		buf = append(buf, SnameKey...)
+		buf = append(buf, `,"sname":`...)
 		buf = append(buf, sname...)
 	}
 	if (fields&PhoneField) == PhoneField && a.Phone[0] > 0 {
-		buf = append(buf, ',')
-		buf = append(buf, PhoneKey...)
+		buf = append(buf, `,"phone":`...)
 		buf = append(buf, trim(a.Phone[:])...)
 	}
 	if (fields & SexField) == SexField {
@@ -204,14 +152,12 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 	}
 	if (fields&CountryField) == CountryField && a.Country > 0 {
 		country, _ := CountryDict.Value(uint64(a.Country))
-		buf = append(buf, ',')
-		buf = append(buf, CountryKey...)
+		buf = append(buf, `,"country":`...)
 		buf = append(buf, country...)
 	}
 	if (fields&CityField) == CityField && a.City > 0 {
 		city, _ := CityDict.Value(uint64(a.City))
-		buf = append(buf, ',')
-		buf = append(buf, CityKey...)
+		buf = append(buf, `,"city":`...)
 		buf = append(buf, city...)
 	}
 	if (fields & StatusField) == StatusField {
@@ -248,69 +194,69 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 	for {
 		tail = parse.ParseSpaces(tail)
 		switch {
-		case len(tail) > IdLen && string(tail[:IdLen]) == IdKey:
-			if tail, temp, ok = parse.ParseNumber(tail[IdLen:]); !ok {
+		case len(tail) > 5 && string(tail[:5]) == `"id":`:
+			if tail, temp, ok = parse.ParseNumber(tail[5:]); !ok {
 				return buf, false
 			}
 			copy(a.ID[:], temp)
-		case len(tail) > BirthLen && string(tail[:BirthLen]) == BirthKey:
-			if tail, temp, ok = parse.ParseNumber(tail[BirthLen:]); !ok {
+		case len(tail) > 8 && string(tail[:8]) == `"birth":`:
+			if tail, temp, ok = parse.ParseNumber(tail[8:]); !ok {
 				return buf, false
 			}
 			copy(a.Birth[:], temp)
-		case len(tail) > JoinedLen && string(tail[:JoinedLen]) == JoinedKey:
-			if tail, temp, ok = parse.ParseNumber(tail[JoinedLen:]); !ok {
+		case len(tail) > 9 && string(tail[:9]) == `"joined":`:
+			if tail, temp, ok = parse.ParseNumber(tail[9:]); !ok {
 				return buf, false
 			}
 			copy(a.Joined[:], temp)
-		case len(tail) > EmailLen && string(tail[:EmailLen]) == EmailKey:
-			if tail, temp, ok = parse.ParseQuoted(tail[EmailLen:]); !ok {
+		case len(tail) > 8 && string(tail[:8]) == `"email":`:
+			if tail, temp, ok = parse.ParseQuoted(tail[8:]); !ok {
 				return buf, false
 			}
 			a.Email.Len = uint8(copy(a.Email.Buf[:], temp))
-		case len(tail) > FnameLen && string(tail[:FnameLen]) == FnameKey:
-			if tail, a.Fname, ok = parseFname(tail[FnameLen:]); !ok {
+		case len(tail) > 8 && string(tail[:8]) == `"fname":`:
+			if tail, a.Fname, ok = ParseFname(tail[8:]); !ok {
 				return buf, false
 			}
-		case len(tail) > SnameLen && string(tail[:SnameLen]) == SnameKey:
-			if tail, a.Sname, ok = parseSname(tail[SnameLen:]); !ok {
+		case len(tail) > 8 && string(tail[:8]) == `"sname":`:
+			if tail, a.Sname, ok = ParseSname(tail[8:]); !ok {
 				return buf, false
 			}
-		case len(tail) > PhoneLen && string(tail[:PhoneLen]) == PhoneKey:
-			if tail, temp, ok = parse.ParseQuoted(tail[PhoneLen:]); !ok {
+		case len(tail) > 8 && string(tail[:8]) == `"phone":`:
+			if tail, temp, ok = parse.ParseQuoted(tail[8:]); !ok {
 				return buf, false
 			}
 			copy(a.Phone[:], temp)
-		case len(tail) > SexLen && string(tail[:SexLen]) == SexKey:
-			if tail, a.Sex, ok = parseSex(tail[SexLen:]); !ok {
+		case len(tail) > 6 && string(tail[:6]) == `"sex":`:
+			if tail, a.Sex, ok = ParseSex(tail[6:]); !ok {
 				return buf, false
 			}
-		case len(tail) > CountryLen && string(tail[:CountryLen]) == CountryKey:
-			if tail, a.Country, ok = parseCountry(tail[CountryLen:]); !ok {
+		case len(tail) > 10 && string(tail[:10]) == `"country":`:
+			if tail, a.Country, ok = ParseCountry(tail[10:]); !ok {
 				return buf, false
 			}
-		case len(tail) > CityLen && string(tail[:CityLen]) == CityKey:
-			if tail, a.City, ok = parseCity(tail[CityLen:]); !ok {
+		case len(tail) > 7 && string(tail[:7]) == `"city":`:
+			if tail, a.City, ok = ParseCity(tail[7:]); !ok {
 				return buf, false
 			}
-		case len(tail) > StatusLen && string(tail[:StatusLen]) == StatusKey:
-			if tail, a.Status, ok = parseStatus(tail[StatusLen:]); !ok {
+		case len(tail) > 9 && string(tail[:9]) == `"status":`:
+			if tail, a.Status, ok = ParseStatus(tail[9:]); !ok {
 				return buf, false
 			}
-		case len(tail) > PremiumLen && string(tail[:PremiumLen]) == PremiumKey:
-			if tail, ok = parse.ParseSymbol(tail[PremiumLen:], '{'); !ok {
+		case len(tail) > 10 && string(tail[:10]) == `"premium":`:
+			if tail, ok = parse.ParseSymbol(tail[10:], '{'); !ok {
 				return buf, false
 			}
 			for {
 				tail = parse.ParseSpaces(tail)
 				switch {
-				case len(tail) > StartLen && string(tail[:StartLen]) == StartKey:
-					if tail, temp, ok = parse.ParseNumber(tail[StartLen:]); !ok {
+				case len(tail) > 8 && string(tail[:8]) == `"start":`:
+					if tail, temp, ok = parse.ParseNumber(tail[8:]); !ok {
 						return buf, false
 					}
 					copy(a.PremiumStart[:], temp)
-				case len(tail) > FinishLen && string(tail[:FinishLen]) == FinishKey:
-					if tail, temp, ok = parse.ParseNumber(tail[FinishLen:]); !ok {
+				case len(tail) > 9 && string(tail[:9]) == `"finish":`:
+					if tail, temp, ok = parse.ParseNumber(tail[9:]); !ok {
 						return buf, false
 					}
 					copy(a.PremiumFinish[:], temp)
@@ -322,14 +268,14 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, ok = parse.ParseSymbol(tail, '}'); !ok {
 				return buf, false
 			}
-		case len(tail) > InterestsLen && string(tail[:InterestsLen]) == InterestsKey:
-			if tail, ok = parse.ParseSymbol(tail[InterestsLen:], '['); !ok {
+		case len(tail) > 12 && string(tail[:12]) == `"interests":`:
+			if tail, ok = parse.ParseSymbol(tail[12:], '['); !ok {
 				return buf, false
 			}
 			var i uint8
 			var interest uint8
 			for {
-				if tail, interest, ok = parseInterest(tail); !ok {
+				if tail, interest, ok = ParseInterest(tail); !ok {
 					return buf, false
 				}
 				a.Interests[i] = interest
@@ -341,8 +287,8 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			if tail, ok = parse.ParseSymbol(tail, ']'); !ok {
 				return buf, false
 			}
-		case len(tail) > LikesLen && string(tail[:LikesLen]) == LikesKey:
-			if tail, ok = parse.ParseSymbol(tail[LikesLen:], '['); !ok {
+		case len(tail) > 8 && string(tail[:8]) == `"likes":`:
+			if tail, ok = parse.ParseSymbol(tail[8:], '['); !ok {
 				return buf, false
 			}
 			for {
@@ -354,12 +300,12 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				for {
 					tail = parse.ParseSpaces(tail)
 					switch {
-					case len(tail) > IdLen && string(tail[:IdLen]) == IdKey:
-						if tail, ID, ok = parse.ParseInt(tail[IdLen:]); !ok {
+					case len(tail) > 5 && string(tail[:5]) == `"id":`:
+						if tail, ID, ok = parse.ParseInt(tail[5:]); !ok {
 							return buf, false
 						}
-					case len(tail) > TsLen && string(tail[:TsLen]) == TsKey:
-						if tail, TS, ok = parse.ParseInt(tail[TsLen:]); !ok {
+					case len(tail) > 5 && string(tail[:5]) == `"ts":`:
+						if tail, TS, ok = parse.ParseInt(tail[5:]); !ok {
 							return buf, false
 						}
 					}
