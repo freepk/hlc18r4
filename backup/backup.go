@@ -66,14 +66,11 @@ func readFrom(rep *repo.AccountsRepo, src io.Reader) error {
 				if tail, ok = acc.UnmarshalJSON(tail); !ok {
 					break
 				}
-				if _, id, ok := parse.ParseInt(acc.ID[:]); ok {
-					n := len(acc.LikesTo)
-					tmp := *acc
-					tmp.LikesTo, likes = append(likes[:0], acc.LikesTo...), likes[n:]
-					rep.Set(id, &tmp)
-				} else {
-					return ReadError
-				}
+				n := len(acc.LikesTo)
+				tmp := *acc
+				tmp.LikesTo, likes = append(likes[:0], acc.LikesTo...), likes[n:]
+				id := parse.AtoiNocheck(acc.ID[:])
+				rep.Set(id, &tmp)
 			}
 			if pos = copy(buf, tail); pos == len(buf) {
 				return ReadError

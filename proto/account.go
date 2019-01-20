@@ -195,17 +195,17 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 		tail = parse.ParseSpaces(tail)
 		switch {
 		case len(tail) > 5 && string(tail[:5]) == `"id":`:
-			if tail, temp, ok = parse.ParseNumber(tail[5:]); !ok {
+			if tail, temp, ok = parse.ParseNumbers(tail[5:]); !ok {
 				return buf, false
 			}
 			copy(a.ID[:], temp)
 		case len(tail) > 8 && string(tail[:8]) == `"birth":`:
-			if tail, temp, ok = parse.ParseNumber(tail[8:]); !ok {
+			if tail, temp, ok = parse.ParseNumbers(tail[8:]); !ok {
 				return buf, false
 			}
 			copy(a.Birth[:], temp)
 		case len(tail) > 9 && string(tail[:9]) == `"joined":`:
-			if tail, temp, ok = parse.ParseNumber(tail[9:]); !ok {
+			if tail, temp, ok = parse.ParseNumbers(tail[9:]); !ok {
 				return buf, false
 			}
 			copy(a.Joined[:], temp)
@@ -251,12 +251,12 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				tail = parse.ParseSpaces(tail)
 				switch {
 				case len(tail) > 8 && string(tail[:8]) == `"start":`:
-					if tail, temp, ok = parse.ParseNumber(tail[8:]); !ok {
+					if tail, temp, ok = parse.ParseNumbers(tail[8:]); !ok {
 						return buf, false
 					}
 					copy(a.PremiumStart[:], temp)
 				case len(tail) > 9 && string(tail[:9]) == `"finish":`:
-					if tail, temp, ok = parse.ParseNumber(tail[9:]); !ok {
+					if tail, temp, ok = parse.ParseNumbers(tail[9:]); !ok {
 						return buf, false
 					}
 					copy(a.PremiumFinish[:], temp)
@@ -301,13 +301,15 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 					tail = parse.ParseSpaces(tail)
 					switch {
 					case len(tail) > 5 && string(tail[:5]) == `"id":`:
-						if tail, ID, ok = parse.ParseInt(tail[5:]); !ok {
+						if tail, temp, ok = parse.ParseNumbers(tail[5:]); !ok {
 							return buf, false
 						}
+						ID = parse.AtoiNocheck(temp)
 					case len(tail) > 5 && string(tail[:5]) == `"ts":`:
-						if tail, TS, ok = parse.ParseInt(tail[5:]); !ok {
+						if tail, temp, ok = parse.ParseNumbers(tail[5:]); !ok {
 							return buf, false
 						}
+						TS = parse.AtoiNocheck(temp)
 					}
 					if tail, ok = parse.ParseSymbol(tail, ','); !ok {
 						break
