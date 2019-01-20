@@ -49,41 +49,17 @@ func TestParseSymbol(t *testing.T) {
 	}
 }
 
-func TestParseInt(t *testing.T) {
-	if x, v, ok := ParseInt([]byte("")); v != 0 || ok || string(x) != "" {
+func TestParseNumbers(t *testing.T) {
+	if x, v, ok := ParseNumbers([]byte("")); v != nil || ok || string(x) != "" {
 		t.Fail()
 	}
-	if x, v, ok := ParseInt([]byte(" ")); v != 0 || ok || string(x) != " " {
+	if x, v, ok := ParseNumbers([]byte(" ")); v != nil || ok || string(x) != " " {
 		t.Fail()
 	}
-	if x, v, ok := ParseInt([]byte(" a1")); v != 0 || ok || string(x) != " a1" {
+	if x, v, ok := ParseNumbers([]byte(" 12\"")); string(v) != "12" || !ok || string(x) != "\"" {
 		t.Fail()
 	}
-	if x, v, ok := ParseInt([]byte(" 1")); v != 1 || !ok || string(x) != "" {
-		t.Fail()
-	}
-	if x, v, ok := ParseInt([]byte(" 1 ")); v != 1 || !ok || string(x) != " " {
-		t.Fail()
-	}
-	if x, v, ok := ParseInt([]byte(" 12")); v != 12 || !ok || string(x) != "" {
-		t.Fail()
-	}
-	if x, v, ok := ParseInt([]byte(" 12 ")); v != 12 || !ok || string(x) != " " {
-		t.Fail()
-	}
-}
-
-func TestParseNumber(t *testing.T) {
-	if x, v, ok := ParseNumber([]byte("")); v != nil || ok || string(x) != "" {
-		t.Fail()
-	}
-	if x, v, ok := ParseNumber([]byte(" ")); v != nil || ok || string(x) != " " {
-		t.Fail()
-	}
-	if x, v, ok := ParseNumber([]byte(" 12\"")); string(v) != "12" || !ok || string(x) != "\"" {
-		t.Fail()
-	}
-	if x, v, ok := ParseNumber([]byte(" \"12\"")); v != nil || ok || string(x) != " \"12\"" {
+	if x, v, ok := ParseNumbers([]byte(" \"12\"")); v != nil || ok || string(x) != " \"12\"" {
 		t.Fail()
 	}
 }
@@ -98,11 +74,25 @@ func TestParseQuoted(t *testing.T) {
 	if x, v, ok := ParseQuoted([]byte(" aa\"")); v != nil || ok || string(x) != " aa\"" {
 		t.Fail()
 	}
-	if x, v, ok := ParseQuoted([]byte(" \"aa\"")); string(v) != "\"aa\"" || !ok || string(x) != "" {
+	if x, v, ok := ParseQuoted([]byte(" \"aa\"")); string(v) != "aa" || !ok || string(x) != "" {
 		t.Fail()
 	}
-	if x, v, ok := ParseQuoted([]byte(" \"aa\" ")); string(v) != "\"aa\"" || !ok || string(x) != " " {
+	if x, v, ok := ParseQuoted([]byte(" \"aa\" ")); string(v) != "aa" || !ok || string(x) != " " {
 		t.Fail()
+	}
+}
+
+func BenchmarkUnquoteInplace(b *testing.B) {
+	x := []byte("\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b")
+	for i := 0; i < b.N; i++ {
+		UnquoteInplace(x)
+	}
+}
+
+func BenchmarkAtoiNocheck(b *testing.B) {
+	x := []byte("1234567")
+	for i := 0; i < b.N; i++ {
+		AtoiNocheck(x)
 	}
 }
 
@@ -114,16 +104,16 @@ func BenchmarkParseSpaces(b *testing.B) {
 }
 
 func BenchmarkParseSymbol(b *testing.B) {
-	x := []byte("         {")
+	x := []byte("         { ")
 	for i := 0; i < b.N; i++ {
 		ParseSymbol(x, '{')
 	}
 }
 
-func BenchmarkParseInt(b *testing.B) {
-	x := []byte("         1234567")
+func BenchmarkParseNumbers(b *testing.B) {
+	x := []byte("         123 ")
 	for i := 0; i < b.N; i++ {
-		ParseInt(x)
+		ParseSymbol(x, '{')
 	}
 }
 
