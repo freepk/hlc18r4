@@ -86,7 +86,7 @@ func decode(a, b, c, d byte) (byte, byte) {
 	b0 |= 0xc0
 	b1 := byte(r) & 0x3f
 	b1 |= 0x80
-	return b0, b1, true
+	return b0, b1
 }
 
 func ParseQuoted(b []byte) ([]byte, []byte, bool) {
