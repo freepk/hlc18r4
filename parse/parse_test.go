@@ -64,6 +64,32 @@ func TestParseNumber(t *testing.T) {
 	}
 }
 
+func TestParseInt(t *testing.T) {
+	if x, v, ok := ParseInt([]byte("")); v != 0 || ok || string(x) != "" {
+		t.Fail()
+	}
+	if x, v, ok := ParseInt([]byte(" ")); v != 0 || ok || string(x) != " " {
+		t.Fail()
+	}
+
+	if x, v, ok := ParseInt([]byte(" a1")); v != 0 || ok || string(x) != " a1" {
+		t.Fail()
+	}
+
+	if x, v, ok := ParseInt([]byte(" 1")); v != 1 || !ok || string(x) != "" {
+		t.Fail()
+	}
+	if x, v, ok := ParseInt([]byte(" 1 ")); v != 1 || !ok || string(x) != " " {
+		t.Fail()
+	}
+	if x, v, ok := ParseInt([]byte(" 12")); v != 12 || !ok || string(x) != "" {
+		t.Fail()
+	}
+	if x, v, ok := ParseInt([]byte(" 12 ")); v != 12 || !ok || string(x) != " " {
+		t.Fail()
+	}
+}
+
 func TestParseQuoted(t *testing.T) {
 	if x, v, ok := ParseQuoted([]byte("")); v != nil || ok || string(x) != "" {
 		t.Fail()

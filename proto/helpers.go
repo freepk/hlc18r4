@@ -38,7 +38,7 @@ func ParseSname(b []byte) ([]byte, uint16, bool) {
 }
 
 func ParseSex(b []byte) ([]byte, SexEnum, bool) {
-	t := parse.ParseSpaces(b)
+	t := parse.SkipSpaces(b)
 	if len(t) < 3 {
 		return b, 0, false
 	}
@@ -76,7 +76,7 @@ func ParseCity(b []byte) ([]byte, uint16, bool) {
 }
 
 func ParseStatus(b []byte) ([]byte, StatusEnum, bool) {
-	t := parse.ParseSpaces(b)
+	t := parse.SkipSpaces(b)
 	switch {
 	case len(t) > 38 && string(t[:38]) == `"\u0437\u0430\u043d\u044f\u0442\u044b"`:
 		return t[38:], BusyStatus, true

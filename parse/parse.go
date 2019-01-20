@@ -83,7 +83,7 @@ func ParseInt(b []byte) ([]byte, int, bool) {
 				x *= 10
 				x += int(b[j]) - 0x30
 			}
-			return b[i:], x, true
+			return nil, x, true
 		}
 	}
 	return b, 0, false
@@ -112,3 +112,32 @@ func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 	}
 	return b, nil, false
 }
+
+/*
+func UnquoteInplace(b []byte) []byte {
+	n := len(b)
+	i := 0
+	j := 0
+	for i < n {
+		if (i+5) < n && b[i] == 0x5C && b[i+1] == 0x75 {
+			b[j], b[j+1] = decode(b[i+2], b[i+3], b[i+4], b[i+5])
+			i += 6
+			j += 2
+		} else {
+			b[j] = b[i]
+			i++
+			j++
+		}
+	}
+	return b[:j]
+}
+
+func AtoiNocheck(b []byte) int {
+	x := 0
+	for _, c := range b {
+		x *= 10
+		x += int(c) - 0x30
+	}
+	return x
+}
+*/
