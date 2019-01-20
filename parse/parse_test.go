@@ -4,62 +4,62 @@ import (
 	"testing"
 )
 
-func TestParseSpaces(t *testing.T) {
-	if b := ParseSpaces([]byte("")); string(b) != "" {
+func TestSkipSpaces(t *testing.T) {
+	if b := SkipSpaces([]byte("")); string(b) != "" {
 		t.Fail()
 	}
-	if b := ParseSpaces([]byte("  ")); string(b) != "" {
+	if b := SkipSpaces([]byte("  ")); string(b) != "" {
 		t.Fail()
 	}
-	if b := ParseSpaces([]byte("a")); string(b) != "a" {
+	if b := SkipSpaces([]byte("a")); string(b) != "a" {
 		t.Fail()
 	}
-	if b := ParseSpaces([]byte(" a")); string(b) != "a" {
+	if b := SkipSpaces([]byte(" a")); string(b) != "a" {
 		t.Fail()
 	}
-	if b := ParseSpaces([]byte("  a")); string(b) != "a" {
-		t.Fail()
-	}
-}
-
-func TestParseSymbol(t *testing.T) {
-	if b, ok := ParseSymbol([]byte(""), '{'); ok || string(b) != "" {
-		t.Fail()
-	}
-	if b, ok := ParseSymbol([]byte(" "), '{'); ok || string(b) != " " {
-		t.Fail()
-	}
-	if b, ok := ParseSymbol([]byte("x{"), '{'); ok || string(b) != "x{" {
-		t.Fail()
-	}
-	if b, ok := ParseSymbol([]byte(" x{"), '{'); ok || string(b) != " x{" {
-		t.Fail()
-	}
-	if b, ok := ParseSymbol([]byte("{"), '{'); !ok || string(b) != "" {
-		t.Fail()
-	}
-	if b, ok := ParseSymbol([]byte(" {"), '{'); !ok || string(b) != "" {
-		t.Fail()
-	}
-	if b, ok := ParseSymbol([]byte("{x"), '{'); !ok || string(b) != "x" {
-		t.Fail()
-	}
-	if b, ok := ParseSymbol([]byte(" {x"), '{'); !ok || string(b) != "x" {
+	if b := SkipSpaces([]byte("  a")); string(b) != "a" {
 		t.Fail()
 	}
 }
 
-func TestParseNumbers(t *testing.T) {
-	if x, v, ok := ParseNumbers([]byte("")); v != nil || ok || string(x) != "" {
+func TestSkipSymbol(t *testing.T) {
+	if b, ok := SkipSymbol([]byte(""), '{'); ok || string(b) != "" {
 		t.Fail()
 	}
-	if x, v, ok := ParseNumbers([]byte(" ")); v != nil || ok || string(x) != " " {
+	if b, ok := SkipSymbol([]byte(" "), '{'); ok || string(b) != " " {
 		t.Fail()
 	}
-	if x, v, ok := ParseNumbers([]byte(" 12\"")); string(v) != "12" || !ok || string(x) != "\"" {
+	if b, ok := SkipSymbol([]byte("x{"), '{'); ok || string(b) != "x{" {
 		t.Fail()
 	}
-	if x, v, ok := ParseNumbers([]byte(" \"12\"")); v != nil || ok || string(x) != " \"12\"" {
+	if b, ok := SkipSymbol([]byte(" x{"), '{'); ok || string(b) != " x{" {
+		t.Fail()
+	}
+	if b, ok := SkipSymbol([]byte("{"), '{'); !ok || string(b) != "" {
+		t.Fail()
+	}
+	if b, ok := SkipSymbol([]byte(" {"), '{'); !ok || string(b) != "" {
+		t.Fail()
+	}
+	if b, ok := SkipSymbol([]byte("{x"), '{'); !ok || string(b) != "x" {
+		t.Fail()
+	}
+	if b, ok := SkipSymbol([]byte(" {x"), '{'); !ok || string(b) != "x" {
+		t.Fail()
+	}
+}
+
+func TestParseNumber(t *testing.T) {
+	if x, v, ok := ParseNumber([]byte("")); v != nil || ok || string(x) != "" {
+		t.Fail()
+	}
+	if x, v, ok := ParseNumber([]byte(" ")); v != nil || ok || string(x) != " " {
+		t.Fail()
+	}
+	if x, v, ok := ParseNumber([]byte(" 12\"")); string(v) != "12" || !ok || string(x) != "\"" {
+		t.Fail()
+	}
+	if x, v, ok := ParseNumber([]byte(" \"12\"")); v != nil || ok || string(x) != " \"12\"" {
 		t.Fail()
 	}
 }
@@ -82,38 +82,31 @@ func TestParseQuoted(t *testing.T) {
 	}
 }
 
-//func BenchmarkUnquoteInplace(b *testing.B) {
-//	x := []byte("\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b")
-//	for i := 0; i < b.N; i++ {
-//		UnquoteInplace(x)
-//	}
-//}
-
-//func BenchmarkAtoiNocheck(b *testing.B) {
-//	x := []byte("1234567")
-//	for i := 0; i < b.N; i++ {
-//		AtoiNocheck(x)
-//	}
-//}
-
-func BenchmarkParseSpaces(b *testing.B) {
+func BenchmarkSkipSpaces(b *testing.B) {
 	x := []byte("         ")
 	for i := 0; i < b.N; i++ {
-		ParseSpaces(x)
+		SkipSpaces(x)
 	}
 }
 
-func BenchmarkParseSymbol(b *testing.B) {
+func BenchmarkSkipSymbol(b *testing.B) {
 	x := []byte("         { ")
 	for i := 0; i < b.N; i++ {
-		ParseSymbol(x, '{')
+		SkipSymbol(x, '{')
 	}
 }
 
-func BenchmarkParseNumbers(b *testing.B) {
-	x := []byte("         123 ")
+func BenchmarkParseNumber(b *testing.B) {
+	x := []byte("         12345678 ")
 	for i := 0; i < b.N; i++ {
-		ParseSymbol(x, '{')
+		ParseNumber(x)
+	}
+}
+
+func BenchmarkParseInt(b *testing.B) {
+	x := []byte("         12345678 ")
+	for i := 0; i < b.N; i++ {
+		ParseInt(x)
 	}
 }
 
