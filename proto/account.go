@@ -129,12 +129,12 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 		buf = append(buf, a.Email.Buf[:a.Email.Len]...)
 	}
 	if (fields&FnameField) == FnameField && a.Fname > 0 {
-		fname, _ := FnameDict.Value(uint64(a.Fname))
+		fname, _ := FnameDict.Value(int(a.Fname))
 		buf = append(buf, `,"fname":`...)
 		buf = append(buf, fname...)
 	}
 	if (fields&SnameField) == SnameField && a.Sname > 0 {
-		sname, _ := SnameDict.Value(uint64(a.Sname))
+		sname, _ := SnameDict.Value(int(a.Sname))
 		buf = append(buf, `,"sname":`...)
 		buf = append(buf, sname...)
 	}
@@ -151,12 +151,12 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 		}
 	}
 	if (fields&CountryField) == CountryField && a.Country > 0 {
-		country, _ := CountryDict.Value(uint64(a.Country))
+		country, _ := CountryDict.Value(int(a.Country))
 		buf = append(buf, `,"country":`...)
 		buf = append(buf, country...)
 	}
 	if (fields&CityField) == CityField && a.City > 0 {
-		city, _ := CityDict.Value(uint64(a.City))
+		city, _ := CityDict.Value(int(a.City))
 		buf = append(buf, `,"city":`...)
 		buf = append(buf, city...)
 	}

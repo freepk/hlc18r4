@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	FnameDict    = dictionary.NewDictionary(256)
-	SnameDict    = dictionary.NewDictionary(2048)
-	CountryDict  = dictionary.NewDictionary(256)
-	CityDict     = dictionary.NewDictionary(2048)
-	InterestDict = dictionary.NewDictionary(256)
+	FnameDict    = dictionary.NewDictionary()
+	SnameDict    = dictionary.NewDictionary()
+	CountryDict  = dictionary.NewDictionary()
+	CityDict     = dictionary.NewDictionary()
+	InterestDict = dictionary.NewDictionary()
 )
 
 func ParseFname(b []byte) ([]byte, uint8, bool) {
