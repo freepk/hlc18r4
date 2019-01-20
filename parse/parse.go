@@ -101,7 +101,7 @@ func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 				case 0x5C:
 					j++
 					if j < n && b[j] == 0x75 {
-						j += 5
+						j += 4
 					}
 				case 0x22:
 					return b[j+1:], b[i+1 : j], true

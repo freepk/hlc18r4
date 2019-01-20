@@ -106,6 +106,10 @@ func TestParseQuoted(t *testing.T) {
 	if x, v, ok := ParseQuoted([]byte(" \"aa\" ")); string(v) != "aa" || !ok || string(x) != " " {
 		t.Fail()
 	}
+	if x, v, ok := ParseQuoted([]byte(`"\u041b\u0435\u0431\u0435\u0442\u0430\u0442\u0435\u0432"}`)); string(v) != `\u041b\u0435\u0431\u0435\u0442\u0430\u0442\u0435\u0432` || !ok || string(x) != "}" {
+		t.Fail()
+	}
+	return
 }
 
 func BenchmarkSkipSpaces(b *testing.B) {
