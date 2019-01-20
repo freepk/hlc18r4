@@ -18,10 +18,7 @@ func ParseFname(b []byte) ([]byte, uint8, bool) {
 	if !ok {
 		return b, 0, false
 	}
-	x, err := FnameDict.Identify(v)
-	if err != nil {
-		return b, 0, false
-	}
+	x, _ := FnameDict.Identify(v)
 	return t, uint8(x), true
 }
 
@@ -30,10 +27,7 @@ func ParseSname(b []byte) ([]byte, uint16, bool) {
 	if !ok {
 		return b, 0, false
 	}
-	x, err := SnameDict.Identify(v)
-	if err != nil {
-		return b, 0, false
-	}
+	x, _ := SnameDict.Identify(v)
 	return t, uint16(x), true
 }
 
@@ -56,10 +50,7 @@ func ParseCountry(b []byte) ([]byte, uint8, bool) {
 	if !ok {
 		return b, 0, false
 	}
-	x, err := CountryDict.Identify(v)
-	if err != nil {
-		return b, 0, false
-	}
+	x, _ := CountryDict.Identify(v)
 	return t, uint8(x), true
 }
 
@@ -68,10 +59,7 @@ func ParseCity(b []byte) ([]byte, uint16, bool) {
 	if !ok {
 		return b, 0, false
 	}
-	x, err := CityDict.Identify(v)
-	if err != nil {
-		return b, 0, false
-	}
+	x, _ := CityDict.Identify(v)
 	return t, uint16(x), true
 }
 
@@ -93,9 +81,6 @@ func ParseInterest(b []byte) ([]byte, uint8, bool) {
 	if !ok {
 		return b, 0, false
 	}
-	x, err := InterestDict.Identify(v)
-	if err != nil {
-		return b, 0, false
-	}
+	x, _ := InterestDict.Identify(v)
 	return t, uint8(x), true
 }
