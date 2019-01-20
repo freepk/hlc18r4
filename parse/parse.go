@@ -67,6 +67,28 @@ func ParseNumber(b []byte) ([]byte, []byte, bool) {
 	return b, nil, false
 }
 
+var (
+	lookup = [...]byte{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0}
+)
+
+func decode(a, b, c, d byte) (byte, byte) {
+	r := int(lookup[a]) << 12
+	r += int(lookup[b]) << 8
+	r += int(lookup[c]) << 4
+	r += int(lookup[d])
+
+	b0 := byte(r >> 6)
+	b0 |= 0xc0
+	b1 := byte(r) & 0x3f
+	b1 |= 0x80
+	return b0, b1, true
+}
+
 func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 	n := len(b)
 	for i := 0; i < n; i++ {
@@ -76,7 +98,6 @@ func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 			}
 			p := i
 			i++
-			//p := i
 			for i < n {
 				j := i + 1
 				switch b[i] {
