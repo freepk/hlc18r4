@@ -35,17 +35,13 @@ func main() {
 			ctx.SetStatusCode(fasthttp.StatusAccepted)
 			return
 		case `/accounts/filter/`:
-			body := ctx.Response.Body()
-			fields := (1 << 20) - 1
-			it := filtersSvc.InterestsAny(0, nil)
-			for i := 0; i < 50; i++ {
-				if id, ok := it.Next(); ok {
-					body = accountsSvc.MarshalToJSON(2000000-id, fields, body)
-					continue
+			args := ctx.QueryArgs()
+			args.VisitAll(func(k, v []byte) {
+				switch string(k) {
+				case `interests_any`:
+					println(string(v))
 				}
-				break
-			}
-			ctx.SetBody(body)
+			})
 			return
 		}
 		path, id, ok := parse.ParseInt(path[10:])
