@@ -37,16 +37,24 @@ func (svc *AccountsService) Exists(id int) bool {
 	return true
 }
 
-func (svc *AccountsService) emailGetOrSet(email []byte, id int) (int, bool) {
+func (svc *AccountsService) MarshalToJSON(id, fields int, buf []byte) []byte {
+	acc := svc.rep.Get(id)
+	if acc == nil || acc.Email.Len == 0 {
+		return buf
+	}
+	return acc.MarshalToJSON(fields, buf)
+}
+
+func (svc *AccountsService) assignEmail(id int, email []byte) (int, bool) {
 	hash := murmur3.Sum64(email)
 	svc.emailsLock.Lock()
 	if owner, ok := svc.emails[hash]; ok {
 		svc.emailsLock.Unlock()
-		return owner, true
+		return owner, false
 	}
 	svc.emails[hash] = id
 	svc.emailsLock.Unlock()
-	return id, false
+	return id, true
 }
 
 func (svc *AccountsService) Create(data []byte) bool {
@@ -62,7 +70,7 @@ func (svc *AccountsService) Create(data []byte) bool {
 	if len(email) == 0 || bytes.IndexByte(email, 0x40) == -1 {
 		return false
 	}
-	if _, ok := svc.emailGetOrSet(email, id); ok {
+	if _, ok := svc.assignEmail(id, email); !ok {
 		return false
 	}
 	dst := *src
@@ -86,7 +94,7 @@ func (svc *AccountsService) Update(id int, data []byte) bool {
 		if bytes.IndexByte(email, 0x40) == -1 {
 			return false
 		}
-		if _, ok := svc.emailGetOrSet(email, id); ok {
+		if _, ok := svc.assignEmail(id, email); !ok {
 			return false
 		}
 		dst.Email = src.Email

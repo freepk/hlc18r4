@@ -18,6 +18,8 @@ func main() {
 	log.Println("Accounts", rep.Len())
 
 	accountsSvc := service.NewAccountsService(rep)
+	filtersSvc := service.NewFiltersService(rep)
+	filtersSvc.RebuildIndexes()
 
 	handler := func(ctx *fasthttp.RequestCtx) {
 		path := ctx.Path()
@@ -31,6 +33,19 @@ func main() {
 			return
 		case `/accounts/likes/`:
 			ctx.SetStatusCode(fasthttp.StatusAccepted)
+			return
+		case `/accounts/filter/`:
+			body := ctx.Response.Body()
+			fields := (1 << 20) - 1
+			it := filtersSvc.InterestsAny(0, nil)
+			for i := 0; i < 50; i++ {
+				id, ok := it.Next()
+				if !ok {
+					break
+				}
+				body = accountsSvc.MarshalToJSON(id, fields, body)
+			}
+			ctx.SetBody(body)
 			return
 		}
 		path, id, ok := parse.ParseInt(path[10:])
