@@ -7,18 +7,18 @@ import (
 	"gitlab.com/freepk/hlc18r4/repo"
 )
 
-type FilterIndexEnum int
+type IndexEnum int
 
 const (
-	SexIndex = FilterIndexEnum(iota)
+	SexIndex = IndexEnum(iota)
 	StatusIndex
 	InterestsIndex
 )
 
-type FilterPartEnum int
+type PartEnum int
 
 const (
-	CommonPart = FilterPartEnum(iota)
+	CommonPart = PartEnum(iota)
 	MalePart
 	FemalePart
 	FreePart
@@ -44,33 +44,31 @@ const (
 
 type FiltersService struct {
 	rep     *repo.AccountsRepo
-	indexes map[FilterIndexEnum]*inverted.InvertedIndex
+	indexes map[IndexEnum]*inverted.InvertedIndex
 }
 
 func NewFiltersService(rep *repo.AccountsRepo) *FiltersService {
-	indexes := make(map[FilterIndexEnum]*inverted.InvertedIndex, 32)
+	indexes := make(map[IndexEnum]*inverted.InvertedIndex, 32)
 	return &FiltersService{rep: rep, indexes: indexes}
 }
 
 func (svc *FiltersService) RebuildIndexes() {
 }
 
-func (svc *FiltersService) SexEq(part FilterPartEnum, sex proto.SexEnum) iterator.Iterator {
+func (svc *FiltersService) InterestsAny(part PartEnum, buf []byte) iterator.Iterator {
+	index, _ := svc.indexes[InterestsIndex]
+	_ = index
 	return nil
 }
 
-func (svc *FiltersService) StatusEq(part FilterPartEnum, status proto.StatusEnum) iterator.Iterator {
+func (svc *FiltersService) InterestsContains(part PartEnum, buf []byte) iterator.Iterator {
 	return nil
 }
 
-func (svc *FiltersService) StatusNeq(part FilterPartEnum, status proto.StatusEnum) iterator.Iterator {
-	return nil
-}
-
-func (svc *FiltersService) InterestsAny(part FilterPartEnum, buf []byte) iterator.Iterator {
-	return nil
-}
-
-func (svc *FiltersService) InterestsContains(part FilterPartEnum, buf []byte) iterator.Iterator {
-	return nil
+func interestsTokenizer(name []byte) inverted.Token {
+	token, ok := proto.InterestDict.Id(name)
+	if !ok {
+		return inverted.Token(token)
+	}
+	return inverted.NullToken
 }

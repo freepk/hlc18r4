@@ -12,11 +12,16 @@ const (
 
 type Partition int
 
-type PartsFunc func(*proto.Account, []Partition) []Partition
+type PartsFunc func([]Partition, *proto.Account) []Partition
 
 type Token int
 
-type TokensFunc func(*proto.Account, []Token) []Token
+const (
+	NullToken    = Token(0)
+	NotNullToken = Token(1)
+)
+
+type TokensFunc func([]Token, *proto.Account) []Token
 
 type InvertedIndex struct {
 	rep        *repo.AccountsRepo
@@ -46,8 +51,8 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 	}
 	total := 0
 	ii.rep.Forward(func(id int, acc *proto.Account) {
-		parts = ii.partsFunc(acc, parts[:0])
-		tokens = ii.tokensFunc(acc, tokens[:0])
+		parts = ii.partsFunc(parts[:0], acc)
+		tokens = ii.tokensFunc(tokens[:0], acc)
 		for _, part := range parts {
 			for _, token := range tokens {
 				total++
@@ -74,8 +79,8 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 		}
 	}
 	ii.rep.Reverse(func(id int, acc *proto.Account) {
-		parts = ii.partsFunc(acc, parts[:0])
-		tokens = ii.tokensFunc(acc, tokens[:0])
+		parts = ii.partsFunc(parts[:0], acc)
+		tokens = ii.tokensFunc(tokens[:0], acc)
 		for _, part := range parts {
 			for _, token := range tokens {
 				id := 2000000 - uint32(id)
