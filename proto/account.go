@@ -125,22 +125,26 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 		buf = append(buf, trim(a.Joined[:])...)
 	}
 	if (fields & EmailField) == EmailField {
-		buf = append(buf, `,"email":`...)
+		buf = append(buf, `,"email":"`...)
 		buf = append(buf, a.Email.Buf[:a.Email.Len]...)
+		buf = append(buf, '"')
 	}
 	if (fields&FnameField) == FnameField && a.Fname > 0 {
 		fname, _ := FnameDict.Value(int(a.Fname))
-		buf = append(buf, `,"fname":`...)
+		buf = append(buf, `,"fname":"`...)
 		buf = append(buf, fname...)
+		buf = append(buf, '"')
 	}
 	if (fields&SnameField) == SnameField && a.Sname > 0 {
 		sname, _ := SnameDict.Value(int(a.Sname))
-		buf = append(buf, `,"sname":`...)
+		buf = append(buf, `,"sname":"`...)
 		buf = append(buf, sname...)
+		buf = append(buf, '"')
 	}
 	if (fields&PhoneField) == PhoneField && a.Phone[0] > 0 {
-		buf = append(buf, `,"phone":`...)
+		buf = append(buf, `,"phone":"`...)
 		buf = append(buf, trim(a.Phone[:])...)
+		buf = append(buf, '"')
 	}
 	if (fields & SexField) == SexField {
 		switch a.Sex {
@@ -152,13 +156,15 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 	}
 	if (fields&CountryField) == CountryField && a.Country > 0 {
 		country, _ := CountryDict.Value(int(a.Country))
-		buf = append(buf, `,"country":`...)
+		buf = append(buf, `,"country":"`...)
 		buf = append(buf, country...)
+		buf = append(buf, '"')
 	}
 	if (fields&CityField) == CityField && a.City > 0 {
 		city, _ := CityDict.Value(int(a.City))
-		buf = append(buf, `,"city":`...)
+		buf = append(buf, `,"city":"`...)
 		buf = append(buf, city...)
+		buf = append(buf, '"')
 	}
 	if (fields & StatusField) == StatusField {
 		switch a.Status {
