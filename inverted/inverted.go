@@ -39,7 +39,9 @@ const (
 
 type PartsFunc func(*proto.Account, []PartitionEnum) []PartitionEnum
 
-type TokensFunc func(*proto.Account, []uint16) []uint16
+type Token int
+
+type TokensFunc func(*proto.Account, []Token) []Token
 
 type InvertedIndex struct {
 	rep        *repo.AccountsRepo
@@ -56,9 +58,13 @@ func NewInvertedIndex(rep *repo.AccountsRepo, partsFunc PartsFunc, tokensFunc To
 	return &InvertedIndex{rep: rep, tokens: tokens, partsFunc: partsFunc, tokensFunc: tokensFunc}
 }
 
+func (ii *InvertedIndex) Iterator(part PartitionEnum, token int) *ReverseIter {
+	return NewReverseIter(ii.tokens[part][token])
+}
+
 func (ii *InvertedIndex) Rebuild() (int, int) {
 	parts := make([]PartitionEnum, 0, partsPerIndex)
-	tokens := make([]uint16, 0, tokensPerPart)
+	tokens := make([]Token, 0, tokensPerPart)
 	want := make([][]int, len(ii.tokens))
 	for i := range ii.tokens {
 		want[i] = make([]int, len(ii.tokens[i]))
@@ -85,12 +91,10 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 	buffer := make([]uint32, grow)
 	for part, tokens := range ii.tokens {
 		for token, ids := range tokens {
-			// grow if needed
 			if want[part][token] > cap(ids) {
 				grow := want[part][token]
 				ii.tokens[part][token], buffer = buffer[:grow], buffer[grow:]
 			}
-			// reset
 			ii.tokens[part][token] = ii.tokens[part][token][:0]
 		}
 	}
@@ -99,89 +103,29 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 		tokens = ii.tokensFunc(acc, tokens[:0])
 		for _, part := range parts {
 			for _, token := range tokens {
-				ii.tokens[part][token] = append(ii.tokens[part][token], uint32(id))
+				reverseID := reverseMaxID - uint32(id)
+				ii.tokens[part][token] = append(ii.tokens[part][token], reverseID)
 			}
 		}
 	})
 	return total, grow
 }
 
-// sex_eq - single?
-// status_eq - single?
-// status_neq - single?
-
-// email_domain
-// email_lt
-// email_gt
-func EmailTokens(acc *proto.Account, tokens []uint16) []uint16 {
-	return tokens
-}
-
-// +fname_eq
-// +fname_neq
-func FnameTokens(acc *proto.Account, tokens []uint16) []uint16 {
-	tokens = append(tokens, uint16(acc.Fname))
-	return tokens
-}
-
-// +sname_eq
-// sname_starts
-// +sname_null
-func SnameTokens(acc *proto.Account, tokens []uint16) []uint16 {
-	tokens = append(tokens, uint16(acc.Sname))
-	return tokens
-}
-
-// phone_code
-// phone_null
-func PhoneTokens(acc *proto.Account, tokens []uint16) []uint16 {
-	return tokens
-}
-
-// +country_eq
-// +country_null
-func CountryTokens(acc *proto.Account, tokens []uint16) []uint16 {
-	tokens = append(tokens, uint16(acc.Country))
-	return tokens
-}
-
-// city_eq
-// city_any
-// city_null
-func CityTokens(acc *proto.Account, tokens []uint16) []uint16 {
-	tokens = append(tokens, uint16(acc.City))
-	return tokens
-}
-
-// birth_lt
-// birth_gt
-// birth_year
-
-// interests_contains
-// interests_any
-func InterestsTokens(acc *proto.Account, tokens []uint16) []uint16 {
+func InterestsTokens(acc *proto.Account, tokens []Token) []Token {
 	for _, interest := range acc.Interests {
 		if interest == 0 {
 			break
 		}
-		tokens = append(tokens, uint16(interest))
+		tokens = append(tokens, Token(interest))
 	}
-	return tokens
-}
-
-// likes_contains
-
-// premium_now
-// premium_null
-func PremiumTokens(acc *proto.Account, tokens []uint16) []uint16 {
 	return tokens
 }
 
 func DefaultParts(acc *proto.Account, parts []PartitionEnum) []PartitionEnum {
 	// Common
 	parts = append(parts, CommonPart)
+	// Sex
 	/*
-		// Sex
 		switch acc.Sex {
 		case proto.MaleSex:
 			parts = append(parts, MalePart)

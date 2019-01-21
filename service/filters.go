@@ -1,15 +1,9 @@
 package service
 
 import (
+	"github.com/freepk/iterator"
 	"gitlab.com/freepk/hlc18r4/inverted"
 	"gitlab.com/freepk/hlc18r4/repo"
-)
-
-type OperatorEnum int
-
-const (
-	IntersectOper = OperatorEnum(iota)
-	UnionOper
 )
 
 type FiltersService struct {
@@ -24,7 +18,15 @@ func NewFiltersService(rep *repo.AccountsRepo) *FiltersService {
 }
 
 func (svc *FiltersService) RebuildIndexes() {
+	svc.indexes[0].Rebuild()
 }
 
-func (svc *FiltersService) ByInterests(oper OperatorEnum, part inverted.PartitionEnum, buf []byte) {
+func (svc *FiltersService) InterestsAny(part inverted.PartitionEnum, buf []byte) iterator.Iterator {
+	index := svc.indexes[0]
+	return iterator.NewUnionIter(index.Iterator(part, 10), index.Iterator(part, 15))
+}
+
+func (svc *FiltersService) InterestsContaint(part inverted.PartitionEnum, buf []byte) iterator.Iterator {
+	index := svc.indexes[0]
+	return iterator.NewInterIter(index.Iterator(part, 10), index.Iterator(part, 15))
 }
