@@ -2,10 +2,13 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"runtime"
+	"runtime/pprof"
 
 	"github.com/valyala/fasthttp"
 	"gitlab.com/freepk/hlc18r4/backup"
-	"gitlab.com/freepk/hlc18r4/inverted"
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/service"
@@ -88,6 +91,18 @@ func AccountsHandler(ctx *fasthttp.RequestCtx, svc *service.AccountsService) {
 }
 
 func main() {
+	if true {
+		if fd, err := os.Create("cpu.prof"); err == nil {
+			pprof.StartCPUProfile(fd)
+			defer pprof.StopCPUProfile()
+		}
+		defer func() {
+			if fd, err := os.Create("mem.prof"); err == nil {
+				runtime.GC()
+				pprof.WriteHeapProfile(fd)
+			}
+		}()
+	}
 	log.Println("Restore service")
 	rep, err := backup.Restore("tmp/data/data.zip")
 	if err != nil {
@@ -98,14 +113,14 @@ func main() {
 	handler := func(ctx *fasthttp.RequestCtx) {
 		AccountsHandler(ctx, svc)
 	}
-	svc.AddInvertedIndex(inverted.DefaultParts, inverted.InterestsTokens)
-	svc.AddInvertedIndex(inverted.DefaultParts, inverted.FnameTokens)
-	svc.AddInvertedIndex(inverted.DefaultParts, inverted.SnameTokens)
-	svc.AddInvertedIndex(inverted.DefaultParts, inverted.CountryTokens)
-	svc.AddInvertedIndex(inverted.DefaultParts, inverted.CityTokens)
 	svc.RebuildIndexes()
-	log.Println("Start listen")
-	if err := fasthttp.ListenAndServe(":80", handler); err != nil {
-		log.Fatal(err)
-	}
+	go func() {
+		log.Println("Start listen")
+		if err := fasthttp.ListenAndServe(":80", handler); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, os.Interrupt)
+	<-ch
 }
