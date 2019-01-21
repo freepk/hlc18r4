@@ -19,7 +19,7 @@ type AccountsService struct {
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 	emailsLock := &sync.Mutex{}
 	emails := make(map[uint64]int, rep.Len())
-	rep.ForEach(func(id int, acc *proto.Account) {
+	rep.Forward(func(id int, acc *proto.Account) {
 		if acc.Email.Len > 0 {
 			email := acc.Email.Buf[:acc.Email.Len]
 			hash := murmur3.Sum64(email)

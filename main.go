@@ -39,11 +39,11 @@ func main() {
 			fields := (1 << 20) - 1
 			it := filtersSvc.InterestsAny(0, nil)
 			for i := 0; i < 50; i++ {
-				id, ok := it.Next()
-				if !ok {
-					break
+				if id, ok := it.Next(); ok {
+					body = accountsSvc.MarshalToJSON(2000000-id, fields, body)
+					continue
 				}
-				body = accountsSvc.MarshalToJSON(id, fields, body)
+				break
 			}
 			ctx.SetBody(body)
 			return

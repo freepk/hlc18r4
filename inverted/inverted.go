@@ -58,8 +58,8 @@ func NewInvertedIndex(rep *repo.AccountsRepo, partsFunc PartsFunc, tokensFunc To
 	return &InvertedIndex{rep: rep, tokens: tokens, partsFunc: partsFunc, tokensFunc: tokensFunc}
 }
 
-func (ii *InvertedIndex) Iterator(part PartitionEnum, token int) *ReverseIter {
-	return NewReverseIter(ii.tokens[part][token])
+func (ii *InvertedIndex) Iterator(part PartitionEnum, token int) *TokenIter {
+	return NewTokenIter(ii.tokens[part][token])
 }
 
 func (ii *InvertedIndex) Rebuild() (int, int) {
@@ -70,7 +70,7 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 		want[i] = make([]int, len(ii.tokens[i]))
 	}
 	total := 0
-	ii.rep.ForEach(func(id int, acc *proto.Account) {
+	ii.rep.Forward(func(id int, acc *proto.Account) {
 		parts = ii.partsFunc(acc, parts[:0])
 		tokens = ii.tokensFunc(acc, tokens[:0])
 		for _, part := range parts {
@@ -98,13 +98,13 @@ func (ii *InvertedIndex) Rebuild() (int, int) {
 			ii.tokens[part][token] = ii.tokens[part][token][:0]
 		}
 	}
-	ii.rep.ForEach(func(id int, acc *proto.Account) {
+	ii.rep.Reverse(func(id int, acc *proto.Account) {
 		parts = ii.partsFunc(acc, parts[:0])
 		tokens = ii.tokensFunc(acc, tokens[:0])
 		for _, part := range parts {
 			for _, token := range tokens {
-				reverseID := reverseMaxID - uint32(id)
-				ii.tokens[part][token] = append(ii.tokens[part][token], reverseID)
+				id := 2000000 - uint32(id)
+				ii.tokens[part][token] = append(ii.tokens[part][token], id)
 			}
 		}
 	})
