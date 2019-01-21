@@ -7,18 +7,16 @@ import (
 	"gitlab.com/freepk/hlc18r4/repo"
 )
 
-type IndexEnum int
-
 const (
-	SexIndex = IndexEnum(iota)
-	StatusIndex
-	InterestsIndex
+	sexIndex = iota
+	statusIndex
+	interestsIndex
 )
 
-type PartEnum int
+type PartitionEnum inverted.Partition
 
 const (
-	CommonPart = PartEnum(iota)
+	CommonPart = PartitionEnum(iota)
 	MalePart
 	FemalePart
 	FreePart
@@ -44,31 +42,58 @@ const (
 
 type FiltersService struct {
 	rep     *repo.AccountsRepo
-	indexes map[IndexEnum]*inverted.InvertedIndex
+	indexes map[int]*inverted.InvertedIndex
 }
 
 func NewFiltersService(rep *repo.AccountsRepo) *FiltersService {
-	indexes := make(map[IndexEnum]*inverted.InvertedIndex, 32)
+	indexes := make(map[int]*inverted.InvertedIndex, 32)
+	indexes[InterestsIndex] = inverted.NewInvertedIndex()
 	return &FiltersService{rep: rep, indexes: indexes}
 }
 
 func (svc *FiltersService) RebuildIndexes() {
+	for _, index := range svc.indexes {
+		index.Rebuild()
+	}
 }
 
-func (svc *FiltersService) InterestsAny(part PartEnum, buf []byte) iterator.Iterator {
+func (svc *FiltersService) InterestsAny(part PartitionEnum, buf []byte) (it iterator.Iterator) {
+	var name []byte
+	var token inverted.Token
 	index, _ := svc.indexes[InterestsIndex]
-	_ = index
-	return nil
+	for {
+		if buf, name = parse.ScanSymbol(buf, 0x2C); len(name) == 0 {
+			break
+		}
+		if token = interestToken(name); token == inverted.NullToken {
+			break
+		}
+		it = iterator.NewUnionIter(it, index.TokenIterator(inverted.Partition(part), token))
+	}
+	return
 }
 
-func (svc *FiltersService) InterestsContains(part PartEnum, buf []byte) iterator.Iterator {
-	return nil
-}
-
-func interestsTokenizer(name []byte) inverted.Token {
-	token, ok := proto.InterestDict.Id(name)
+func interestToken(interest []byte) inverted.Token {
+	token, ok := proto.InterestDict.Id(interest)
 	if !ok {
 		return inverted.Token(token)
 	}
 	return inverted.NullToken
 }
+
+/*
+func interestsTokens([]inverted.Token tokens, acc *proto.Account) []inverted.Token {
+	for _, interest := range acc.Interests {
+		if interest == 0 {
+			break
+		}
+		tokens = append(tokens, inverted.Token(interest))
+	}
+	return tokens
+}
+
+func defaultParts(parts []inverted.Partition, acc *proto.Account) []inverted.Partition {
+	parts = append(parts, inverted.Part(CommonPart))
+	return parts
+}
+*/

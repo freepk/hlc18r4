@@ -38,7 +38,7 @@ func NewInvertedIndex(rep *repo.AccountsRepo, partsFunc PartsFunc, tokensFunc To
 	return &InvertedIndex{rep: rep, tokens: tokens, partsFunc: partsFunc, tokensFunc: tokensFunc}
 }
 
-func (ii *InvertedIndex) Iterator(part Partition, token int) *TokenIter {
+func (ii *InvertedIndex) TokenIterator(part Partition, token int) *TokenIter {
 	return NewTokenIter(ii.tokens[part][token])
 }
 
