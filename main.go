@@ -18,8 +18,6 @@ func main() {
 	log.Println("Accounts", rep.Len())
 
 	accountsSvc := service.NewAccountsService(rep)
-	filtersSvc := service.NewFiltersService(rep)
-	filtersSvc.RebuildIndexes()
 
 	handler := func(ctx *fasthttp.RequestCtx) {
 		path := ctx.Path()
