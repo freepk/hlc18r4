@@ -26,7 +26,7 @@ func (svc *FiltersService) InterestsAny(part inverted.PartitionEnum, buf []byte)
 	return iterator.NewUnionIter(index.Iterator(part, 10), index.Iterator(part, 15))
 }
 
-func (svc *FiltersService) InterestsContaint(part inverted.PartitionEnum, buf []byte) iterator.Iterator {
+func (svc *FiltersService) InterestsContains(part inverted.PartitionEnum, buf []byte) iterator.Iterator {
 	index := svc.indexes[0]
 	return iterator.NewInterIter(index.Iterator(part, 10), index.Iterator(part, 15))
 }
