@@ -3,13 +3,22 @@ package service
 import (
 	"github.com/freepk/iterator"
 	"gitlab.com/freepk/hlc18r4/inverted"
-	"gitlab.com/freepk/hlc18r4/parse"
-	"gitlab.com/freepk/hlc18r4/repo"
 	"gitlab.com/freepk/hlc18r4/proto"
+	"gitlab.com/freepk/hlc18r4/repo"
 )
 
+type FilterIndexEnum int
+
 const (
-	CommonPart = inverted.Partition(0)
+	SexIndex = FilterIndexEnum(iota)
+	StatusIndex
+	InterestsIndex
+)
+
+type FilterPartEnum int
+
+const (
+	CommonPart = FilterPartEnum(iota)
 	MalePart
 	FemalePart
 	FreePart
@@ -35,45 +44,33 @@ const (
 
 type FiltersService struct {
 	rep     *repo.AccountsRepo
-	indexes []*inverted.InvertedIndex
+	indexes map[FilterIndexEnum]*inverted.InvertedIndex
 }
 
 func NewFiltersService(rep *repo.AccountsRepo) *FiltersService {
-	indexes := []*inverted.InvertedIndex{
-		inverted.NewInvertedIndex(rep, DefaultParts, InterestsTokens)}
+	indexes := make(map[FilterIndexEnum]*inverted.InvertedIndex, 32)
 	return &FiltersService{rep: rep, indexes: indexes}
 }
 
 func (svc *FiltersService) RebuildIndexes() {
-	svc.indexes[0].Rebuild()
 }
 
-func (svc *FiltersService) InterestsAny(part inverted.Partition, buf []byte) iterator.Iterator {
-	index := svc.indexes[0]
-	buf, interest := parse.ScanSymbol(buf, 0x2C)
-	for len(interest) > 0 {
-		println(interest)
-		buf, interest = parse.ScanSymbol(buf, 0x2C)
-	}
-	return iterator.NewUnionIter(index.Iterator(part, 10), index.Iterator(part, 15))
+func (svc *FiltersService) SexEq(part FilterPartEnum, sex proto.SexEnum) iterator.Iterator {
+	return nil
 }
 
-func (svc *FiltersService) InterestsContains(part inverted.Partition, buf []byte) iterator.Iterator {
-	index := svc.indexes[0]
-	return iterator.NewInterIter(index.Iterator(part, 10), index.Iterator(part, 15))
+func (svc *FiltersService) StatusEq(part FilterPartEnum, status proto.StatusEnum) iterator.Iterator {
+	return nil
 }
 
-func InterestsTokens(acc *proto.Account, tokens []inverted.Token) []inverted.Token {
-	for _, interest := range acc.Interests {
-		if interest == 0 {
-			break
-		}
-		tokens = append(tokens, inverted.Token(interest))
-	}
-	return tokens
+func (svc *FiltersService) StatusNeq(part FilterPartEnum, status proto.StatusEnum) iterator.Iterator {
+	return nil
 }
 
-func DefaultParts(acc *proto.Account, parts []inverted.Partition) []inverted.Partition {
-	parts = append(parts, CommonPart)
-	return parts
+func (svc *FiltersService) InterestsAny(part FilterPartEnum, buf []byte) iterator.Iterator {
+	return nil
+}
+
+func (svc *FiltersService) InterestsContains(part FilterPartEnum, buf []byte) iterator.Iterator {
+	return nil
 }
