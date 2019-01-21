@@ -10,32 +10,34 @@ const (
 	tokensPerPart = 2048
 )
 
+type PartitionEnum int
+
 const (
-	CommonPart               = 0
-	MalePart                 = 10
-	FemalePart               = 11
-	FreePart                 = 20
-	BusyPart                 = 21
-	ComplicatedPart          = 22
-	NotFreePart              = 30
-	NotBusyPart              = 31
-	NotComplicatedPart       = 32
-	MaleFreePart             = 40
-	MaleBusyPart             = 41
-	MaleComplicatedPart      = 42
-	MaleNotFreePart          = 50
-	MaleNotBusyPart          = 51
-	MaleNotComplicatedPart   = 52
-	FemaleFreePart           = 60
-	FemaleBusyPart           = 61
-	FemaleComplicatedPart    = 62
-	FemaleNotFreePart        = 70
-	FemaleNotBusyPart        = 71
-	FemaleNotComplicatedPart = 72
-	CountryPart              = 100
+	CommonPart = PartitionEnum(0)
+	MalePart
+	FemalePart
+	FreePart
+	BusyPart
+	ComplicatedPart
+	NotFreePart
+	NotBusyPart
+	NotComplicatedPart
+	MaleFreePart
+	MaleBusyPart
+	MaleComplicatedPart
+	MaleNotFreePart
+	MaleNotBusyPart
+	MaleNotComplicatedPart
+	FemaleFreePart
+	FemaleBusyPart
+	FemaleComplicatedPart
+	FemaleNotFreePart
+	FemaleNotBusyPart
+	FemaleNotComplicatedPart
+	CountryPart
 )
 
-type PartsFunc func(*proto.Account, []uint8) []uint8
+type PartsFunc func(*proto.Account, []PartitionEnum) []PartitionEnum
 
 type TokensFunc func(*proto.Account, []uint16) []uint16
 
@@ -55,7 +57,7 @@ func NewInvertedIndex(rep *repo.AccountsRepo, partsFunc PartsFunc, tokensFunc To
 }
 
 func (ii *InvertedIndex) Rebuild() (int, int) {
-	parts := make([]uint8, 0, partsPerIndex)
+	parts := make([]PartitionEnum, 0, partsPerIndex)
 	tokens := make([]uint16, 0, tokensPerPart)
 	want := make([][]int, len(ii.tokens))
 	for i := range ii.tokens {
@@ -175,42 +177,44 @@ func PremiumTokens(acc *proto.Account, tokens []uint16) []uint16 {
 	return tokens
 }
 
-func DefaultParts(acc *proto.Account, parts []uint8) []uint8 {
+func DefaultParts(acc *proto.Account, parts []PartitionEnum) []PartitionEnum {
 	// Common
 	parts = append(parts, CommonPart)
-	// Sex
-	switch acc.Sex {
-	case proto.MaleSex:
-		parts = append(parts, MalePart)
-	case proto.FemaleSex:
-		parts = append(parts, FemalePart)
-	}
-	// Status
-	switch acc.Status {
-	case proto.FreeStatus:
-		parts = append(parts, FreePart, NotBusyPart, NotComplicatedPart)
-	case proto.BusyStatus:
-		parts = append(parts, BusyPart, NotFreePart, NotComplicatedPart)
-	case proto.ComplicatedStatus:
-		parts = append(parts, ComplicatedPart, NotFreePart, NotBusyPart)
-	}
-	// Sex & Status
-	switch {
-	case acc.Sex == proto.MaleSex && acc.Status == proto.FreeStatus:
-		parts = append(parts, MaleFreePart, MaleNotBusyPart, MaleNotComplicatedPart)
-	case acc.Sex == proto.MaleSex && acc.Status == proto.BusyStatus:
-		parts = append(parts, MaleBusyPart, MaleNotFreePart, MaleNotComplicatedPart)
-	case acc.Sex == proto.MaleSex && acc.Status == proto.ComplicatedStatus:
-		parts = append(parts, MaleComplicatedPart, MaleNotFreePart, MaleNotBusyPart)
-	case acc.Sex == proto.FemaleSex && acc.Status == proto.FreeStatus:
-		parts = append(parts, FemaleFreePart, FemaleNotBusyPart, FemaleNotComplicatedPart)
-	case acc.Sex == proto.FemaleSex && acc.Status == proto.BusyStatus:
-		parts = append(parts, FemaleBusyPart, FemaleNotFreePart, FemaleNotComplicatedPart)
-	case acc.Sex == proto.FemaleSex && acc.Status == proto.ComplicatedStatus:
-		parts = append(parts, FemaleComplicatedPart, FemaleNotFreePart, FemaleNotBusyPart)
-	}
-	// Country part
-	country := acc.Country + CountryPart
-	parts = append(parts, uint8(country))
+	/*
+		// Sex
+		switch acc.Sex {
+		case proto.MaleSex:
+			parts = append(parts, MalePart)
+		case proto.FemaleSex:
+			parts = append(parts, FemalePart)
+		}
+		// Status
+		switch acc.Status {
+		case proto.FreeStatus:
+			parts = append(parts, FreePart, NotBusyPart, NotComplicatedPart)
+		case proto.BusyStatus:
+			parts = append(parts, BusyPart, NotFreePart, NotComplicatedPart)
+		case proto.ComplicatedStatus:
+			parts = append(parts, ComplicatedPart, NotFreePart, NotBusyPart)
+		}
+		// Sex & Status
+		switch {
+		case acc.Sex == proto.MaleSex && acc.Status == proto.FreeStatus:
+			parts = append(parts, MaleFreePart, MaleNotBusyPart, MaleNotComplicatedPart)
+		case acc.Sex == proto.MaleSex && acc.Status == proto.BusyStatus:
+			parts = append(parts, MaleBusyPart, MaleNotFreePart, MaleNotComplicatedPart)
+		case acc.Sex == proto.MaleSex && acc.Status == proto.ComplicatedStatus:
+			parts = append(parts, MaleComplicatedPart, MaleNotFreePart, MaleNotBusyPart)
+		case acc.Sex == proto.FemaleSex && acc.Status == proto.FreeStatus:
+			parts = append(parts, FemaleFreePart, FemaleNotBusyPart, FemaleNotComplicatedPart)
+		case acc.Sex == proto.FemaleSex && acc.Status == proto.BusyStatus:
+			parts = append(parts, FemaleBusyPart, FemaleNotFreePart, FemaleNotComplicatedPart)
+		case acc.Sex == proto.FemaleSex && acc.Status == proto.ComplicatedStatus:
+			parts = append(parts, FemaleComplicatedPart, FemaleNotFreePart, FemaleNotBusyPart)
+		}
+		// Country part
+		country := acc.Country + CountryPart
+		parts = append(parts, uint8(country))
+	*/
 	return parts
 }
