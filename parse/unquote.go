@@ -27,7 +27,7 @@ func decode(a, b, c, d byte) (byte, byte) {
 	return b0, b1
 }
 
-func Unquote(b []byte) []byte {
+func UnquoteInp(b []byte) []byte {
 	n := len(b)
 	i := 0
 	j := 0
@@ -43,4 +43,10 @@ func Unquote(b []byte) []byte {
 		}
 	}
 	return b[:j]
+}
+
+func Unquote(b []byte) []byte {
+	a := make([]byte, len(b))
+	copy(a, b)
+	return UnquoteInp(a)
 }

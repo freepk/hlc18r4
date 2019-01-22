@@ -37,7 +37,6 @@ func main() {
 			args.VisitAll(func(k, v []byte) {
 				switch string(k) {
 				case `interests_any`:
-					println(string(v))
 				}
 			})
 			return

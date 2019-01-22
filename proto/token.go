@@ -1,7 +1,7 @@
 package proto
 
 import (
-	"github.com/freepk/dictionary"
+	"gitlab.com/freepk/hlc18r4/dictionary"
 	"gitlab.com/freepk/hlc18r4/parse"
 )
 
