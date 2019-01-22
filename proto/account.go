@@ -319,7 +319,6 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 		}
 	}
 	if tail, ok = parse.SkipSymbol(tail, '}'); !ok {
-		println(string(tail))
 		return buf, false
 	}
 	return tail, true
