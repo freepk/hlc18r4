@@ -21,23 +21,6 @@ const (
 	LikesToField   = 8192
 )
 
-type SexEnum byte
-
-const (
-	_          = iota
-	FreeStatus = StatusEnum(iota)
-	BusyStatus
-	ComplicatedStatus
-)
-
-type StatusEnum uint8
-
-const (
-	_       = iota
-	MaleSex = SexEnum(iota)
-	FemaleSex
-)
-
 const (
 	EmailBufMaxLen  = 40
 	PhoneBufMaxLen  = 15
@@ -69,10 +52,10 @@ type Account struct {
 	Fname         uint8
 	Sname         uint16
 	Phone         PhoneBuf
-	Sex           SexEnum
+	Sex           uint8
 	Country       uint8
 	City          uint16
-	Status        StatusEnum
+	Status        uint8
 	PremiumStart  NumberBuf
 	PremiumFinish NumberBuf
 	Interests     InterestsBuf
@@ -130,13 +113,13 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 		buf = append(buf, '"')
 	}
 	if (fields&FnameField) == FnameField && a.Fname > 0 {
-		fname, _ := FnameDict.Value(int(a.Fname))
+		fname, _ := fnameDict.Value(int(a.Fname))
 		buf = append(buf, `,"fname":"`...)
 		buf = append(buf, fname...)
 		buf = append(buf, '"')
 	}
 	if (fields&SnameField) == SnameField && a.Sname > 0 {
-		sname, _ := SnameDict.Value(int(a.Sname))
+		sname, _ := snameDict.Value(int(a.Sname))
 		buf = append(buf, `,"sname":"`...)
 		buf = append(buf, sname...)
 		buf = append(buf, '"')
@@ -148,31 +131,31 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 	}
 	if (fields & SexField) == SexField {
 		switch a.Sex {
-		case MaleSex:
+		case 1:
 			buf = append(buf, `,"sex":"m"`...)
-		case FemaleSex:
+		case 2:
 			buf = append(buf, `,"sex":"f"`...)
 		}
 	}
 	if (fields&CountryField) == CountryField && a.Country > 0 {
-		country, _ := CountryDict.Value(int(a.Country))
+		country, _ := countryDict.Value(int(a.Country))
 		buf = append(buf, `,"country":"`...)
 		buf = append(buf, country...)
 		buf = append(buf, '"')
 	}
 	if (fields&CityField) == CityField && a.City > 0 {
-		city, _ := CityDict.Value(int(a.City))
+		city, _ := cityDict.Value(int(a.City))
 		buf = append(buf, `,"city":"`...)
 		buf = append(buf, city...)
 		buf = append(buf, '"')
 	}
 	if (fields & StatusField) == StatusField {
 		switch a.Status {
-		case FreeStatus:
+		case 1:
 			buf = append(buf, `,"status":"свободны"`...)
-		case BusyStatus:
+		case 2:
 			buf = append(buf, `,"status":"заняты"`...)
-		case ComplicatedStatus:
+		case 3:
 			buf = append(buf, `,"status":"все сложно"`...)
 		}
 	}
@@ -221,11 +204,11 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			}
 			a.Email.Len = uint8(copy(a.Email.Buf[:], temp))
 		case len(tail) > 8 && string(tail[:8]) == `"fname":`:
-			if tail, a.Fname, ok = ParseFname(tail[8:]); !ok {
+			if tail, a.Fname, ok = parseFname(tail[8:]); !ok {
 				return buf, false
 			}
 		case len(tail) > 8 && string(tail[:8]) == `"sname":`:
-			if tail, a.Sname, ok = ParseSname(tail[8:]); !ok {
+			if tail, a.Sname, ok = parseSname(tail[8:]); !ok {
 				return buf, false
 			}
 		case len(tail) > 8 && string(tail[:8]) == `"phone":`:
@@ -234,19 +217,19 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			}
 			copy(a.Phone[:], temp)
 		case len(tail) > 6 && string(tail[:6]) == `"sex":`:
-			if tail, a.Sex, ok = ParseSex(tail[6:]); !ok {
+			if tail, a.Sex, ok = parseSex(tail[6:]); !ok {
 				return buf, false
 			}
 		case len(tail) > 10 && string(tail[:10]) == `"country":`:
-			if tail, a.Country, ok = ParseCountry(tail[10:]); !ok {
+			if tail, a.Country, ok = parseCountry(tail[10:]); !ok {
 				return buf, false
 			}
 		case len(tail) > 7 && string(tail[:7]) == `"city":`:
-			if tail, a.City, ok = ParseCity(tail[7:]); !ok {
+			if tail, a.City, ok = parseCity(tail[7:]); !ok {
 				return buf, false
 			}
 		case len(tail) > 9 && string(tail[:9]) == `"status":`:
-			if tail, a.Status, ok = ParseStatus(tail[9:]); !ok {
+			if tail, a.Status, ok = parseStatus(tail[9:]); !ok {
 				return buf, false
 			}
 		case len(tail) > 10 && string(tail[:10]) == `"premium":`:
@@ -281,7 +264,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			var i uint8
 			var interest uint8
 			for {
-				if tail, interest, ok = ParseInterest(tail); !ok {
+				if tail, interest, ok = parseInterest(tail); !ok {
 					return buf, false
 				}
 				a.Interests[i] = interest
@@ -336,6 +319,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 		}
 	}
 	if tail, ok = parse.SkipSymbol(tail, '}'); !ok {
+		println(string(tail))
 		return buf, false
 	}
 	return tail, true
