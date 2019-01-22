@@ -30,7 +30,7 @@ func Restore(name string) (*repo.AccountsRepo, error) {
 	num := accountsPerFile * len(arch.File) * 110 / 100
 	rep := repo.NewAccountsRepo(num)
 	grp := &sync.WaitGroup{}
-	for _, file := range arch.File {
+	for _, file := range arch.File[:1] {
 		if src, err := file.Open(); err != nil {
 			return nil, err
 		} else {

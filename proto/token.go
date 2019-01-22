@@ -121,7 +121,7 @@ func parseStatus(b []byte) ([]byte, uint8, bool) {
 	case len(tail) > 38 && string(tail[:38]) == `"\u0437\u0430\u043d\u044f\u0442\u044b"`:
 		return tail[38:], 2, true
 	case len(tail) > 57 && string(tail[:57]) == `"\u0432\u0441\u0451 \u0441\u043b\u043e\u0436\u043d\u043e"`:
-		return tail, 3, true
+		return tail[57:], 3, true
 	}
 	return b, 0, false
 }
