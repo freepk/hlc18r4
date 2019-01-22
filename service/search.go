@@ -41,7 +41,7 @@ func (qry *FilterQuery) Close() {
 
 func (qry *FilterQuery) SexEq(sex []byte) bool {
 	if sex, ok := proto.SexToken(sex); ok {
-		qry.sexEq = sex
+		qry.sex = sex
 		return true
 	}
 	return false
@@ -49,13 +49,17 @@ func (qry *FilterQuery) SexEq(sex []byte) bool {
 
 func (qry *FilterQuery) CountryEq(country []byte) bool {
 	if country, ok := proto.CountryToken(country); ok {
-		qry.countryEq = country
+		qry.country = country
 		return true
 	}
 	return false
 }
 
-func (qry *FilterQuery) CountryNull(null int) {
+func (qry *FilterQuery) CountryNull(null bool) {
 	switch null {
+	case true:
+		qry.country = proto.NullToken
+	case false:
+		qry.country = proto.NotNullToken
 	}
 }
