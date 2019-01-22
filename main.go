@@ -18,6 +18,7 @@ func main() {
 	log.Println("Accounts", rep.Len())
 
 	accountsSvc := service.NewAccountsService(rep)
+	searchSvc := service.NewSearchService(rep)
 
 	handler := func(ctx *fasthttp.RequestCtx) {
 		path := ctx.Path()
@@ -33,10 +34,16 @@ func main() {
 			ctx.SetStatusCode(fasthttp.StatusAccepted)
 			return
 		case `/accounts/filter/`:
+			query := searchSvc.FilterQuery()
 			args := ctx.QueryArgs()
 			args.VisitAll(func(k, v []byte) {
 				switch string(k) {
-				case `interests_any`:
+				case `sex_eq`:
+					query.SexEq(v)
+				case `country_eq`:
+					query.CountryEq(v)
+				case `country_null`:
+					query.CountryNull(v)
 				}
 			})
 			return

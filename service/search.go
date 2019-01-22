@@ -57,11 +57,11 @@ func (qry *FilterQuery) CountryEq(country []byte) bool {
 	return false
 }
 
-func (qry *FilterQuery) CountryNull(null bool) {
-	switch null {
-	case true:
+func (qry *FilterQuery) CountryNull(null []byte) {
+	switch string(null) {
+	case `0`:
 		qry.countryNull = proto.NullToken
-	case false:
+	case `1`:
 		qry.countryNull = proto.NotNullToken
 	}
 }
