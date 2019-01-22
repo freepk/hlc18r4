@@ -25,14 +25,16 @@ func (svc *SearchService) FilterQuery() *FilterQuery {
 }
 
 type FilterQuery struct {
-	svc     *SearchService
-	sex     int
-	country int
+	svc         *SearchService
+	sex         int
+	country     int
+	countryNull int
 }
 
 func (qry *FilterQuery) Reset() {
 	qry.sex = 0
 	qry.country = 0
+	qry.countryNull = 0
 }
 
 func (qry *FilterQuery) Close() {
@@ -58,8 +60,8 @@ func (qry *FilterQuery) CountryEq(country []byte) bool {
 func (qry *FilterQuery) CountryNull(null bool) {
 	switch null {
 	case true:
-		qry.country = proto.NullToken
+		qry.countryNull = proto.NullToken
 	case false:
-		qry.country = proto.NotNullToken
+		qry.countryNull = proto.NotNullToken
 	}
 }
