@@ -12,9 +12,9 @@ type Dictionary struct {
 	values [][]byte
 }
 
-func NewDictionary() *Dictionary {
+func NewDictionary(reserved int) *Dictionary {
 	tokens := make(map[string]int)
-	values := make([][]byte, 1)
+	values := make([][]byte, reserved)
 	return &Dictionary{tokens: tokens, values: values}
 }
 

@@ -37,14 +37,6 @@ func (svc *AccountsService) Exists(id int) bool {
 	return true
 }
 
-func (svc *AccountsService) MarshalToJSON(id, fields int, buf []byte) []byte {
-	acc := svc.rep.Get(id)
-	if acc == nil || acc.Email.Len == 0 {
-		return buf
-	}
-	return acc.MarshalToJSON(fields, buf)
-}
-
 func (svc *AccountsService) assignEmail(id int, email []byte) (int, bool) {
 	hash := murmur3.Sum64(email)
 	svc.emailsLock.Lock()

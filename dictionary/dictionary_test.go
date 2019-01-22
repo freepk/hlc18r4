@@ -7,7 +7,7 @@ import (
 )
 
 func TestDictionary(t *testing.T) {
-	dict := NewDictionary()
+	dict := NewDictionary(1)
 	for i := 1; i <= 50; i++ {
 		buf := make([]byte, 8)
 		binary.LittleEndian.PutUint64(buf, uint64(i))
