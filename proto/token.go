@@ -99,13 +99,11 @@ func InterestToken(b []byte) (int, bool) {
 }
 
 func SexToken(b []byte) (int, bool) {
-	if len(b) == 1 {
-		switch b[0] {
-		case MaleSex:
-			return MaleSex, true
-		case FemaleSex:
-			return FemaleSex, true
-		}
+	switch string(b) {
+	case `m`:
+		return MaleSex, true
+	case `f`:
+		return FemaleSex, true
 	}
 	return 0, false
 }
@@ -146,4 +144,14 @@ func parseStatus(b []byte) ([]byte, uint8, bool) {
 		return tail[57:], ComplStatus, true
 	}
 	return b, 0, false
+}
+
+func IsNullToken(b []byte) (int, bool) {
+	switch string(b) {
+	case `0`:
+		return NotNullToken, true
+	case `1`:
+		return NullToken, true
+	}
+	return 0, false
 }
