@@ -46,6 +46,7 @@ func main() {
 					query.CountryNull(v)
 				}
 			})
+			query.Close()
 			return
 		}
 		path, id, ok := parse.ParseInt(path[10:])

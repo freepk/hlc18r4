@@ -18,7 +18,7 @@ func NewSearchService(rep *repo.AccountsRepo) *SearchService {
 
 func (svc *SearchService) FilterQuery() *FilterQuery {
 	if query, ok := svc.filterQueries.Get().(*FilterQuery); ok {
-		query.Reset()
+		query.reset()
 		return query
 	}
 	return &FilterQuery{svc: svc}
@@ -31,7 +31,7 @@ type FilterQuery struct {
 	countryNull int
 }
 
-func (qry *FilterQuery) Reset() {
+func (qry *FilterQuery) reset() {
 	qry.sex = 0
 	qry.country = 0
 	qry.countryNull = 0

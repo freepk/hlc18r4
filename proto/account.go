@@ -131,9 +131,9 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 	}
 	if (fields & SexField) == SexField {
 		switch a.Sex {
-		case 1:
+		case MaleSex:
 			buf = append(buf, `,"sex":"m"`...)
-		case 2:
+		case FemaleSex:
 			buf = append(buf, `,"sex":"f"`...)
 		}
 	}
@@ -151,11 +151,11 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 	}
 	if (fields & StatusField) == StatusField {
 		switch a.Status {
-		case 1:
+		case SingleStatus:
 			buf = append(buf, `,"status":"свободны"`...)
-		case 2:
+		case InRelStatus:
 			buf = append(buf, `,"status":"заняты"`...)
-		case 3:
+		case ComplStatus:
 			buf = append(buf, `,"status":"все сложно"`...)
 		}
 	}
