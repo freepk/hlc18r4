@@ -65,10 +65,6 @@ func CityToken(b []byte) (int, bool) {
 	return cityDict.Token(b)
 }
 
-func InterestToken(b []byte) (int, bool) {
-	return interestDict.Token(b)
-}
-
 func parseInterest(b []byte) ([]byte, uint8, bool) {
 	tail, value, ok := parse.ParseQuoted(b)
 	if !ok {
@@ -76,6 +72,10 @@ func parseInterest(b []byte) ([]byte, uint8, bool) {
 	}
 	token, _ := interestDict.AddToken(value)
 	return tail, uint8(token), true
+}
+
+func InterestToken(b []byte) (int, bool) {
+	return interestDict.Token(b)
 }
 
 func SexToken(b []byte) (int, bool) {
