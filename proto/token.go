@@ -14,7 +14,6 @@ var (
 )
 
 const (
-	NotSetToken  = 0
 	NullToken    = 1
 	NotNullToken = 2
 )
@@ -127,7 +126,7 @@ func StatusToken(b []byte) (int, bool) {
 		return SingleStatus, true
 	case `заняты`:
 		return InRelStatus, true
-	case `все сложно`:
+	case `всё сложно`:
 		return ComplStatus, true
 	}
 	return 0, false

@@ -156,7 +156,7 @@ func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
 		case InRelStatus:
 			buf = append(buf, `,"status":"заняты"`...)
 		case ComplStatus:
-			buf = append(buf, `,"status":"все сложно"`...)
+			buf = append(buf, `,"status":"всё сложно"`...)
 		}
 	}
 	if (fields&PremiumField) == PremiumField && a.PremiumFinish[0] > 0 {
