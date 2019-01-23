@@ -3,7 +3,7 @@ package index
 type Document struct {
 	ID         int
 	Partitions []int
-	Tokens     [][]int
+	Indexes     [][]int
 }
 
 type Indexer interface {
@@ -21,7 +21,7 @@ type partition []index
 
 type Inverted struct {
 	indexer    Indexer
-	partitions []partition // part, index, token, docs
+	partitions []partition
 }
 
 func NewInverted(indexer Indexer) *Inverted {
@@ -31,8 +31,13 @@ func NewInverted(indexer Indexer) *Inverted {
 func (inv *Inverted) Rebuild() {
 	inv.indexer.Reset()
 	if doc, ok := inv.indexer.Next(); ok {
-		if len(doc.Partitions) > len(inv.partitions) {
-			inv.partitions = make([]partition, len(doc.Partitions))
+		parts := len(doc.Partitions)
+		if parts > len(inv.partitions) {
+			inv.partitions = make([]partition, parts)
+			indexes := len(doc.Indexes)
+			for part := range inv.partitions {
+				inv.partitions[part] = make([]index, indexes)
+			}
 		}
 	}
 }

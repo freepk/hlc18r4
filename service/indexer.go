@@ -44,7 +44,7 @@ type AccountsIndexer struct {
 }
 
 func NewAccountsIndexer(rep *repo.AccountsRepo) *AccountsIndexer {
-	doc := &index.Document{ID: 0, Partitions: make([]int, 1), Tokens: make([][]int, 5)}
+	doc := &index.Document{ID: 0, Partitions: make([]int, 1), Indexes: make([][]int, 5)}
 	return &AccountsIndexer{pos: 0, doc: doc, rep: rep}
 }
 
@@ -56,8 +56,8 @@ func (ix *AccountsIndexer) resetDocument() *index.Document {
 	doc := ix.doc
 	doc.ID = 0
 	doc.Partitions = doc.Partitions[:0]
-	for i := range doc.Tokens {
-		doc.Tokens[i] = doc.Tokens[i][:0]
+	for i := range doc.Indexes {
+		doc.Indexes[i] = doc.Indexes[i][:0]
 	}
 	return doc
 }
@@ -68,33 +68,33 @@ func (ix *AccountsIndexer) processDocument(id int, acc *proto.Account) *index.Do
 	doc.Partitions = append(doc.Partitions, commonPartition)
 	switch acc.Sex {
 	case proto.MaleSex:
-		doc.Tokens[sexIndex] = append(doc.Tokens[sexIndex], MaleToken)
+		doc.Indexes[sexIndex] = append(doc.Indexes[sexIndex], MaleToken)
 	case proto.FemaleSex:
-		doc.Tokens[sexIndex] = append(doc.Tokens[sexIndex], FemaleToken)
+		doc.Indexes[sexIndex] = append(doc.Indexes[sexIndex], FemaleToken)
 	}
 	switch acc.Status {
 	case proto.SingleStatus:
-		doc.Tokens[statusIndex] = append(doc.Tokens[statusIndex], SingleToken, NotInRelToken, NotComplToken)
+		doc.Indexes[statusIndex] = append(doc.Indexes[statusIndex], SingleToken, NotInRelToken, NotComplToken)
 	case proto.InRelStatus:
-		doc.Tokens[statusIndex] = append(doc.Tokens[statusIndex], InRelToken, NotSingleToken, NotComplToken)
+		doc.Indexes[statusIndex] = append(doc.Indexes[statusIndex], InRelToken, NotSingleToken, NotComplToken)
 	case proto.ComplStatus:
-		doc.Tokens[statusIndex] = append(doc.Tokens[statusIndex], ComplToken, NotSingleToken, NotInRelToken)
+		doc.Indexes[statusIndex] = append(doc.Indexes[statusIndex], ComplToken, NotSingleToken, NotInRelToken)
 	}
 	if acc.Country > 0 {
-		doc.Tokens[countryIndex] = append(doc.Tokens[countryIndex], NotNullToken, int(acc.Country))
+		doc.Indexes[countryIndex] = append(doc.Indexes[countryIndex], NotNullToken, int(acc.Country))
 	} else {
-		doc.Tokens[countryIndex] = append(doc.Tokens[countryIndex], NullToken)
+		doc.Indexes[countryIndex] = append(doc.Indexes[countryIndex], NullToken)
 	}
 	if acc.City > 0 {
-		doc.Tokens[cityIndex] = append(doc.Tokens[cityIndex], NotNullToken, int(acc.City))
+		doc.Indexes[cityIndex] = append(doc.Indexes[cityIndex], NotNullToken, int(acc.City))
 	} else {
-		doc.Tokens[cityIndex] = append(doc.Tokens[cityIndex], NullToken)
+		doc.Indexes[cityIndex] = append(doc.Indexes[cityIndex], NullToken)
 	}
 	for i := range acc.Interests {
 		if acc.Interests[i] == 0 {
 			break
 		}
-		doc.Tokens[interestIndex] = append(doc.Tokens[interestIndex], int(acc.Interests[i]))
+		doc.Indexes[interestIndex] = append(doc.Indexes[interestIndex], int(acc.Interests[i]))
 	}
 	return doc
 }
