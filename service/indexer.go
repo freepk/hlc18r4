@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	commonPart = 0
+	commonPartition = 0
 )
 
 const (
@@ -44,7 +44,7 @@ type AccountsIndexer struct {
 }
 
 func NewAccountsIndexer(rep *repo.AccountsRepo) *AccountsIndexer {
-	doc := &index.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 5)}
+	doc := &index.Document{ID: 0, Partitions: make([]int, 1), Tokens: make([][]int, 5)}
 	return &AccountsIndexer{pos: 0, doc: doc, rep: rep}
 }
 
@@ -55,7 +55,7 @@ func (ix *AccountsIndexer) Reset() {
 func (ix *AccountsIndexer) resetDocument() *index.Document {
 	doc := ix.doc
 	doc.ID = 0
-	doc.Parts = doc.Parts[:0]
+	doc.Partitions = doc.Partitions[:0]
 	for i := range doc.Tokens {
 		doc.Tokens[i] = doc.Tokens[i][:0]
 	}
@@ -65,7 +65,7 @@ func (ix *AccountsIndexer) resetDocument() *index.Document {
 func (ix *AccountsIndexer) processDocument(id int, acc *proto.Account) *index.Document {
 	doc := ix.resetDocument()
 	doc.ID = id
-	doc.Parts = append(doc.Parts, 0)
+	doc.Partitions = append(doc.Partitions, commonPartition)
 	switch acc.Sex {
 	case proto.MaleSex:
 		doc.Tokens[sexIndex] = append(doc.Tokens[sexIndex], MaleToken)
