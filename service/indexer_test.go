@@ -15,5 +15,12 @@ func TestIndexer(t *testing.T) {
 	t.Log("Create index")
 	ir := NewAccountsIndexer(rep)
 	ix := index.NewInverted(ir)
+	t.Log("Rebuild")
+	ix.Rebuild()
+	t.Log("Rebuild")
+	ix.Rebuild()
+	t.Log("Rebuild")
+	ix.Rebuild()
+	t.Log("Rebuild")
 	ix.Rebuild()
 }

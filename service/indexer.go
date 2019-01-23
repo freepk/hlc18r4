@@ -44,7 +44,7 @@ func (ix *AccountsIndexer) Next() (*index.Document, bool) {
 		acc := ix.rep.Get(id)
 		if acc.Email.Len > 0 {
 			ix.pos = i + 1
-			return ix.processDocument(2000000 - id, acc), true
+			return ix.processDocument(2000000-id, acc), true
 		}
 	}
 	return nil, false
