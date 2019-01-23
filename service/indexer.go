@@ -6,6 +6,39 @@ import (
 	"gitlab.com/freepk/hlc18r4/repo"
 )
 
+const (
+	commonPart = 0
+)
+
+const (
+	sexIndex = iota
+	statusIndex
+	//fnameIndex
+	//snameIndex
+	countryIndex
+	cityIndex
+	interestIndex
+)
+
+const (
+	MaleToken = iota
+	FemaleToken
+)
+
+const (
+	SingleToken = iota
+	InRelToken
+	ComplToken
+	NotSingleToken
+	NotInRelToken
+	NotComplToken
+)
+
+const (
+	NullToken = iota
+	NotNullToken
+)
+
 type AccountsIndexer struct {
 	pos int
 	doc *index.Document
@@ -13,7 +46,7 @@ type AccountsIndexer struct {
 }
 
 func NewAccountsIndexer(rep *repo.AccountsRepo) *AccountsIndexer {
-	doc := &index.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 4)}
+	doc := &index.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 5)}
 	return &AccountsIndexer{pos: 0, doc: doc, rep: rep}
 }
 
@@ -34,6 +67,37 @@ func (ix *AccountsIndexer) resetDocument() *index.Document {
 func (ix *AccountsIndexer) processDocument(id int, acc *proto.Account) *index.Document {
 	doc := ix.resetDocument()
 	doc.ID = id
+	doc.Parts = append(doc.Parts, 0)
+	switch acc.Sex {
+	case proto.MaleSex:
+		doc.Tokens[sexIndex] = append(doc.Tokens[sexIndex], MaleToken)
+	case proto.FemaleSex:
+		doc.Tokens[sexIndex] = append(doc.Tokens[sexIndex], FemaleToken)
+	}
+	switch acc.Status {
+	case proto.SingleStatus:
+		doc.Tokens[statusIndex] = append(doc.Tokens[statusIndex], SingleToken, NotInRelToken, NotComplToken)
+	case proto.InRelStatus:
+		doc.Tokens[statusIndex] = append(doc.Tokens[statusIndex], InRelToken, NotSingleToken, NotComplToken)
+	case proto.ComplStatus:
+		doc.Tokens[statusIndex] = append(doc.Tokens[statusIndex], ComplToken, NotSingleToken, NotInRelToken)
+	}
+	if acc.Country > 0 {
+		doc.Tokens[countryIndex] = append(doc.Tokens[countryIndex], NotNullToken, int(acc.Country))
+	} else {
+		doc.Tokens[countryIndex] = append(doc.Tokens[countryIndex], NullToken)
+	}
+	if acc.City > 0 {
+		doc.Tokens[countryIndex] = append(doc.Tokens[countryIndex], NotNullToken, int(acc.City))
+	} else {
+		doc.Tokens[countryIndex] = append(doc.Tokens[countryIndex], NullToken)
+	}
+	for i := range acc.Interests {
+		if acc.Interests[i] == 0 {
+			break
+		}
+		doc.Tokens[interestIndex] = append(doc.Tokens[interestIndex], int(acc.Interests[i]))
+	}
 	return doc
 }
 
@@ -44,7 +108,8 @@ func (ix *AccountsIndexer) Next() (*index.Document, bool) {
 		acc := ix.rep.Get(id)
 		if acc.Email.Len > 0 {
 			ix.pos = i + 1
-			return ix.processDocument(2000000-id, acc), true
+			pseudo := 2000000 - id
+			return ix.processDocument(pseudo, acc), true
 		}
 	}
 	return nil, false
