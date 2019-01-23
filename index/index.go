@@ -1,21 +1,20 @@
 package index
 
-type Item struct {
-	ID         int
-	Partitions []int
-	Tokens     [][]int
+type Document struct {
+	ID     int
+	Parts  []int
+	Tokens [][]int
 }
 
 type Indexer interface {
 	Reset()
-	Next() (*Item, bool)
+	Next() (*Document, bool)
 }
 
-type Index struct {
+type Inverted struct {
 	indexer Indexer
-	tokens  [][][][]int
 }
 
-func NewIndex(indexer Indexer) *Index {
-	return &Index{indexer: indexer}
+func NewInverted(indexer Indexer) *Inverted {
+	return &Inverted{indexer: indexer}
 }
