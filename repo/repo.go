@@ -16,7 +16,7 @@ func NewAccountsRepo(num int) *AccountsRepo {
 }
 
 func (rep *AccountsRepo) Get(id int) *proto.Account {
-	if id > 0 && id < len(rep.accounts) {
+	if id < len(rep.accounts) {
 		acc := rep.accounts[id]
 		return &acc
 	}
@@ -24,7 +24,7 @@ func (rep *AccountsRepo) Get(id int) *proto.Account {
 }
 
 func (rep *AccountsRepo) Set(id int, acc *proto.Account) bool {
-	if id > 0 && id < len(rep.accounts) {
+	if id < len(rep.accounts) {
 		rep.accounts[id] = *acc
 		return true
 	}

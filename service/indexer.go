@@ -7,40 +7,44 @@ import (
 )
 
 type AccountsIndexer struct {
-	last int
-	doc  *index.Document
-	rep  *repo.AccountsRepo
+	pos int
+	doc *index.Document
+	rep *repo.AccountsRepo
 }
 
-func NewAccountsIndexer(rep *repo.AccountsRepo, parts, tokens int) *AccountsIndexer {
-	doc := &index.Document{ID: 0, Parts: make([]int, parts), Tokens: make([][]int, tokens)}
-	return &AccountsIndexer{last: 0, doc: doc, rep: rep}
+func NewAccountsIndexer(rep *repo.AccountsRepo) *AccountsIndexer {
+	doc := &index.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 4)}
+	return &AccountsIndexer{pos: 0, doc: doc, rep: rep}
 }
 
 func (ix *AccountsIndexer) Reset() {
-	ix.last = 0
+	ix.pos = 0
 }
 
-func (ix *AccountsIndexer) resetDocument() {
+func (ix *AccountsIndexer) resetDocument() *index.Document {
 	doc := ix.doc
 	doc.ID = 0
 	doc.Parts = doc.Parts[:0]
 	for i := range doc.Tokens {
 		doc.Tokens[i] = doc.Tokens[i][:0]
 	}
+	return doc
 }
 
-func (ix *AccountsIndexer) processDocument(acc *proto.Account) *index.Document {
-	ix.resetDocument()
-	return ix.doc
+func (ix *AccountsIndexer) processDocument(id int, acc *proto.Account) *index.Document {
+	doc := ix.resetDocument()
+	doc.ID = id
+	return doc
 }
 
 func (ix *AccountsIndexer) Next() (*index.Document, bool) {
 	n := ix.rep.Len()
-	for i := ix.last; i < n; i++ {
-		acc := ix.rep.Get(n - i - 1)
+	for i := ix.pos; i < n; i++ {
+		id := n - i - 1
+		acc := ix.rep.Get(id)
 		if acc.Email.Len > 0 {
-			return ix.doc, true
+			ix.pos = i + 1
+			return ix.processDocument(2000000 - id, acc), true
 		}
 	}
 	return nil, false

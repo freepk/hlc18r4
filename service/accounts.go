@@ -19,7 +19,7 @@ type AccountsService struct {
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 	emailsLock := &sync.Mutex{}
 	emails := make(map[uint64]int, rep.Len())
-	for id := 1; id < rep.Len(); id++ {
+	for id := 0; id < rep.Len(); id++ {
 		acc := rep.Get(id)
 		if acc.Email.Len > 0 {
 			email := acc.Email.Buf[:acc.Email.Len]

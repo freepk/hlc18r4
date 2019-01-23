@@ -18,3 +18,12 @@ type Inverted struct {
 func NewInverted(indexer Indexer) *Inverted {
 	return &Inverted{indexer: indexer}
 }
+
+func (inv *Inverted) Rebuild() {
+	inv.indexer.Reset()
+	doc, ok := inv.indexer.Next()
+	for ok {
+		_ = doc
+		doc, ok = inv.indexer.Next()
+	}
+}
