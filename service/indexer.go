@@ -13,8 +13,6 @@ const (
 const (
 	sexIndex = iota
 	statusIndex
-	//fnameIndex
-	//snameIndex
 	countryIndex
 	cityIndex
 	interestIndex
@@ -88,9 +86,9 @@ func (ix *AccountsIndexer) processDocument(id int, acc *proto.Account) *index.Do
 		doc.Tokens[countryIndex] = append(doc.Tokens[countryIndex], NullToken)
 	}
 	if acc.City > 0 {
-		doc.Tokens[countryIndex] = append(doc.Tokens[countryIndex], NotNullToken, int(acc.City))
+		doc.Tokens[cityIndex] = append(doc.Tokens[cityIndex], NotNullToken, int(acc.City))
 	} else {
-		doc.Tokens[countryIndex] = append(doc.Tokens[countryIndex], NullToken)
+		doc.Tokens[cityIndex] = append(doc.Tokens[cityIndex], NullToken)
 	}
 	for i := range acc.Interests {
 		if acc.Interests[i] == 0 {

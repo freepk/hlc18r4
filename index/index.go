@@ -23,7 +23,11 @@ func (inv *Inverted) Rebuild() {
 	inv.indexer.Reset()
 	doc, ok := inv.indexer.Next()
 	for ok {
-		_ = doc
+		for i := range doc.Tokens {
+			for j := range doc.Tokens[i] {
+				_ = j
+			}
+		}
 		doc, ok = inv.indexer.Next()
 	}
 }
