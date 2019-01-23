@@ -1,9 +1,13 @@
 package inverted
 
+import (
+	"fmt"
+)
+
 type Document struct {
-	ID         int
-	Partitions []int
-	Indexes    [][]int
+	ID     int
+	Parts  []int
+	Tokens [][]int
 }
 
 type Indexer interface {
@@ -11,26 +15,41 @@ type Indexer interface {
 	Next() (*Document, bool)
 }
 
-type document uint32
-
-type vector []document
-
-type index []vector
-
-type partition []index
-
 type Inverted struct {
-	indexer    Indexer
-	partitions []partition
+	indexer Indexer
 }
 
 func NewInverted(indexer Indexer) *Inverted {
 	return &Inverted{indexer: indexer}
 }
 
-func (inv *Inverted) Rebuild() {
-	inv.indexer.Reset()
-	if doc, ok := inv.indexer.Next(); ok {
-		_ = doc
+func (inv *Inverted) prepare() (layout [][][]uint32) {
+	it := inv.indexer
+	it.Reset()
+	for {
+		doc, ok := it.Next()
+		if !ok {
+			break
+		}
+		for _, part := range doc.Parts {
+			if grow := part + 1 - len(layout); grow > 0 {
+				for i := 0; i < grow; i++ {
+					layout = append(layout, make([][]uint32, len(doc.Tokens)))
+				}
+			}
+			for index, tokens := range doc.Tokens {
+				for _, token := range tokens {
+					if grow := token + 1 - len(layout[part][index]); grow > 0 {
+						layout[part][index] = append(layout[part][index], make([]uint32, grow)...)
+					}
+					layout[part][index][token]++
+				}
+			}
+		}
 	}
+	return
+}
+
+func (inv *Inverted) Rebuild() {
+	fmt.Println(inv.prepare())
 }
