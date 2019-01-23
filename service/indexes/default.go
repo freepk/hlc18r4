@@ -1,7 +1,7 @@
-package service
+package indexes
 
 import (
-	"gitlab.com/freepk/hlc18r4/index"
+	"gitlab.com/freepk/hlc18r4/inverted"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
 )
@@ -19,6 +19,11 @@ const (
 )
 
 const (
+	NullToken = iota
+	NotNullToken
+)
+
+const (
 	MaleToken = iota
 	FemaleToken
 )
@@ -32,27 +37,22 @@ const (
 	NotComplToken
 )
 
-const (
-	NullToken = iota
-	NotNullToken
-)
-
-type AccountsIndexer struct {
+type DefaultIndexer struct {
 	pos int
-	doc *index.Document
+	doc *inverted.Document
 	rep *repo.AccountsRepo
 }
 
-func NewAccountsIndexer(rep *repo.AccountsRepo) *AccountsIndexer {
-	doc := &index.Document{ID: 0, Partitions: make([]int, 1), Indexes: make([][]int, 5)}
-	return &AccountsIndexer{pos: 0, doc: doc, rep: rep}
+func NewDefaultIndexer(rep *repo.AccountsRepo) *DefaultIndexer {
+	doc := &inverted.Document{ID: 0, Partitions: make([]int, 1), Indexes: make([][]int, 5)}
+	return &DefaultIndexer{pos: 0, doc: doc, rep: rep}
 }
 
-func (ix *AccountsIndexer) Reset() {
+func (ix *DefaultIndexer) Reset() {
 	ix.pos = 0
 }
 
-func (ix *AccountsIndexer) resetDocument() *index.Document {
+func (ix *DefaultIndexer) resetDocument() *inverted.Document {
 	doc := ix.doc
 	doc.ID = 0
 	doc.Partitions = doc.Partitions[:0]
@@ -62,7 +62,7 @@ func (ix *AccountsIndexer) resetDocument() *index.Document {
 	return doc
 }
 
-func (ix *AccountsIndexer) processDocument(id int, acc *proto.Account) *index.Document {
+func (ix *DefaultIndexer) processDocument(id int, acc *proto.Account) *inverted.Document {
 	doc := ix.resetDocument()
 	doc.ID = id
 	doc.Partitions = append(doc.Partitions, commonPartition)
@@ -99,7 +99,7 @@ func (ix *AccountsIndexer) processDocument(id int, acc *proto.Account) *index.Do
 	return doc
 }
 
-func (ix *AccountsIndexer) Next() (*index.Document, bool) {
+func (ix *DefaultIndexer) Next() (*inverted.Document, bool) {
 	n := ix.rep.Len()
 	for i := ix.pos; i < n; i++ {
 		id := n - i - 1
