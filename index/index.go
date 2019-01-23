@@ -1,40 +1,21 @@
 package index
 
-type Ref uint32
-
-type Token []Ref
-
-type Folder []Token
-
-type TokenFolder struct {
-	token  int
-	folder int
-}
-
-type Element struct {
-	ref    Ref
-	parts  []int
-	tokens []TokenFolder
+type Item struct {
+	ID         int
+	Partitions []int
+	Tokens     [][]int
 }
 
 type Indexer interface {
 	Reset()
-	Next() (*Element, bool)
+	Next() (*Item, bool)
 }
 
 type Index struct {
-	tokens []Folder
-	source Indexer
+	indexer Indexer
+	tokens  [][][][]int
 }
 
-func (ix *Index) Rebuild() {
-	src := &ix.source
-	src.Reset()
-	for {
-		if elem, ok := src.Next(); ok {
-			// ...
-			continue
-		}
-		break
-	}
+func NewIndex(indexer Indexer) *Index {
+	return &Index{indexer: indexer}
 }

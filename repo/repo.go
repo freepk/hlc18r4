@@ -31,27 +31,6 @@ func (rep *AccountsRepo) Set(id int, acc *proto.Account) bool {
 	return false
 }
 
-func (rep *AccountsRepo) Forward(handler ForEachFunc) {
-	acc := &proto.Account{}
-	for id := range rep.accounts {
-		*acc = rep.accounts[id]
-		if acc.Email.Len > 0 {
-			handler(id, acc)
-		}
-	}
-}
-
-func (rep *AccountsRepo) Reverse(handler ForEachFunc) {
-	acc := &proto.Account{}
-	last := len(rep.accounts) - 1
-	for id := range rep.accounts {
-		*acc = rep.accounts[last-id]
-		if acc.Email.Len > 0 {
-			handler(last-id, acc)
-		}
-	}
-}
-
 func (rep *AccountsRepo) Len() int {
 	return len(rep.accounts)
 }
