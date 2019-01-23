@@ -3,7 +3,7 @@ package index
 type Document struct {
 	ID         int
 	Partitions []int
-	Indexes     [][]int
+	Indexes    [][]int
 }
 
 type Indexer interface {
