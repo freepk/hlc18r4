@@ -64,6 +64,10 @@ func (svc *AccountsService) assignEmail(id int, email []byte) (int, bool) {
 	return id, true
 }
 
+func (svc *AccountsService) Get(id int) *proto.Account {
+	return svc.rep.Get(id)
+}
+
 func (svc *AccountsService) Create(data []byte) bool {
 	src := &proto.Account{}
 	if _, ok := src.UnmarshalJSON(data); !ok {
@@ -87,13 +91,13 @@ func (svc *AccountsService) Create(data []byte) bool {
 	return true
 }
 
-func (svc *AccountsService) Update(id int, data []byte) bool {
+func (svc *AccountsService) Update(id int, buf []byte) bool {
 	dst := svc.rep.Get(id)
 	if dst == nil || dst.Email.Len == 0 {
 		return false
 	}
 	src := &proto.Account{}
-	if _, ok := src.UnmarshalJSON(data); !ok {
+	if _, ok := src.UnmarshalJSON(buf); !ok {
 		return false
 	}
 	email := src.Email.Buf[:src.Email.Len]

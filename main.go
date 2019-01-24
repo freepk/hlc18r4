@@ -7,6 +7,7 @@ import (
 	"github.com/valyala/fasthttp"
 	"gitlab.com/freepk/hlc18r4/backup"
 	"gitlab.com/freepk/hlc18r4/parse"
+	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/service"
 )
 
@@ -44,8 +45,9 @@ func main() {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}
-			hasErrors := false
 			var iter iterator.Iterator
+			hasErrors := false
+			fields := proto.IDField
 			args.VisitAll(func(k, v []byte) {
 				var next iterator.Iterator
 				switch string(k) {
@@ -58,16 +60,19 @@ func main() {
 						hasErrors = true
 						return
 					}
+					fields |= proto.SexField
 				case `status_eq`:
 					if next = accountsSvc.ByStatusEq(v); next == nil {
 						hasErrors = true
 						return
 					}
+					fields |= proto.StatusField
 				case `status_neq`:
 					if next = accountsSvc.ByStatusNeq(v); next == nil {
 						hasErrors = true
 						return
 					}
+					fields |= proto.StatusField
 				default:
 					hasErrors = true
 					return
@@ -82,14 +87,11 @@ func main() {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}
-			for limit > 0 {
-				limit--
-				if pseudo, ok := iter.Next(); ok {
-					id := 2000000 - pseudo
-					println(id)
-					continue
-				}
-				break
+			if _, ok := iter.Next(); ok {
+				ctx.WriteString(`{"accounts":[`)
+				ctx.WriteString(`]}`)
+			} else {
+				ctx.WriteString(`{"accounts":[]}`)
 			}
 			return
 		}
