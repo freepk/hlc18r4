@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"sync/atomic"
+	"time"
 
 	"github.com/freepk/iterator"
 	"github.com/valyala/fasthttp"
@@ -21,8 +23,31 @@ func main() {
 
 	accountsSvc := service.NewAccountsService(rep)
 
+	writesCount := uint64(0)
+	go func() {
+		tick := time.Tick(10 * time.Millisecond)
+		writeProcess := false
+		for {
+			select {
+			case <-tick:
+				temp := atomic.LoadUint64(&writesCount)
+				if temp > 0 {
+					writeProcess = true
+					atomic.StoreUint64(&writesCount, 0)
+				} else if writeProcess {
+					writeProcess = false
+					log.Println("Rebuild indexes")
+					accountsSvc.RebuildIndexes()
+				}
+			}
+		}
+	}()
+
 	handler := func(ctx *fasthttp.RequestCtx) {
 		path := ctx.Path()
+		if ctx.IsPost() {
+			atomic.StoreUint64(&writesCount, 1)
+		}
 		switch string(path) {
 		case `/accounts/new/`:
 			if accountsSvc.Create(ctx.PostBody()) {
