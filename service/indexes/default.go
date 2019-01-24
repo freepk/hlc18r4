@@ -83,31 +83,31 @@ func (ix *defaultIndexer) Next() (*inverted.Document, bool) {
 }
 
 type DefaultIndex struct {
-	index *inverted.Inverted
+	inv *inverted.Inverted
 }
 
 func NewDefaultIndex(rep *repo.AccountsRepo) *DefaultIndex {
-	indexer := newDefaultIndexer(rep)
-	index := inverted.NewInverted(indexer)
-	return &DefaultIndex{index: index}
+	src := newDefaultIndexer(rep)
+	inv := inverted.NewInverted(src)
+	return &DefaultIndex{inv: inv}
 }
 
 func (idx *DefaultIndex) Rebuild() {
-	idx.index.Rebuild()
+	idx.inv.Rebuild()
 }
 
 func (idx *DefaultIndex) Sex(token int) *inverted.ArrayIter {
-	return idx.index.Iterator(defaultPartition, sexField, token)
+	return idx.inv.Iterator(defaultPartition, sexField, token)
 }
 
 func (idx *DefaultIndex) Status(token int) *inverted.ArrayIter {
-	return idx.index.Iterator(defaultPartition, statusField, token)
+	return idx.inv.Iterator(defaultPartition, statusField, token)
 }
 
 func (idx *DefaultIndex) Country(token int) *inverted.ArrayIter {
-	return idx.index.Iterator(defaultPartition, countryField, token)
+	return idx.inv.Iterator(defaultPartition, countryField, token)
 }
 
 func (idx *DefaultIndex) City(token int) *inverted.ArrayIter {
-	return idx.index.Iterator(defaultPartition, cityField, token)
+	return idx.inv.Iterator(defaultPartition, cityField, token)
 }
