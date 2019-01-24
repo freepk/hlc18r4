@@ -233,3 +233,38 @@ func (svc *AccountsService) ByCityAny(cities []byte) iterator.Iterator {
 	}
 	return iter
 }
+
+func (svc *AccountsService) ByInterestsAny(interests []byte) iterator.Iterator {
+	var iter iterator.Iterator
+	interests, interest := parse.ScanSymbol(interests, 0x2C)
+	for len(interest) > 0 {
+		if token, ok := proto.InterestToken(interest); ok {
+			next := svc.defaultIndex.Interest(token)
+			if iter == nil {
+				iter = next
+			} else {
+				iter = iterator.NewUnionIter(iter, next)
+			}
+		}
+		interests, interest = parse.ScanSymbol(interests, 0x2C)
+	}
+	return iter
+}
+
+func (svc *AccountsService) ByInterestsContains(interests []byte) iterator.Iterator {
+        var iter iterator.Iterator
+        interests, interest := parse.ScanSymbol(interests, 0x2C)
+        for len(interest) > 0 {
+                if token, ok := proto.InterestToken(interest); ok {
+                        next := svc.defaultIndex.Interest(token)
+                        if iter == nil {
+                                iter = next
+                        } else {
+                                iter = iterator.NewInterIter(iter, next)
+                        }
+                }
+                interests, interest = parse.ScanSymbol(interests, 0x2C)
+        }
+        return iter
+}
+

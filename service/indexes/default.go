@@ -112,3 +112,7 @@ func (idx *DefaultIndex) Country(country int) *inverted.ArrayIter {
 func (idx *DefaultIndex) City(city int) *inverted.ArrayIter {
 	return idx.inv.Iterator(defaultPartition, cityField, city)
 }
+
+func (idx *DefaultIndex) Interest(interest int) *inverted.ArrayIter {
+        return idx.inv.Iterator(defaultPartition, interestField, interest)
+}

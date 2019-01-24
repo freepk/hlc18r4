@@ -103,6 +103,16 @@ func main() {
 						return
 					}
 					fields |= proto.CityField
+				case `interests_any`:
+					if next = accountsSvc.ByInterestsAny(v); next == nil {
+						hasErrors = true
+						return
+					}
+				case `interests_contains`:
+					if next = accountsSvc.ByInterestsContains(v); next == nil {
+						hasErrors = true
+						return
+					}
 				default:
 					hasErrors = true
 					return
