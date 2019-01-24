@@ -4,16 +4,20 @@ import (
 	"bytes"
 	"sync"
 
+	"github.com/freepk/iterator"
 	"github.com/spaolacci/murmur3"
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
+	"gitlab.com/freepk/hlc18r4/service/indexes"
 )
 
 type AccountsService struct {
-	rep        *repo.AccountsRepo
-	emailsLock *sync.Mutex
-	emails     map[uint64]int
+	rep          *repo.AccountsRepo
+	emailsLock   *sync.Mutex
+	emails       map[uint64]int
+	defaultIndex *indexes.DefaultIndex
+	countryIndex *indexes.CountryIndex
 }
 
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
@@ -28,7 +32,16 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 			emails[hash] = id
 		}
 	}
-	return &AccountsService{rep: rep, emailsLock: emailsLock, emails: emails}
+	defaultIndex := indexes.NewDefaultIndex(rep)
+	defaultIndex.Rebuild()
+	countryIndex := indexes.NewCountryIndex(rep)
+	countryIndex.Rebuild()
+	return &AccountsService{
+		rep:          rep,
+		emailsLock:   emailsLock,
+		emails:       emails,
+		defaultIndex: defaultIndex,
+		countryIndex: countryIndex}
 }
 
 func (svc *AccountsService) Exists(id int) bool {
@@ -125,4 +138,38 @@ func (svc *AccountsService) Update(id int, data []byte) bool {
 	}
 	svc.rep.Set(id, dst)
 	return true
+}
+
+func (svc *AccountsService) BySexEq(sex []byte) iterator.Iterator {
+	switch string(sex) {
+	case `m`:
+		return svc.defaultIndex.Sex(indexes.MaleToken)
+	case `f`:
+		return svc.defaultIndex.Sex(indexes.FemaleToken)
+	}
+	return nil
+}
+
+func (svc *AccountsService) ByStatusEq(status []byte) iterator.Iterator {
+	switch string(status) {
+	case `свободны`:
+		return svc.defaultIndex.Status(indexes.SingleToken)
+	case `заняты`:
+		return svc.defaultIndex.Status(indexes.InRelToken)
+	case `всё сложно`:
+		return svc.defaultIndex.Status(indexes.ComplToken)
+	}
+	return nil
+}
+
+func (svc *AccountsService) ByStatusNeq(status []byte) iterator.Iterator {
+	switch string(status) {
+	case `свободны`:
+		return svc.defaultIndex.Status(indexes.NotSingleToken)
+	case `заняты`:
+		return svc.defaultIndex.Status(indexes.NotInRelToken)
+	case `всё сложно`:
+		return svc.defaultIndex.Status(indexes.NotComplToken)
+	}
+	return nil
 }
