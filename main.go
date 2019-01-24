@@ -47,7 +47,7 @@ func main() {
 			}
 			var iter iterator.Iterator
 			hasErrors := false
-			fields := proto.IDField
+			fields := proto.IDField | proto.EmailField
 			args.VisitAll(func(k, v []byte) {
 				var next iterator.Iterator
 				switch string(k) {
@@ -87,8 +87,20 @@ func main() {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}
-			if _, ok := iter.Next(); ok {
+			limit--
+			if pseudo, ok := iter.Next(); ok {
 				ctx.WriteString(`{"accounts":[`)
+				acc := accountsSvc.Get(2000000 - pseudo)
+				acc.WriteJSON(fields, ctx)
+				for limit > 0 {
+					limit--
+					if pseudo, ok = iter.Next(); !ok {
+						break
+					}
+					ctx.WriteString(`,`)
+					*acc = *accountsSvc.Get(2000000 - pseudo)
+					acc.WriteJSON(fields, ctx)
+				}
 				ctx.WriteString(`]}`)
 			} else {
 				ctx.WriteString(`{"accounts":[]}`)

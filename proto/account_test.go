@@ -1,6 +1,7 @@
 package proto
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -32,9 +33,9 @@ func TestAccountUnmarshalJSON(t *testing.T) {
 		t.Fail()
 	}
 	fields := (1 << 20) - 1
-	buf := make([]byte, 8192)
-	buf = acc.MarshalToJSON(fields, buf[:0])
-	t.Log(string(buf))
+	buf := &bytes.Buffer{}
+	acc.WriteJSON(fields, buf)
+	t.Log(string(buf.Bytes()))
 }
 
 func BenchmarkAccountReset(b *testing.B) {
@@ -61,8 +62,9 @@ func BenchmarkAccountMarshalJSON(b *testing.B) {
 		b.Fatal("UnmarshalJSON error")
 	}
 	fields := (1 << 20) - 1
-	buf := make([]byte, 8192)
+	buf := &bytes.Buffer{}
 	for i := 0; i < b.N; i++ {
-		buf = acc.MarshalToJSON(fields, buf[:0])
+		buf.Reset()
+		acc.WriteJSON(fields, buf)
 	}
 }

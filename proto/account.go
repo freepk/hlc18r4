@@ -96,78 +96,82 @@ func trim(b []byte) []byte {
 	return b[:n]
 }
 
-func (a *Account) MarshalToJSON(fields int, buf []byte) []byte {
-	buf = append(buf, `{"id":`...)
-	buf = append(buf, trim(a.ID[:])...)
+type extendedWriter interface {
+	Write(p []byte) (int, error)
+	WriteString(s string) (int, error)
+}
+
+func (a *Account) WriteJSON(fields int, w extendedWriter) {
+	w.WriteString(`{"id":`)
+	w.Write(trim(a.ID[:]))
 	if (fields & BirthField) == BirthField {
-		buf = append(buf, `,"birth":`...)
-		buf = append(buf, trim(a.Birth[:])...)
+		w.WriteString(`,"birth":`)
+		w.Write(trim(a.Birth[:]))
 	}
 	if (fields & JoinedField) == JoinedField {
-		buf = append(buf, `,"joined":`...)
-		buf = append(buf, trim(a.Joined[:])...)
+		w.WriteString(`,"joined":`)
+		w.Write(trim(a.Joined[:]))
 	}
 	if (fields & EmailField) == EmailField {
-		buf = append(buf, `,"email":"`...)
-		buf = append(buf, a.Email.Buf[:a.Email.Len]...)
-		buf = append(buf, '"')
+		w.WriteString(`,"email":"`)
+		w.Write(a.Email.Buf[:a.Email.Len])
+		w.WriteString(`"`)
 	}
 	if (fields&FnameField) == FnameField && a.Fname > 0 {
 		fname, _ := fnameDict.Value(int(a.Fname))
-		buf = append(buf, `,"fname":"`...)
-		buf = append(buf, fname...)
-		buf = append(buf, '"')
+		w.WriteString(`,"fname":"`)
+		w.Write(fname)
+		w.WriteString(`"`)
 	}
 	if (fields&SnameField) == SnameField && a.Sname > 0 {
 		sname, _ := snameDict.Value(int(a.Sname))
-		buf = append(buf, `,"sname":"`...)
-		buf = append(buf, sname...)
-		buf = append(buf, '"')
+		w.WriteString(`,"sname":"`)
+		w.Write(sname)
+		w.WriteString(`"`)
 	}
 	if (fields&PhoneField) == PhoneField && a.Phone[0] > 0 {
-		buf = append(buf, `,"phone":"`...)
-		buf = append(buf, trim(a.Phone[:])...)
-		buf = append(buf, '"')
+		w.WriteString(`,"phone":"`)
+		w.Write(trim(a.Phone[:]))
+		w.WriteString(`"`)
 	}
 	if (fields & SexField) == SexField {
 		switch a.Sex {
 		case MaleSex:
-			buf = append(buf, `,"sex":"m"`...)
+			w.WriteString(`,"sex":"m"`)
 		case FemaleSex:
-			buf = append(buf, `,"sex":"f"`...)
+			w.WriteString(`,"sex":"f"`)
 		}
 	}
 	if (fields&CountryField) == CountryField && a.Country > 0 {
 		country, _ := countryDict.Value(int(a.Country))
-		buf = append(buf, `,"country":"`...)
-		buf = append(buf, country...)
-		buf = append(buf, '"')
+		w.WriteString(`,"country":"`)
+		w.Write(country)
+		w.WriteString(`"`)
 	}
 	if (fields&CityField) == CityField && a.City > 0 {
 		city, _ := cityDict.Value(int(a.City))
-		buf = append(buf, `,"city":"`...)
-		buf = append(buf, city...)
-		buf = append(buf, '"')
+		w.WriteString(`,"city":"`)
+		w.Write(city)
+		w.WriteString(`"`)
 	}
 	if (fields & StatusField) == StatusField {
 		switch a.Status {
 		case SingleStatus:
-			buf = append(buf, `,"status":"свободны"`...)
+			w.WriteString(`,"status":"свободны"`)
 		case InRelStatus:
-			buf = append(buf, `,"status":"заняты"`...)
+			w.WriteString(`,"status":"заняты"`)
 		case ComplStatus:
-			buf = append(buf, `,"status":"всё сложно"`...)
+			w.WriteString(`,"status":"всё сложно"`)
 		}
 	}
 	if (fields&PremiumField) == PremiumField && a.PremiumFinish[0] > 0 {
-		buf = append(buf, `',"premium":{"finish":`...)
-		buf = append(buf, trim(a.PremiumFinish[:])...)
-		buf = append(buf, `,"start":`...)
-		buf = append(buf, trim(a.PremiumStart[:])...)
-		buf = append(buf, '}')
+		w.WriteString(`',"premium":{"finish":`)
+		w.Write(trim(a.PremiumFinish[:]))
+		w.WriteString(`,"start":`)
+		w.Write(trim(a.PremiumStart[:]))
+		w.WriteString(`}`)
 	}
-	buf = append(buf, '}')
-	return buf
+	w.WriteString(`}`)
 }
 
 func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
