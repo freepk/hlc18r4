@@ -20,7 +20,8 @@ func NewInverted(indexer Indexer) *Inverted {
 	return &Inverted{indexer: indexer}
 }
 
-func (inv *Inverted) prepare() (layout [][][]int) {
+func (inv *Inverted) Rebuild() {
+	var layout [][][]int
 	it := inv.indexer
 	it.Reset()
 	for {
@@ -30,12 +31,13 @@ func (inv *Inverted) prepare() (layout [][][]int) {
 		}
 		for _, part := range doc.Parts {
 			if grow := part + 1 - len(layout); grow > 0 {
-				for i := 0; i < grow; i++ {
-					layout = append(layout, make([][]int, len(doc.Tokens)))
-				}
+				layout = append(layout, make([][][]int, grow)...)
 			}
-			for field, tokens := range doc.Tokens {
-				for _, token := range tokens {
+			for field := range doc.Tokens {
+				if grow := len(doc.Tokens) - len(layout[part]); grow > 0 {
+					layout[part] = append(layout[part], make([][]int, grow)...)
+				}
+				for _, token := range doc.Tokens[field] {
 					if grow := token + 1 - len(layout[part][field]); grow > 0 {
 						layout[part][field] = append(layout[part][field], make([]int, grow)...)
 					}
@@ -44,11 +46,6 @@ func (inv *Inverted) prepare() (layout [][][]int) {
 			}
 		}
 	}
-	return
-}
-
-func (inv *Inverted) Rebuild() {
-	layout := inv.prepare()
 	if grow := len(layout) - len(inv.layout); grow > 0 {
 		inv.layout = append(inv.layout, make([][][][]uint32, grow)...)
 	}
@@ -61,10 +58,34 @@ func (inv *Inverted) Rebuild() {
 				inv.layout[part][field] = append(inv.layout[part][field], make([][]uint32, grow)...)
 			}
 			for token := range layout[part][field] {
-				if grow := layout[part][field][token] - len(inv.layout[part][field][token]); grow > 0 {
+				if grow := layout[part][field][token] - cap(inv.layout[part][field][token]); grow > 0 {
 					inv.layout[part][field][token] = append(inv.layout[part][field][token], make([]uint32, grow)...)
+				}
+				inv.layout[part][field][token] = inv.layout[part][field][token][:0]
+			}
+		}
+	}
+	it.Reset()
+	for {
+		doc, ok := it.Next()
+		if !ok {
+			break
+		}
+		for _, part := range doc.Parts {
+			for field := range doc.Tokens {
+				for _, token := range doc.Tokens[field] {
+					inv.layout[part][field][token] = append(inv.layout[part][field][token], uint32(doc.ID))
 				}
 			}
 		}
 	}
+}
+
+func (inv *Inverted) Iterator(part, field, token int) *ArrayIter {
+	if part+1 > len(inv.layout) ||
+		field+1 > len(inv.layout[part]) ||
+		token+1 > len(inv.layout[part][field]) {
+		return nil
+	}
+	return NewArrayIter(inv.layout[part][field][token])
 }
