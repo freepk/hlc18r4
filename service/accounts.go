@@ -44,6 +44,11 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 		countryIndex: countryIndex}
 }
 
+func (svc *AccountsService) RebuildIndexes() {
+	svc.defaultIndex.Rebuild()
+	svc.countryIndex.Rebuild()
+}
+
 func (svc *AccountsService) Exists(id int) bool {
 	acc := svc.rep.Get(id)
 	if acc == nil || acc.Email.Len == 0 {
@@ -210,4 +215,21 @@ func (svc *AccountsService) ByCityNull(null []byte) iterator.Iterator {
 		return svc.defaultIndex.City(indexes.NullToken)
 	}
 	return nil
+}
+
+func (svc *AccountsService) ByCityAny(cities []byte) iterator.Iterator {
+	var iter iterator.Iterator
+	cities, city := parse.ScanSymbol(cities, 0x2C)
+	for len(city) > 0 {
+		if token, ok := proto.CityToken(city); ok {
+			next := svc.defaultIndex.City(token)
+			if iter == nil {
+				iter = next
+			} else {
+				iter = iterator.NewUnionIter(iter, next)
+			}
+		}
+		cities, city = parse.ScanSymbol(cities, 0x2C)
+	}
+	return iter
 }

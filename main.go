@@ -97,6 +97,12 @@ func main() {
 						return
 					}
 					fields |= proto.CityField
+				case `city_any`:
+					if next = accountsSvc.ByCityAny(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.CityField
 				default:
 					hasErrors = true
 					return
