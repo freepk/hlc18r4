@@ -25,21 +25,18 @@ func main() {
 
 	writesCount := uint64(0)
 	go func() {
-		tick := time.Tick(10 * time.Millisecond)
 		writeProcess := false
 		for {
-			select {
-			case <-tick:
-				temp := atomic.LoadUint64(&writesCount)
-				if temp > 0 {
-					writeProcess = true
-					atomic.StoreUint64(&writesCount, 0)
-				} else if writeProcess {
-					writeProcess = false
-					log.Println("Rebuild indexes")
-					accountsSvc.RebuildIndexes()
-				}
+			temp := atomic.LoadUint64(&writesCount)
+			if temp > 0 {
+				writeProcess = true
+				atomic.StoreUint64(&writesCount, 0)
+			} else if writeProcess {
+				writeProcess = false
+				log.Println("Rebuild indexes")
+				accountsSvc.RebuildIndexes()
 			}
+			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 
