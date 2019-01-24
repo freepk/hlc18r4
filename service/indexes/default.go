@@ -96,18 +96,18 @@ func (idx *DefaultIndex) Rebuild() {
 	idx.inv.Rebuild()
 }
 
-func (idx *DefaultIndex) Sex(token int) *inverted.ArrayIter {
-	return idx.inv.Iterator(defaultPartition, sexField, token)
+func (idx *DefaultIndex) Sex(sex int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, sexField, sex)
 }
 
-func (idx *DefaultIndex) Status(token int) *inverted.ArrayIter {
-	return idx.inv.Iterator(defaultPartition, statusField, token)
+func (idx *DefaultIndex) Status(status int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, statusField, status)
 }
 
-func (idx *DefaultIndex) Country(token int) *inverted.ArrayIter {
-	return idx.inv.Iterator(defaultPartition, countryField, token)
+func (idx *DefaultIndex) Country(country int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, countryField, country)
 }
 
-func (idx *DefaultIndex) City(token int) *inverted.ArrayIter {
-	return idx.inv.Iterator(defaultPartition, cityField, token)
+func (idx *DefaultIndex) City(city int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, cityField, city)
 }
