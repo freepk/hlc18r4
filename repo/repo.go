@@ -8,8 +8,6 @@ type AccountsRepo struct {
 	accounts []proto.Account
 }
 
-type ForEachFunc func(id int, acc *proto.Account)
-
 func NewAccountsRepo(num int) *AccountsRepo {
 	accounts := make([]proto.Account, num)
 	return &AccountsRepo{accounts: accounts}

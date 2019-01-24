@@ -69,9 +69,9 @@ func readFrom(rep *repo.AccountsRepo, src io.Reader) error {
 				if _, id, ok := parse.ParseInt(acc.ID[:]); !ok {
 					return ReadError
 				} else {
-					tmp := *acc
-					tmp.LikesTo, likes = append(likes[:0], acc.LikesTo...), likes[len(acc.LikesTo):]
-					rep.Set(id, &tmp)
+					dst := *acc
+					dst.LikesTo, likes = append(likes[:0], acc.LikesTo...), likes[len(acc.LikesTo):]
+					rep.Set(id, &dst)
 				}
 			}
 			if pos = copy(buf, tail); pos == len(buf) {
