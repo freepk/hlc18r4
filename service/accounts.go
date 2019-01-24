@@ -177,3 +177,37 @@ func (svc *AccountsService) ByStatusNeq(status []byte) iterator.Iterator {
 	}
 	return nil
 }
+
+func (svc *AccountsService) ByCountryEq(country []byte) iterator.Iterator {
+	if token, ok := proto.CountryToken(country); ok {
+		return svc.defaultIndex.Country(token)
+	}
+	return nil
+}
+
+func (svc *AccountsService) ByCountryNull(null []byte) iterator.Iterator {
+	switch string(null) {
+	case `0`:
+		return svc.defaultIndex.Country(indexes.NotNullToken)
+	case `1`:
+		return svc.defaultIndex.Country(indexes.NullToken)
+	}
+	return nil
+}
+
+func (svc *AccountsService) ByCityEq(city []byte) iterator.Iterator {
+	if token, ok := proto.CityToken(city); ok {
+		return svc.defaultIndex.City(token)
+	}
+	return nil
+}
+
+func (svc *AccountsService) ByCityNull(null []byte) iterator.Iterator {
+	switch string(null) {
+	case `0`:
+		return svc.defaultIndex.City(indexes.NotNullToken)
+	case `1`:
+		return svc.defaultIndex.City(indexes.NullToken)
+	}
+	return nil
+}

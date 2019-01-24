@@ -73,6 +73,30 @@ func main() {
 						return
 					}
 					fields |= proto.StatusField
+				case `country_eq`:
+					if next = accountsSvc.ByCountryEq(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.CountryField
+				case `country_null`:
+					if next = accountsSvc.ByCountryNull(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.CountryField
+				case `city_eq`:
+					if next = accountsSvc.ByCityEq(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.CityField
+				case `city_null`:
+					if next = accountsSvc.ByCityNull(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.CityField
 				default:
 					hasErrors = true
 					return
