@@ -114,5 +114,5 @@ func (idx *DefaultIndex) City(city int) *inverted.ArrayIter {
 }
 
 func (idx *DefaultIndex) Interest(interest int) *inverted.ArrayIter {
-        return idx.inv.Iterator(defaultPartition, interestField, interest)
+	return idx.inv.Iterator(defaultPartition, interestField, interest)
 }
