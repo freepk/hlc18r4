@@ -3,6 +3,7 @@ package indexes
 import (
 	"github.com/freepk/iterator"
 	"gitlab.com/freepk/hlc18r4/backup"
+	"gitlab.com/freepk/hlc18r4/proto"
 	"testing"
 )
 
@@ -16,9 +17,14 @@ func TestIndexer(t *testing.T) {
 	index := NewDefaultIndex(rep)
 	t.Log("Rebuild")
 	index.Rebuild()
-	it := iterator.Iterator(index.Country(NotNullToken))
+
+	country, ok := proto.CountryToken([]byte(`Мализия`))
+	if !ok {
+		t.Fail()
+	}
+	it := iterator.Iterator(index.Country(country))
 	it = iterator.NewInterIter(it, index.Sex(MaleToken))
-	limit := 20
+	limit := 32
 	for limit > 0 {
 		limit--
 		pseudo, ok := it.Next()
@@ -28,4 +34,35 @@ func TestIndexer(t *testing.T) {
 		id := 2000000 - pseudo
 		t.Log(limit, id)
 	}
+}
+
+func BenchmarkDefaultIndex(b *testing.B) {
+	rep, err := backup.Restore("../../tmp/data/data.zip")
+	if err != nil {
+		b.Fatal(err)
+	}
+	index := NewDefaultIndex(rep)
+	index.Rebuild()
+	country, ok := proto.CountryToken([]byte(`Мализия`))
+	if !ok {
+		b.Fail()
+	}
+	it := iterator.Iterator(index.Country(country))
+	it = iterator.NewInterIter(it, index.Sex(MaleToken))
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		it.Reset()
+		limit := 32
+		for limit > 0 {
+			limit--
+			pseudo, ok := it.Next()
+			if !ok {
+				break
+			}
+			id := 2000000 - pseudo
+			_ = id
+		}
+	}
+
 }

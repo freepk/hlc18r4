@@ -6,7 +6,7 @@ import (
 	"github.com/valyala/fasthttp"
 	"gitlab.com/freepk/hlc18r4/backup"
 	"gitlab.com/freepk/hlc18r4/parse"
-	"gitlab.com/freepk/hlc18r4/proto"
+	//"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/service"
 )
 
@@ -34,6 +34,7 @@ func main() {
 			ctx.SetStatusCode(fasthttp.StatusAccepted)
 			return
 		case `/accounts/filter/`:
+			println("-----------")
 			errs := 0
 			args := ctx.QueryArgs()
 			args.VisitAll(func(k, v []byte) {
@@ -57,6 +58,7 @@ func main() {
 			if errs > 0 {
 				return
 			}
+			println("+++++++++++")
 			if args.Len() < 3 {
 				return
 			} else if args.Len() > 3 {
