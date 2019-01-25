@@ -66,10 +66,6 @@ func main() {
 			}
 			var iter iterator.Iterator
 			hasErrors := false
-			//birthGT := 0
-			//birthLT := 0
-			//emailGT := 0
-			//emailLT := 0
 			fields := proto.IDField | proto.EmailField
 			args.VisitAll(func(k, v []byte) {
 				var next iterator.Iterator
@@ -203,29 +199,6 @@ func main() {
 				//		return
 				//	}
 				//	fields |= proto.PremiumField
-				//case `birth_lt`:
-				//      if next = accountsSvc.ByBirthLT(v); next == nil {
-				//              hasErrors = true
-				//              return
-				//      }
-				//      fields |= proto.BirthField
-				//      return
-				//case `birth_gt`:
-				//      if next = accountsSvc.ByBirthGT(v); next == nil {
-				//              hasErrors = true
-				//              return
-				//      }
-				//      fields |= proto.BirthField
-				//      return
-				//case `phone_code`:
-				//case `phone_null`:
-				//case `email_domain`:
-				//case `email_lt`:
-				//	emailLT++
-				//	return
-				//case `email_gt`:
-				//	emailGT++
-				//	return
 				default:
 					hasErrors = true
 					return
