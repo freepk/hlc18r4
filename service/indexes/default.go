@@ -1,7 +1,10 @@
 package indexes
 
 import (
+	"time"
+
 	"gitlab.com/freepk/hlc18r4/inverted"
+	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
 )
@@ -13,7 +16,7 @@ type defaultIndexer struct {
 }
 
 func newDefaultIndexer(rep *repo.AccountsRepo) *defaultIndexer {
-	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 5)}
+	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 6)}
 	return &defaultIndexer{pos: 0, doc: doc, rep: rep}
 }
 
@@ -25,8 +28,8 @@ func (ix *defaultIndexer) resetDocument() *inverted.Document {
 	doc := ix.doc
 	doc.ID = 0
 	doc.Parts = doc.Parts[:0]
-	for index := range doc.Tokens {
-		doc.Tokens[index] = doc.Tokens[index][:0]
+	for field := range doc.Tokens {
+		doc.Tokens[field] = doc.Tokens[field][:0]
 	}
 	return doc
 }
@@ -65,6 +68,10 @@ func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.
 		}
 		doc.Tokens[interestField] = append(doc.Tokens[interestField], int(acc.Interests[i]))
 	}
+	if _, birth, ok := parse.ParseInt(acc.Birth[:]); ok {
+		birthYear := time.Unix(int64(birth), 0).UTC().Year() - 1975
+		doc.Tokens[birthYearField] = append(doc.Tokens[birthYearField], birthYear)
+	}
 	return doc
 }
 
@@ -97,22 +104,26 @@ func (idx *DefaultIndex) Rebuild() {
 	idx.inv.Rebuild()
 }
 
-func (idx *DefaultIndex) Sex(sex int) *inverted.ArrayIter {
-	return idx.inv.Iterator(defaultPartition, sexField, sex)
+func (idx *DefaultIndex) Sex(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, sexField, token)
 }
 
-func (idx *DefaultIndex) Status(status int) *inverted.ArrayIter {
-	return idx.inv.Iterator(defaultPartition, statusField, status)
+func (idx *DefaultIndex) Status(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, statusField, token)
 }
 
-func (idx *DefaultIndex) Country(country int) *inverted.ArrayIter {
-	return idx.inv.Iterator(defaultPartition, countryField, country)
+func (idx *DefaultIndex) Country(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, countryField, token)
 }
 
-func (idx *DefaultIndex) City(city int) *inverted.ArrayIter {
-	return idx.inv.Iterator(defaultPartition, cityField, city)
+func (idx *DefaultIndex) City(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, cityField, token)
 }
 
-func (idx *DefaultIndex) Interest(interest int) *inverted.ArrayIter {
-	return idx.inv.Iterator(defaultPartition, interestField, interest)
+func (idx *DefaultIndex) Interest(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, interestField, token)
+}
+
+func (idx *DefaultIndex) BirthYear(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, birthYearField, token)
 }

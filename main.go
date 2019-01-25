@@ -33,10 +33,10 @@ func main() {
 				atomic.StoreUint64(&writesCount, 0)
 			} else if writeProcess {
 				writeProcess = false
-				log.Println("Rebuild indexes")
 				accountsSvc.RebuildIndexes()
+				log.Println("Indexes rebuilded")
 			}
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(time.Second)
 		}
 	}()
 
@@ -135,6 +135,12 @@ func main() {
 						hasErrors = true
 						return
 					}
+				case `birth_year`:
+					if next = accountsSvc.ByBirthYear(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.BirthField
 				default:
 					hasErrors = true
 					return

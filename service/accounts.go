@@ -267,3 +267,12 @@ func (svc *AccountsService) ByInterestsContains(interests []byte) iterator.Itera
 	}
 	return iter
 }
+
+func (svc *AccountsService) ByBirthYear(year []byte) iterator.Iterator {
+	if _, year, ok := parse.ParseInt(year); ok && year > 1975 {
+		if iter := svc.defaultIndex.BirthYear(year - 1975); iter != nil {
+			return iter
+		}
+	}
+	return nil
+}

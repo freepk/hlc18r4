@@ -10,6 +10,7 @@ const (
 	countryField
 	cityField
 	interestField
+	birthYearField
 )
 
 const (
