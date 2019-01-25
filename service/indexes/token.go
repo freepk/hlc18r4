@@ -1,6 +1,9 @@
 package indexes
 
 import (
+	"time"
+
+	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 )
 
@@ -91,4 +94,20 @@ func GetCityToken(b []byte) (int, bool) {
 
 func GetInterestToken(b []byte) (int, bool) {
 	return proto.GetInterestToken(b)
+}
+
+func GetBirthYearTokenByTS(b []byte) (int, bool) {
+	if _, ts, ok := parse.ParseInt(b); ok {
+		if year := time.Unix(int64(ts), 0).UTC().Year(); year > 1960 && year < 2020 {
+			return year - 1970, true
+		}
+	}
+	return 0, false
+}
+
+func GetBirthYearTokenByYear(b []byte) (int, bool) {
+	if _, year, ok := parse.ParseInt(b); ok && year > 1960 && year < 2020 {
+		return year - 1970, true
+	}
+	return 0, false
 }

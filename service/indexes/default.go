@@ -3,7 +3,6 @@ package indexes
 import (
 	"io/ioutil"
 	"log"
-	//"time"
 
 	"gitlab.com/freepk/hlc18r4/inverted"
 	"gitlab.com/freepk/hlc18r4/parse"
@@ -107,18 +106,17 @@ func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.
 		}
 		doc.Tokens[interestField] = append(doc.Tokens[interestField], int(acc.Interests[i]))
 	}
-	//if _, birth, ok := parse.ParseInt(acc.Birth[:]); ok {
-	//	birthYear := time.Unix(int64(birth), 0).UTC().Year() - 1960
-	//	doc.Tokens[birthYearField] = append(doc.Tokens[birthYearField], birthYear)
-	//}
-	if acc.PremiumFinish[0] > 0 {
-		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NotNullToken)
-		if _, premium, ok := parse.ParseInt(acc.PremiumFinish[:]); ok && premium >= currentTime {
-			doc.Tokens[premiumField] = append(doc.Tokens[premiumField], PremiumNowToken)
-		}
-	} else {
-		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NullToken)
+	if token, ok := GetBirthYearTokenByTS(acc.Birth[:]); ok {
+		doc.Tokens[birthYearField] = append(doc.Tokens[birthYearField], token)
 	}
+	//if acc.PremiumFinish[0] > 0 {
+	//	doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NotNullToken)
+	//	if _, premium, ok := parse.ParseInt(acc.PremiumFinish[:]); ok && premium >= currentTime {
+	//		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], PremiumNowToken)
+	//	}
+	//} else {
+	//	doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NullToken)
+	//}
 	return doc
 }
 
@@ -159,6 +157,14 @@ func (idx *DefaultIndex) Status(token int) *inverted.ArrayIter {
 	return idx.inv.Iterator(defaultPartition, statusField, token)
 }
 
+func (idx *DefaultIndex) Fname(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, fnameField, token)
+}
+
+func (idx *DefaultIndex) Sname(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, snameField, token)
+}
+
 func (idx *DefaultIndex) Country(token int) *inverted.ArrayIter {
 	return idx.inv.Iterator(defaultPartition, countryField, token)
 }
@@ -173,14 +179,6 @@ func (idx *DefaultIndex) Interest(token int) *inverted.ArrayIter {
 
 func (idx *DefaultIndex) BirthYear(token int) *inverted.ArrayIter {
 	return idx.inv.Iterator(defaultPartition, birthYearField, token)
-}
-
-func (idx *DefaultIndex) Fname(token int) *inverted.ArrayIter {
-	return idx.inv.Iterator(defaultPartition, fnameField, token)
-}
-
-func (idx *DefaultIndex) Sname(token int) *inverted.ArrayIter {
-	return idx.inv.Iterator(defaultPartition, snameField, token)
 }
 
 func (idx *DefaultIndex) Premium(token int) *inverted.ArrayIter {

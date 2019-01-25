@@ -184,38 +184,39 @@ func main() {
 						hasErrors = true
 						return
 					}
-				case `premium_now`:
-					if next = accountsSvc.ByPremiumNow(v); next == nil {
+				case `birth_year`:
+					if next = accountsSvc.ByBirthYear(v); next == nil {
 						hasErrors = true
 						return
 					}
-					fields |= proto.PremiumField
-				case `premium_null`:
-					if next = accountsSvc.ByPremiumNull(v); next == nil {
-						hasErrors = true
-						return
-					}
-					fields |= proto.PremiumField
-					//case `birth_lt`:
-					//      if next = accountsSvc.ByBirthLT(v); next == nil {
-					//              hasErrors = true
-					//              return
-					//      }
-					//      fields |= proto.BirthField
-					//      return
-					//case `birth_gt`:
-					//      if next = accountsSvc.ByBirthGT(v); next == nil {
-					//              hasErrors = true
-					//              return
-					//      }
-					//      fields |= proto.BirthField
-					//      return
-					//case `birth_year`:
-					//      if next = accountsSvc.ByBirthYear(v); next == nil {
-					//              hasErrors = true
-					//              return
-					//      }
-					//      fields |= proto.BirthField
+					fields |= proto.BirthField
+
+				//case `premium_now`:
+				//	if next = accountsSvc.ByPremiumNow(v); next == nil {
+				//		hasErrors = true
+				//		return
+				//	}
+				//	fields |= proto.PremiumField
+				//case `premium_null`:
+				//	if next = accountsSvc.ByPremiumNull(v); next == nil {
+				//		hasErrors = true
+				//		return
+				//	}
+				//	fields |= proto.PremiumField
+				//case `birth_lt`:
+				//      if next = accountsSvc.ByBirthLT(v); next == nil {
+				//              hasErrors = true
+				//              return
+				//      }
+				//      fields |= proto.BirthField
+				//      return
+				//case `birth_gt`:
+				//      if next = accountsSvc.ByBirthGT(v); next == nil {
+				//              hasErrors = true
+				//              return
+				//      }
+				//      fields |= proto.BirthField
+				//      return
 				//case `phone_code`:
 				//case `phone_null`:
 				//case `email_domain`:
