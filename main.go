@@ -66,6 +66,8 @@ func main() {
 			}
 			var iter iterator.Iterator
 			hasErrors := false
+			birthLT := 0
+			birthGT := 0
 			fields := proto.IDField | proto.EmailField
 			args.VisitAll(func(k, v []byte) {
 				var next iterator.Iterator
@@ -186,6 +188,22 @@ func main() {
 						return
 					}
 					fields |= proto.BirthField
+				case `birth_lt`:
+					if _, ts, ok := parse.ParseInt(v); !ok {
+						hasErrors = true
+						return
+					} else {
+						birthLT = ts
+					}
+					fields |= proto.BirthField
+				case `birth_gt`:
+					if _, ts, ok := parse.ParseInt(v); !ok {
+						hasErrors = true
+						return
+					} else {
+						birthGT = ts
+					}
+					fields |= proto.BirthField
 				case `premium_now`:
 					if next = accountsSvc.ByPremiumNow(); next == nil {
 						hasErrors = true
@@ -202,14 +220,20 @@ func main() {
 					hasErrors = true
 					return
 				}
+				if next == nil {
+					return
+				}
 				if iter == nil {
 					iter = next
-				} else {
-					iter = iterator.NewInterIter(iter, next)
+					return
 				}
+				iter = iterator.NewInterIter(iter, next)
 			})
 			if hasErrors {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
+				return
+			}
+			if iter == nil {
 				return
 			}
 			acc := &proto.Account{}
