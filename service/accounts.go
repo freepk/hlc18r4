@@ -329,3 +329,10 @@ func (svc *AccountsService) ByBirthYear(year []byte) iterator.Iterator {
 	}
 	return nil
 }
+
+func (svc *AccountsService) ByPremiumNull(null []byte) iterator.Iterator {
+	if token, ok := indexes.GetNullToken(null); ok {
+		return svc.defaultIndex.Premium(token)
+	}
+	return nil
+}

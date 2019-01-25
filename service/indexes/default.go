@@ -109,6 +109,11 @@ func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.
 	if token, ok := GetBirthYearTokenByTS(acc.Birth[:]); ok {
 		doc.Tokens[birthYearField] = append(doc.Tokens[birthYearField], token)
 	}
+	if acc.PremiumFinish[0] > 0 {
+		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NotNullToken)
+	} else {
+		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NullToken)
+	}
 	return doc
 }
 
@@ -171,4 +176,8 @@ func (idx *DefaultIndex) Interest(token int) *inverted.ArrayIter {
 
 func (idx *DefaultIndex) BirthYear(token int) *inverted.ArrayIter {
 	return idx.inv.Iterator(defaultPartition, birthYearField, token)
+}
+
+func (idx *DefaultIndex) Premium(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, premiumField, token)
 }
