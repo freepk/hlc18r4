@@ -139,10 +139,9 @@ func (idx *DefaultIndex) BirthYear(token int) *inverted.ArrayIter {
 }
 
 func (idx *DefaultIndex) Fname(token int) *inverted.ArrayIter {
-        return idx.inv.Iterator(defaultPartition, fnameField, token)
+	return idx.inv.Iterator(defaultPartition, fnameField, token)
 }
 
 func (idx *DefaultIndex) Sname(token int) *inverted.ArrayIter {
-        return idx.inv.Iterator(defaultPartition, snameField, token)
+	return idx.inv.Iterator(defaultPartition, snameField, token)
 }
-
