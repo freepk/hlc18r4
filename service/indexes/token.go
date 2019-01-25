@@ -27,9 +27,7 @@ const (
 )
 
 const (
-	PremiumNullToken    = NullToken
-	PremiumNotNullToken = NotNullToken
-	PremiumNowToken     = 4
+	PremiumNowToken = 4
 )
 
 func GetNullToken(b []byte) (int, bool) {

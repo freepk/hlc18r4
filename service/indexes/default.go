@@ -111,6 +111,9 @@ func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.
 	}
 	if acc.PremiumFinish[0] > 0 {
 		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NotNullToken)
+		if _, finish, ok := parse.ParseInt(acc.PremiumFinish[:]); ok && finish > currentTime {
+			doc.Tokens[premiumField] = append(doc.Tokens[premiumField], PremiumNowToken)
+		}
 	} else {
 		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NullToken)
 	}

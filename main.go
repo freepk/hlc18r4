@@ -186,6 +186,12 @@ func main() {
 						return
 					}
 					fields |= proto.BirthField
+				case `premium_now`:
+					if next = accountsSvc.ByPremiumNow(); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.PremiumField
 				case `premium_null`:
 					if next = accountsSvc.ByPremiumNull(v); next == nil {
 						hasErrors = true
