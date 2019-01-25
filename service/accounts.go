@@ -340,3 +340,10 @@ func (svc *AccountsService) ByPremiumNull(null []byte) iterator.Iterator {
 	}
 	return nil
 }
+
+func (svc *AccountsService) ByPhoneNull(null []byte) iterator.Iterator {
+	if token, ok := indexes.GetNullToken(null); ok {
+		return svc.defaultIndex.Phone(token)
+	}
+	return nil
+}

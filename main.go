@@ -196,6 +196,7 @@ func main() {
 						birthLT = ts
 					}
 					fields |= proto.BirthField
+					return
 				case `birth_gt`:
 					if _, ts, ok := parse.ParseInt(v); !ok {
 						hasErrors = true
@@ -204,6 +205,7 @@ func main() {
 						birthGT = ts
 					}
 					fields |= proto.BirthField
+					return
 				case `premium_now`:
 					if next = accountsSvc.ByPremiumNow(); next == nil {
 						hasErrors = true
@@ -216,11 +218,14 @@ func main() {
 						return
 					}
 					fields |= proto.PremiumField
+				case `phone_null`:
+					if next = accountsSvc.ByPhoneNull(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.PhoneField
 				default:
 					hasErrors = true
-					return
-				}
-				if next == nil {
 					return
 				}
 				if iter == nil {
@@ -234,6 +239,7 @@ func main() {
 				return
 			}
 			if iter == nil {
+				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}
 			acc := &proto.Account{}
@@ -245,6 +251,12 @@ func main() {
 					break
 				}
 				*acc = *accountsSvc.Get(2000000 - pseudo)
+				if birthGT > 0 && birthGT > int(acc.BirthTS) {
+					continue
+				}
+				if birthLT > 0 && birthLT < int(acc.BirthTS) {
+					continue
+				}
 				limit--
 				if comma {
 					ctx.WriteString(`,`)

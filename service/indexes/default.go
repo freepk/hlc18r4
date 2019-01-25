@@ -24,6 +24,7 @@ const (
 	interestField
 	birthYearField
 	premiumField
+	phoneField
 )
 
 var currentTime int
@@ -44,7 +45,7 @@ type defaultIndexer struct {
 }
 
 func newDefaultIndexer(rep *repo.AccountsRepo) *defaultIndexer {
-	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 9)}
+	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 10)}
 	return &defaultIndexer{pos: 0, doc: doc, rep: rep}
 }
 
@@ -117,6 +118,11 @@ func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.
 	} else {
 		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NullToken)
 	}
+	if acc.Phone[0] > 0 {
+		doc.Tokens[phoneField] = append(doc.Tokens[phoneField], NotNullToken)
+	} else {
+		doc.Tokens[phoneField] = append(doc.Tokens[phoneField], NullToken)
+	}
 	return doc
 }
 
@@ -183,4 +189,8 @@ func (idx *DefaultIndex) BirthYear(token int) *inverted.ArrayIter {
 
 func (idx *DefaultIndex) Premium(token int) *inverted.ArrayIter {
 	return idx.inv.Iterator(defaultPartition, premiumField, token)
+}
+
+func (idx *DefaultIndex) Phone(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, phoneField, token)
 }
