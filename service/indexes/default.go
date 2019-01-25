@@ -3,12 +3,28 @@ package indexes
 import (
 	"io/ioutil"
 	"log"
-	"time"
+	//"time"
 
 	"gitlab.com/freepk/hlc18r4/inverted"
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
+)
+
+const (
+	defaultPartition = 0
+)
+
+const (
+	sexField = iota
+	statusField
+	fnameField
+	snameField
+	countryField
+	cityField
+	interestField
+	birthYearField
+	premiumField
 )
 
 var currentTime int
@@ -65,6 +81,16 @@ func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.
 	case proto.ComplStatus:
 		doc.Tokens[statusField] = append(doc.Tokens[statusField], ComplToken, NotSingleToken, NotInRelToken)
 	}
+	if acc.Fname > 0 {
+		doc.Tokens[fnameField] = append(doc.Tokens[fnameField], NotNullToken, int(acc.Fname))
+	} else {
+		doc.Tokens[fnameField] = append(doc.Tokens[fnameField], NullToken)
+	}
+	if acc.Sname > 0 {
+		doc.Tokens[snameField] = append(doc.Tokens[snameField], NotNullToken, int(acc.Sname))
+	} else {
+		doc.Tokens[snameField] = append(doc.Tokens[snameField], NullToken)
+	}
 	if acc.Country > 0 {
 		doc.Tokens[countryField] = append(doc.Tokens[countryField], NotNullToken, int(acc.Country))
 	} else {
@@ -81,20 +107,10 @@ func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.
 		}
 		doc.Tokens[interestField] = append(doc.Tokens[interestField], int(acc.Interests[i]))
 	}
-	if _, birth, ok := parse.ParseInt(acc.Birth[:]); ok {
-		birthYear := time.Unix(int64(birth), 0).UTC().Year() - 1975
-		doc.Tokens[birthYearField] = append(doc.Tokens[birthYearField], birthYear)
-	}
-	if acc.Fname > 0 {
-		doc.Tokens[fnameField] = append(doc.Tokens[fnameField], NotNullToken, int(acc.Fname))
-	} else {
-		doc.Tokens[fnameField] = append(doc.Tokens[fnameField], NullToken)
-	}
-	if acc.Sname > 0 {
-		doc.Tokens[snameField] = append(doc.Tokens[snameField], NotNullToken, int(acc.Sname))
-	} else {
-		doc.Tokens[snameField] = append(doc.Tokens[snameField], NullToken)
-	}
+	//if _, birth, ok := parse.ParseInt(acc.Birth[:]); ok {
+	//	birthYear := time.Unix(int64(birth), 0).UTC().Year() - 1960
+	//	doc.Tokens[birthYearField] = append(doc.Tokens[birthYearField], birthYear)
+	//}
 	if acc.PremiumFinish[0] > 0 {
 		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NotNullToken)
 		if _, premium, ok := parse.ParseInt(acc.PremiumFinish[:]); ok && premium >= currentTime {

@@ -150,109 +150,122 @@ func (svc *AccountsService) Update(id int, buf []byte) bool {
 }
 
 func (svc *AccountsService) BySexEq(sex []byte) iterator.Iterator {
-	switch string(sex) {
-	case `m`:
-		return svc.defaultIndex.Sex(indexes.MaleToken)
-	case `f`:
-		return svc.defaultIndex.Sex(indexes.FemaleToken)
+	if token, ok := indexes.GetSexToken(sex); ok {
+		return svc.defaultIndex.Sex(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByStatusEq(status []byte) iterator.Iterator {
-	switch string(status) {
-	case `свободны`:
-		return svc.defaultIndex.Status(indexes.SingleToken)
-	case `заняты`:
-		return svc.defaultIndex.Status(indexes.InRelToken)
-	case `всё сложно`:
-		return svc.defaultIndex.Status(indexes.ComplToken)
+	if token, ok := indexes.GetStatusToken(status); ok {
+		return svc.defaultIndex.Status(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByStatusNeq(status []byte) iterator.Iterator {
-	switch string(status) {
-	case `свободны`:
-		return svc.defaultIndex.Status(indexes.NotSingleToken)
-	case `заняты`:
-		return svc.defaultIndex.Status(indexes.NotInRelToken)
-	case `всё сложно`:
-		return svc.defaultIndex.Status(indexes.NotComplToken)
+	if token, ok := indexes.GetNotStatusToken(status); ok {
+		return svc.defaultIndex.Status(token)
 	}
 	return nil
 }
 
+func (svc *AccountsService) ByFnameEq(fname []byte) iterator.Iterator {
+        if token, ok := indexes.GetFnameToken(fname); ok {
+                return svc.defaultIndex.Fname(token)
+        }
+        return nil
+}
+
+func (svc *AccountsService) ByFnameNull(null []byte) iterator.Iterator {
+        if token, ok := indexes.GetNullToken(null); ok {
+                return svc.defaultIndex.Fname(token)
+        }
+        return nil
+}
+
+func (svc *AccountsService) ByFnameAny(fnames []byte) iterator.Iterator {
+        var iter iterator.Iterator
+        fnames, fname := parse.ScanSymbol(fnames, 0x2C)
+        for len(fname) > 0 {
+                if token, ok := indexes.GetFnameToken(fname); ok {
+                        next := svc.defaultIndex.Fname(token)
+                        if iter == nil {
+                                iter = next
+                        } else {
+                                iter = iterator.NewUnionIter(iter, next)
+                        }
+                }
+                fnames, fname = parse.ScanSymbol(fnames, 0x2C)
+        }
+        return iter
+}
+
+func (svc *AccountsService) BySnameEq(sname []byte) iterator.Iterator {
+        if token, ok := indexes.GetSnameToken(sname); ok {
+                return svc.defaultIndex.Sname(token)
+        }
+        return nil
+}
+
+func (svc *AccountsService) BySnameNull(null []byte) iterator.Iterator {
+        if token, ok := indexes.GetNullToken(null); ok {
+                return svc.defaultIndex.Sname(token)
+        }
+        return nil
+}
+
 func (svc *AccountsService) ByCountryEq(country []byte) iterator.Iterator {
-	if token, ok := proto.CountryToken(country); ok {
+	if token, ok := indexes.GetCountryToken(country); ok {
+		return svc.defaultIndex.Country(token)
+	}
+	return nil
+}
+
+func (svc *AccountsService) ByCountryNull(null []byte) iterator.Iterator {
+	if token, ok := indexes.GetNullToken(null); ok {
 		return svc.defaultIndex.Country(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByCountryEqSexEq(country, sex []byte) iterator.Iterator {
-	if token, ok := proto.CountryToken(country); ok {
-		switch string(sex) {
-		case `m`:
-			return svc.countryIndex.Sex(token, indexes.MaleToken)
-		case `f`:
-			return svc.countryIndex.Sex(token, indexes.FemaleToken)
+	if country, ok := indexes.GetCountryToken(country); ok {
+		if sex, ok := indexes.GetSexToken(sex); ok {
+			return svc.countryIndex.Sex(country, sex)
 		}
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByCountryEqStatusEq(country, status []byte) iterator.Iterator {
-	if token, ok := proto.CountryToken(country); ok {
-		switch string(status) {
-		case `свободны`:
-			return svc.countryIndex.Status(token, indexes.SingleToken)
-		case `заняты`:
-			return svc.countryIndex.Status(token, indexes.InRelToken)
-		case `всё сложно`:
-			return svc.countryIndex.Status(token, indexes.ComplToken)
+	if country, ok := indexes.GetCountryToken(country); ok {
+		if status, ok := indexes.GetStatusToken(status); ok {
+			return svc.countryIndex.Status(country, status)
 		}
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByCountryEqStatusNeq(country, status []byte) iterator.Iterator {
-	if token, ok := proto.CountryToken(country); ok {
-		switch string(status) {
-		case `свободны`:
-			return svc.countryIndex.Status(token, indexes.NotSingleToken)
-		case `заняты`:
-			return svc.countryIndex.Status(token, indexes.NotInRelToken)
-		case `всё сложно`:
-			return svc.countryIndex.Status(token, indexes.NotComplToken)
+	if country, ok := indexes.GetCountryToken(country); ok {
+		if status, ok := indexes.GetNotStatusToken(status); ok {
+			return svc.countryIndex.Status(country, status)
 		}
 	}
 	return nil
 }
 
-func (svc *AccountsService) ByCountryNull(null []byte) iterator.Iterator {
-	switch string(null) {
-	case `0`:
-		return svc.defaultIndex.Country(indexes.NotNullToken)
-	case `1`:
-		return svc.defaultIndex.Country(indexes.NullToken)
-	}
-	return nil
-}
-
 func (svc *AccountsService) ByCityEq(city []byte) iterator.Iterator {
-	if token, ok := proto.CityToken(city); ok {
+	if token, ok := indexes.GetCityToken(city); ok {
 		return svc.defaultIndex.City(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByCityNull(null []byte) iterator.Iterator {
-	switch string(null) {
-	case `0`:
-		return svc.defaultIndex.City(indexes.NotNullToken)
-	case `1`:
-		return svc.defaultIndex.City(indexes.NullToken)
+	if token, ok := indexes.GetNullToken(null); ok {
+		return svc.defaultIndex.City(token)
 	}
 	return nil
 }
@@ -261,7 +274,7 @@ func (svc *AccountsService) ByCityAny(cities []byte) iterator.Iterator {
 	var iter iterator.Iterator
 	cities, city := parse.ScanSymbol(cities, 0x2C)
 	for len(city) > 0 {
-		if token, ok := proto.CityToken(city); ok {
+		if token, ok := indexes.GetCityToken(city); ok {
 			next := svc.defaultIndex.City(token)
 			if iter == nil {
 				iter = next
@@ -278,7 +291,7 @@ func (svc *AccountsService) ByInterestsAny(interests []byte) iterator.Iterator {
 	var iter iterator.Iterator
 	interests, interest := parse.ScanSymbol(interests, 0x2C)
 	for len(interest) > 0 {
-		if token, ok := proto.InterestToken(interest); ok {
+		if token, ok := indexes.GetInterestToken(interest); ok {
 			next := svc.defaultIndex.Interest(token)
 			if iter == nil {
 				iter = next
@@ -295,7 +308,7 @@ func (svc *AccountsService) ByInterestsContains(interests []byte) iterator.Itera
 	var iter iterator.Iterator
 	interests, interest := parse.ScanSymbol(interests, 0x2C)
 	for len(interest) > 0 {
-		if token, ok := proto.InterestToken(interest); ok {
+		if token, ok := indexes.GetInterestToken(interest); ok {
 			next := svc.defaultIndex.Interest(token)
 			if iter == nil {
 				iter = next
@@ -308,62 +321,9 @@ func (svc *AccountsService) ByInterestsContains(interests []byte) iterator.Itera
 	return iter
 }
 
-func (svc *AccountsService) ByBirthYear(year []byte) iterator.Iterator {
-	if _, year, ok := parse.ParseInt(year); ok && year > 1975 {
-		if iter := svc.defaultIndex.BirthYear(year - 1975); iter != nil {
-			return iter
-		}
-	}
-	return nil
-}
-
-func (svc *AccountsService) ByFnameEq(fname []byte) iterator.Iterator {
-	if token, ok := proto.FnameToken(fname); ok {
-		return svc.defaultIndex.Fname(token)
-	}
-	return nil
-}
-
-func (svc *AccountsService) ByFnameNull(null []byte) iterator.Iterator {
-	switch string(null) {
-	case `0`:
-		return svc.defaultIndex.Fname(indexes.NotNullToken)
-	case `1`:
-		return svc.defaultIndex.Fname(indexes.NullToken)
-	}
-	return nil
-}
-
-func (svc *AccountsService) ByFnameAny(fnames []byte) iterator.Iterator {
-	var iter iterator.Iterator
-	fnames, fname := parse.ScanSymbol(fnames, 0x2C)
-	for len(fname) > 0 {
-		if token, ok := proto.FnameToken(fname); ok {
-			next := svc.defaultIndex.Fname(token)
-			if iter == nil {
-				iter = next
-			} else {
-				iter = iterator.NewUnionIter(iter, next)
-			}
-		}
-		fnames, fname = parse.ScanSymbol(fnames, 0x2C)
-	}
-	return iter
-}
-
-func (svc *AccountsService) BySnameEq(sname []byte) iterator.Iterator {
-	if token, ok := proto.SnameToken(sname); ok {
-		return svc.defaultIndex.Sname(token)
-	}
-	return nil
-}
-
-func (svc *AccountsService) BySnameNull(null []byte) iterator.Iterator {
-	switch string(null) {
-	case `0`:
-		return svc.defaultIndex.Sname(indexes.NotNullToken)
-	case `1`:
-		return svc.defaultIndex.Sname(indexes.NullToken)
+func (svc *AccountsService) ByPremiumNull(null []byte) iterator.Iterator {
+	if token, ok := indexes.GetNullToken(null); ok {
+		return svc.defaultIndex.Premium(token)
 	}
 	return nil
 }
@@ -375,12 +335,31 @@ func (svc *AccountsService) ByPremiumNow(now []byte) iterator.Iterator {
 	return nil
 }
 
-func (svc *AccountsService) ByPremiumNull(null []byte) iterator.Iterator {
-	switch string(null) {
-	case `0`:
-		return svc.defaultIndex.Premium(indexes.NotNullToken)
-	case `1`:
-		return svc.defaultIndex.Premium(indexes.NullToken)
+/*
+func (svc *AccountsService) ByBirthLT(ts []byte) iterator.Iterator {
+	//if _, ts, ok := parse.ParseInt(ts); ok {
+	//	year := time.Unix(int64(ts), 0).UTC().Year()
+	//	//if year < 1975 {
+	//	//	return nil
+	//	//}
+	//	//iter := svc.defaultIndex.BirthYear(year - 1975)
+	//}
+	return nil
+}
+
+func (svc *AccountsService) ByBirthGT(ts []byte) iterator.Iterator {
+	//if _, ts, ok := parse.ParseInt(ts); ok {
+	//        year := time.Unix(int64(ts), 0).UTC().Year()
+	//}
+	return nil
+}
+
+func (svc *AccountsService) ByBirthYear(year []byte) iterator.Iterator {
+	if _, year, ok := parse.ParseInt(year); ok && year > 1965 {
+		if iter := svc.defaultIndex.BirthYear(year - 1960); iter != nil {
+			return iter
+		}
 	}
 	return nil
 }
+*/

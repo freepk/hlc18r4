@@ -66,6 +66,10 @@ func main() {
 			}
 			var iter iterator.Iterator
 			hasErrors := false
+			//birthGT := 0
+			//birthLT := 0
+			//emailGT := 0
+			//emailLT := 0
 			fields := proto.IDField | proto.EmailField
 			args.VisitAll(func(k, v []byte) {
 				var next iterator.Iterator
@@ -107,6 +111,36 @@ func main() {
 						return
 					}
 					fields |= proto.StatusField
+				case `fname_eq`:
+					if next = accountsSvc.ByFnameEq(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.FnameField
+				case `fname_null`:
+					if next = accountsSvc.ByFnameNull(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.FnameField
+				case `fname_any`:
+					if next = accountsSvc.ByFnameAny(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.FnameField
+				case `sname_eq`:
+					if next = accountsSvc.BySnameEq(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.SnameField
+				case `sname_null`:
+					if next = accountsSvc.BySnameNull(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.SnameField
 				case `country_eq`:
 					if args.Has(`sex_eq`) || args.Has(`status_eq`) || args.Has(`status_neq`) {
 						fields |= proto.CountryField
@@ -150,42 +184,6 @@ func main() {
 						hasErrors = true
 						return
 					}
-				case `birth_year`:
-					if next = accountsSvc.ByBirthYear(v); next == nil {
-						hasErrors = true
-						return
-					}
-					fields |= proto.BirthField
-				case `fname_eq`:
-					if next = accountsSvc.ByFnameEq(v); next == nil {
-						hasErrors = true
-						return
-					}
-					fields |= proto.FnameField
-				case `fname_null`:
-					if next = accountsSvc.ByFnameNull(v); next == nil {
-						hasErrors = true
-						return
-					}
-					fields |= proto.FnameField
-				case `fname_any`:
-					if next = accountsSvc.ByFnameAny(v); next == nil {
-						hasErrors = true
-						return
-					}
-					fields |= proto.FnameField
-				case `sname_eq`:
-					if next = accountsSvc.BySnameEq(v); next == nil {
-						hasErrors = true
-						return
-					}
-					fields |= proto.SnameField
-				case `sname_null`:
-					if next = accountsSvc.BySnameNull(v); next == nil {
-						hasErrors = true
-						return
-					}
-					fields |= proto.SnameField
 				case `premium_now`:
 					if next = accountsSvc.ByPremiumNow(v); next == nil {
 						hasErrors = true
@@ -198,6 +196,35 @@ func main() {
 						return
 					}
 					fields |= proto.PremiumField
+					//case `birth_lt`:
+					//      if next = accountsSvc.ByBirthLT(v); next == nil {
+					//              hasErrors = true
+					//              return
+					//      }
+					//      fields |= proto.BirthField
+					//      return
+					//case `birth_gt`:
+					//      if next = accountsSvc.ByBirthGT(v); next == nil {
+					//              hasErrors = true
+					//              return
+					//      }
+					//      fields |= proto.BirthField
+					//      return
+					//case `birth_year`:
+					//      if next = accountsSvc.ByBirthYear(v); next == nil {
+					//              hasErrors = true
+					//              return
+					//      }
+					//      fields |= proto.BirthField
+				//case `phone_code`:
+				//case `phone_null`:
+				//case `email_domain`:
+				//case `email_lt`:
+				//	emailLT++
+				//	return
+				//case `email_gt`:
+				//	emailGT++
+				//	return
 				default:
 					hasErrors = true
 					return

@@ -3,7 +3,6 @@ package indexes
 import (
 	"github.com/freepk/iterator"
 	"gitlab.com/freepk/hlc18r4/backup"
-	"gitlab.com/freepk/hlc18r4/proto"
 	"testing"
 )
 
@@ -13,12 +12,12 @@ func TestDefaultIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log("Create index")
+	t.Log("Create default index")
 	index := NewDefaultIndex(rep)
-	t.Log("Rebuild")
+	t.Log("Rebuild default")
 	index.Rebuild()
 
-	country, ok := proto.CountryToken([]byte(`Мализия`))
+	country, ok := GetCountryToken([]byte(`Мализия`))
 	if !ok {
 		t.Fail()
 	}
@@ -43,17 +42,17 @@ func TestCountryIndex(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log("Create index")
+	t.Log("Create default index")
 	defaultIdx := NewDefaultIndex(rep)
-	t.Log("Rebuild")
+	t.Log("Rebuild default")
 	defaultIdx.Rebuild()
 
-	t.Log("Create index")
+	t.Log("Create country index")
 	countryIdx := NewCountryIndex(rep)
-	t.Log("Rebuild")
+	t.Log("Rebuild country")
 	countryIdx.Rebuild()
 
-	country, ok := proto.CountryToken([]byte(`Мализия`))
+	country, ok := GetCountryToken([]byte(`Мализия`))
 	if !ok {
 		t.Fail()
 	}
@@ -79,7 +78,7 @@ func BenchmarkDefaultIndex(b *testing.B) {
 	}
 	defaultIdx := NewDefaultIndex(rep)
 	defaultIdx.Rebuild()
-	country, ok := proto.CountryToken([]byte(`Мализия`))
+	country, ok := GetCountryToken([]byte(`Мализия`))
 	if !ok {
 		b.Fail()
 	}
@@ -115,7 +114,7 @@ func BenchmarkCountryIndex(b *testing.B) {
 	countryIdx := NewCountryIndex(rep)
 	countryIdx.Rebuild()
 
-	country, ok := proto.CountryToken([]byte(`Мализия`))
+	country, ok := GetCountryToken([]byte(`Мализия`))
 	if !ok {
 		b.Fail()
 	}
