@@ -13,6 +13,7 @@ const (
 	birthYearField
 	fnameField
 	snameField
+	premiumField
 )
 
 const (
@@ -20,11 +21,13 @@ const (
 	NotNullToken
 )
 
+// Not used with Null/NotNull, can be started from 0
 const (
 	MaleToken = iota
 	FemaleToken
 )
 
+// Not used with Null/NotNull, can be started from 0
 const (
 	SingleToken = iota
 	InRelToken
@@ -32,4 +35,9 @@ const (
 	NotSingleToken
 	NotInRelToken
 	NotComplToken
+)
+
+// Used with Null/NotNull, skip first four
+const (
+	PremiumNowToken = 4
 )

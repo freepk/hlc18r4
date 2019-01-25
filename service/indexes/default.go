@@ -1,6 +1,8 @@
 package indexes
 
 import (
+	"io/ioutil"
+	"log"
 	"time"
 
 	"gitlab.com/freepk/hlc18r4/inverted"
@@ -9,6 +11,17 @@ import (
 	"gitlab.com/freepk/hlc18r4/repo"
 )
 
+var currentTime int
+
+func init() {
+	if options, err := ioutil.ReadFile("tmp/data/options.txt"); err == nil {
+		if _, now, ok := parse.ParseInt(options); ok {
+			currentTime = now
+		}
+	}
+	log.Println("Current time", currentTime)
+}
+
 type defaultIndexer struct {
 	pos int
 	doc *inverted.Document
@@ -16,7 +29,7 @@ type defaultIndexer struct {
 }
 
 func newDefaultIndexer(rep *repo.AccountsRepo) *defaultIndexer {
-	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 8)}
+	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 9)}
 	return &defaultIndexer{pos: 0, doc: doc, rep: rep}
 }
 
@@ -82,6 +95,14 @@ func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.
 	} else {
 		doc.Tokens[snameField] = append(doc.Tokens[snameField], NullToken)
 	}
+	if acc.PremiumFinish[0] > 0 {
+		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NotNullToken)
+		if _, premium, ok := parse.ParseInt(acc.PremiumFinish[:]); ok && premium >= currentTime {
+			doc.Tokens[premiumField] = append(doc.Tokens[premiumField], PremiumNowToken)
+		}
+	} else {
+		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NullToken)
+	}
 	return doc
 }
 
@@ -144,4 +165,8 @@ func (idx *DefaultIndex) Fname(token int) *inverted.ArrayIter {
 
 func (idx *DefaultIndex) Sname(token int) *inverted.ArrayIter {
 	return idx.inv.Iterator(defaultPartition, snameField, token)
+}
+
+func (idx *DefaultIndex) Premium(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, premiumField, token)
 }

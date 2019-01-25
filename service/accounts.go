@@ -191,43 +191,43 @@ func (svc *AccountsService) ByCountryEq(country []byte) iterator.Iterator {
 }
 
 func (svc *AccountsService) ByCountryEqSexEq(country, sex []byte) iterator.Iterator {
-        if token, ok := proto.CountryToken(country); ok {
-                switch string(sex) {
-                case `m`:
-                        return svc.countryIndex.Sex(token, indexes.MaleToken)
-                case `f`:
-                        return svc.countryIndex.Sex(token, indexes.FemaleToken)
-                }
-        }
-        return nil
+	if token, ok := proto.CountryToken(country); ok {
+		switch string(sex) {
+		case `m`:
+			return svc.countryIndex.Sex(token, indexes.MaleToken)
+		case `f`:
+			return svc.countryIndex.Sex(token, indexes.FemaleToken)
+		}
+	}
+	return nil
 }
 
 func (svc *AccountsService) ByCountryEqStatusEq(country, status []byte) iterator.Iterator {
-        if token, ok := proto.CountryToken(country); ok {
-                switch string(status) {
-                case `свободны`:
-                        return svc.countryIndex.Status(token, indexes.SingleToken)
-                case `заняты`:
-                        return svc.countryIndex.Status(token, indexes.InRelToken)
-                case `всё сложно`:
-                        return svc.countryIndex.Status(token, indexes.ComplToken)
-                }
-        }
-        return nil
+	if token, ok := proto.CountryToken(country); ok {
+		switch string(status) {
+		case `свободны`:
+			return svc.countryIndex.Status(token, indexes.SingleToken)
+		case `заняты`:
+			return svc.countryIndex.Status(token, indexes.InRelToken)
+		case `всё сложно`:
+			return svc.countryIndex.Status(token, indexes.ComplToken)
+		}
+	}
+	return nil
 }
 
 func (svc *AccountsService) ByCountryEqStatusNeq(country, status []byte) iterator.Iterator {
-        if token, ok := proto.CountryToken(country); ok {
-                switch string(status) {
-                case `свободны`:
-                        return svc.countryIndex.Status(token, indexes.NotSingleToken)
-                case `заняты`:
-                        return svc.countryIndex.Status(token, indexes.NotInRelToken)
-                case `всё сложно`:
-                        return svc.countryIndex.Status(token, indexes.NotComplToken)
-                }
-        }
-        return nil
+	if token, ok := proto.CountryToken(country); ok {
+		switch string(status) {
+		case `свободны`:
+			return svc.countryIndex.Status(token, indexes.NotSingleToken)
+		case `заняты`:
+			return svc.countryIndex.Status(token, indexes.NotInRelToken)
+		case `всё сложно`:
+			return svc.countryIndex.Status(token, indexes.NotComplToken)
+		}
+	}
+	return nil
 }
 
 func (svc *AccountsService) ByCountryNull(null []byte) iterator.Iterator {
@@ -364,6 +364,23 @@ func (svc *AccountsService) BySnameNull(null []byte) iterator.Iterator {
 		return svc.defaultIndex.Sname(indexes.NotNullToken)
 	case `1`:
 		return svc.defaultIndex.Sname(indexes.NullToken)
+	}
+	return nil
+}
+
+func (svc *AccountsService) ByPremiumNow(now []byte) iterator.Iterator {
+	if string(now) == `1` {
+		return svc.defaultIndex.Premium(indexes.PremiumNowToken)
+	}
+	return nil
+}
+
+func (svc *AccountsService) ByPremiumNull(null []byte) iterator.Iterator {
+	switch string(null) {
+	case `0`:
+		return svc.defaultIndex.Premium(indexes.NotNullToken)
+	case `1`:
+		return svc.defaultIndex.Premium(indexes.NullToken)
 	}
 	return nil
 }

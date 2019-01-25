@@ -14,16 +14,13 @@ import (
 )
 
 func main() {
-
 	log.Println("Restoring accounts")
 	rep, err := backup.Restore("tmp/data/data.zip")
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Accounts", rep.Len())
-
 	accountsSvc := service.NewAccountsService(rep)
-
 	writesCount := uint64(0)
 	go func() {
 		writeProcess := false
@@ -40,7 +37,6 @@ func main() {
 			time.Sleep(time.Second)
 		}
 	}()
-
 	handler := func(ctx *fasthttp.RequestCtx) {
 		path := ctx.Path()
 		if ctx.IsPost() {
@@ -190,6 +186,18 @@ func main() {
 						return
 					}
 					fields |= proto.SnameField
+				case `premium_now`:
+					if next = accountsSvc.ByPremiumNow(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.PremiumField
+				case `premium_null`:
+					if next = accountsSvc.ByPremiumNull(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.PremiumField
 				default:
 					hasErrors = true
 					return
@@ -245,5 +253,4 @@ func main() {
 	if err := fasthttp.ListenAndServe(":80", handler); err != nil {
 		log.Fatal(err)
 	}
-
 }
