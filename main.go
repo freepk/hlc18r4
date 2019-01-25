@@ -212,24 +212,23 @@ func main() {
 				ctx.SetStatusCode(fasthttp.StatusBadRequest)
 				return
 			}
-			limit--
-			if pseudo, ok := iter.Next(); ok {
-				ctx.WriteString(`{"accounts":[`)
-				acc := accountsSvc.Get(2000000 - pseudo)
-				acc.WriteJSON(fields, ctx)
-				for limit > 0 {
-					limit--
-					if pseudo, ok = iter.Next(); !ok {
-						break
-					}
-					ctx.WriteString(`,`)
-					*acc = *accountsSvc.Get(2000000 - pseudo)
-					acc.WriteJSON(fields, ctx)
+			acc := &proto.Account{}
+			comma := false
+			ctx.WriteString(`{"accounts":[`)
+			for limit > 0 {
+				pseudo, ok := iter.Next()
+				if !ok {
+					break
 				}
-				ctx.WriteString(`]}`)
-			} else {
-				ctx.WriteString(`{"accounts":[]}`)
+				*acc = *accountsSvc.Get(2000000 - pseudo)
+				limit--
+				if comma {
+					ctx.WriteString(`,`)
+				}
+				comma = true
+				acc.WriteJSON(fields, ctx)
 			}
+			ctx.WriteString(`]}`)
 			return
 		}
 		path, id, ok := parse.ParseInt(path[10:])

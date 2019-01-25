@@ -62,6 +62,11 @@ func ParseInt(b []byte) ([]byte, int, bool) {
 	return b, 0, false
 }
 
+func ParseUint32(b []byte) ([]byte, uint32, bool) {
+	t, v, ok := ParseInt(b)
+	return t, uint32(v), ok
+}
+
 func ParseQuoted(b []byte) ([]byte, []byte, bool) {
 	n := len(b)
 	for i := 0; i < n; i++ {

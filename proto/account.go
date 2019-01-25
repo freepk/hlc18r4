@@ -47,7 +47,9 @@ type Like struct {
 type Account struct {
 	ID            NumberBuf
 	Birth         NumberBuf
+	BirthTS       uint32
 	Joined        NumberBuf
+	JoinedTS      uint32
 	Email         EmailBuf
 	Fname         uint8
 	Sname         uint16
@@ -70,7 +72,9 @@ func (a *Account) reset() {
 
 	a.ID = number
 	a.Birth = number
+	a.BirthTS = 0
 	a.Joined = number
+	a.JoinedTS = 0
 	a.Email = email
 	a.Fname = 0
 	a.Sname = 0
@@ -197,11 +201,13 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				return buf, false
 			}
 			copy(a.Birth[:], temp)
+			_, a.BirthTS, ok = parse.ParseUint32(temp)
 		case len(tail) > 9 && string(tail[:9]) == `"joined":`:
 			if tail, temp, ok = parse.ParseNumber(tail[9:]); !ok {
 				return buf, false
 			}
 			copy(a.Joined[:], temp)
+			_, a.JoinedTS, ok = parse.ParseUint32(temp)
 		case len(tail) > 8 && string(tail[:8]) == `"email":`:
 			if tail, temp, ok = parse.ParseQuoted(tail[8:]); !ok {
 				return buf, false
