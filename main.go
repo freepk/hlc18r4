@@ -79,25 +79,43 @@ func main() {
 				case `query_id`:
 					return
 				case `sex_eq`:
-					if next = accountsSvc.BySexEq(v); next == nil {
+					if country := args.Peek(`country_eq`); len(country) > 0 {
+						if next = accountsSvc.ByCountryEqSexEq(country, v); next == nil {
+							hasErrors = true
+							return
+						}
+					} else if next = accountsSvc.BySexEq(v); next == nil {
 						hasErrors = true
 						return
 					}
 					fields |= proto.SexField
 				case `status_eq`:
-					if next = accountsSvc.ByStatusEq(v); next == nil {
+					if country := args.Peek(`country_eq`); len(country) > 0 {
+						if next = accountsSvc.ByCountryEqStatusEq(country, v); next == nil {
+							hasErrors = true
+							return
+						}
+					} else if next = accountsSvc.ByStatusEq(v); next == nil {
 						hasErrors = true
 						return
 					}
 					fields |= proto.StatusField
 				case `status_neq`:
-					if next = accountsSvc.ByStatusNeq(v); next == nil {
+					if country := args.Peek(`country_eq`); len(country) > 0 {
+						if next = accountsSvc.ByCountryEqStatusNeq(country, v); next == nil {
+							hasErrors = true
+							return
+						}
+					} else if next = accountsSvc.ByStatusNeq(v); next == nil {
 						hasErrors = true
 						return
 					}
 					fields |= proto.StatusField
 				case `country_eq`:
-					if next = accountsSvc.ByCountryEq(v); next == nil {
+					if args.Has(`sex_eq`) || args.Has(`status_eq`) || args.Has(`status_neq`) {
+						fields |= proto.CountryField
+						return
+					} else if next = accountsSvc.ByCountryEq(v); next == nil {
 						hasErrors = true
 						return
 					}
