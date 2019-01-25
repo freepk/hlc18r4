@@ -96,18 +96,24 @@ func GetInterestToken(b []byte) (int, bool) {
 	return proto.GetInterestToken(b)
 }
 
+func birthYearToken(year int) (int, bool) {
+	if year > 1960 && year < 2020 {
+		return year - 1970, true
+	}
+	return 0, false
+}
+
 func GetBirthYearTokenByTS(b []byte) (int, bool) {
 	if _, ts, ok := parse.ParseInt(b); ok {
-		if year := time.Unix(int64(ts), 0).UTC().Year(); year > 1960 && year < 2020 {
-			return year - 1970, true
-		}
+		year := time.Unix(int64(ts), 0).UTC().Year()
+		return birthYearToken(year)
 	}
 	return 0, false
 }
 
 func GetBirthYearTokenByYear(b []byte) (int, bool) {
-	if _, year, ok := parse.ParseInt(b); ok && year > 1960 && year < 2020 {
-		return year - 1970, true
+	if _, year, ok := parse.ParseInt(b); ok {
+		return birthYearToken(year)
 	}
 	return 0, false
 }
