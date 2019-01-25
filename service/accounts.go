@@ -276,3 +276,55 @@ func (svc *AccountsService) ByBirthYear(year []byte) iterator.Iterator {
 	}
 	return nil
 }
+
+func (svc *AccountsService) ByFnameEq(fname []byte) iterator.Iterator {
+        if token, ok := proto.FnameToken(fname); ok {
+                return svc.defaultIndex.Fname(token)
+        }
+        return nil
+}
+
+func (svc *AccountsService) ByFnameNull(null []byte) iterator.Iterator {
+        switch string(null) {
+        case `0`:
+                return svc.defaultIndex.Fname(indexes.NotNullToken)
+        case `1`:
+                return svc.defaultIndex.Fname(indexes.NullToken)
+        }
+        return nil
+}
+
+func (svc *AccountsService) ByFnameAny(fnames []byte) iterator.Iterator {
+        var iter iterator.Iterator
+        fnames, fname := parse.ScanSymbol(fnames, 0x2C)
+        for len(fname) > 0 {
+                if token, ok := proto.FnameToken(fname); ok {
+                        next := svc.defaultIndex.Fname(token)
+                        if iter == nil {
+                                iter = next
+                        } else {
+                                iter = iterator.NewUnionIter(iter, next)
+                        }
+                }
+                fnames, fname = parse.ScanSymbol(fnames, 0x2C)
+        }
+        return iter
+}
+
+func (svc *AccountsService) BySnameEq(sname []byte) iterator.Iterator {
+        if token, ok := proto.SnameToken(sname); ok {
+                return svc.defaultIndex.Sname(token)
+        }
+        return nil
+}
+
+func (svc *AccountsService) BySnameNull(null []byte) iterator.Iterator {
+        switch string(null) {
+        case `0`:
+                return svc.defaultIndex.Sname(indexes.NotNullToken)
+        case `1`:
+                return svc.defaultIndex.Sname(indexes.NullToken)
+        }
+        return nil
+}
+

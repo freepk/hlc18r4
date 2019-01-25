@@ -16,7 +16,7 @@ type defaultIndexer struct {
 }
 
 func newDefaultIndexer(rep *repo.AccountsRepo) *defaultIndexer {
-	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 6)}
+	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 8)}
 	return &defaultIndexer{pos: 0, doc: doc, rep: rep}
 }
 
@@ -71,6 +71,16 @@ func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.
 	if _, birth, ok := parse.ParseInt(acc.Birth[:]); ok {
 		birthYear := time.Unix(int64(birth), 0).UTC().Year() - 1975
 		doc.Tokens[birthYearField] = append(doc.Tokens[birthYearField], birthYear)
+	}
+	if acc.Fname > 0 {
+		doc.Tokens[fnameField] = append(doc.Tokens[fnameField], NotNullToken, int(acc.Fname))
+	} else {
+		doc.Tokens[fnameField] = append(doc.Tokens[fnameField], NullToken)
+	}
+	if acc.Sname > 0 {
+		doc.Tokens[snameField] = append(doc.Tokens[snameField], NotNullToken, int(acc.Sname))
+	} else {
+		doc.Tokens[snameField] = append(doc.Tokens[snameField], NullToken)
 	}
 	return doc
 }
@@ -127,3 +137,12 @@ func (idx *DefaultIndex) Interest(token int) *inverted.ArrayIter {
 func (idx *DefaultIndex) BirthYear(token int) *inverted.ArrayIter {
 	return idx.inv.Iterator(defaultPartition, birthYearField, token)
 }
+
+func (idx *DefaultIndex) Fname(token int) *inverted.ArrayIter {
+        return idx.inv.Iterator(defaultPartition, fnameField, token)
+}
+
+func (idx *DefaultIndex) Sname(token int) *inverted.ArrayIter {
+        return idx.inv.Iterator(defaultPartition, snameField, token)
+}
+

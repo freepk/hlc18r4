@@ -14,6 +14,7 @@ import (
 )
 
 func main() {
+
 	log.Println("Restoring accounts")
 	rep, err := backup.Restore("tmp/data/data.zip")
 	if err != nil {
@@ -141,6 +142,36 @@ func main() {
 						return
 					}
 					fields |= proto.BirthField
+				case `fname_eq`:
+					if next = accountsSvc.ByFnameEq(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.FnameField
+				case `fname_null`:
+					if next = accountsSvc.ByFnameNull(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.FnameField
+				case `fname_any`:
+					if next = accountsSvc.ByFnameAny(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.FnameField
+				case `sname_eq`:
+					if next = accountsSvc.BySnameEq(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.SnameField
+				case `sname_null`:
+					if next = accountsSvc.BySnameNull(v); next == nil {
+						hasErrors = true
+						return
+					}
+					fields |= proto.SnameField
 				default:
 					hasErrors = true
 					return
@@ -192,9 +223,9 @@ func main() {
 		case `recommend/`:
 		}
 	}
-
 	log.Println("Start listen")
 	if err := fasthttp.ListenAndServe(":80", handler); err != nil {
 		log.Fatal(err)
 	}
+
 }

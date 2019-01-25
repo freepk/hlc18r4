@@ -11,6 +11,8 @@ const (
 	cityField
 	interestField
 	birthYearField
+	fnameField
+	snameField
 )
 
 const (

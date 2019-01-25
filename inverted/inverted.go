@@ -59,7 +59,7 @@ func (inv *Inverted) Rebuild() {
 			}
 			for token := range layout[part][field] {
 				if grow := layout[part][field][token] - cap(inv.layout[part][field][token]); grow > 0 {
-					inv.layout[part][field][token] = append(inv.layout[part][field][token], make([]uint32, grow)...)
+					inv.layout[part][field][token] = append(inv.layout[part][field][token], make([]uint32, grow*105/100)...)
 				}
 				inv.layout[part][field][token] = inv.layout[part][field][token][:0]
 			}
