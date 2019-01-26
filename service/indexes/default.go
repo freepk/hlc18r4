@@ -17,8 +17,10 @@ const (
 const (
 	sexField = iota
 	statusField
+	emailDomainField
 	fnameField
 	snameField
+	snamePrefixField
 	countryField
 	cityField
 	interestField
@@ -45,7 +47,7 @@ type defaultIndexer struct {
 }
 
 func newDefaultIndexer(rep *repo.AccountsRepo) *defaultIndexer {
-	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 10)}
+	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 12)}
 	return &defaultIndexer{pos: 0, doc: doc, rep: rep}
 }
 

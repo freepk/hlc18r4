@@ -68,6 +68,8 @@ func main() {
 			hasErrors := false
 			birthLT := 0
 			birthGT := 0
+			emailLT := []byte{}
+			emailGT := []byte{}
 			fields := proto.IDField | proto.EmailField
 			args.VisitAll(func(k, v []byte) {
 				var next iterator.Iterator
@@ -224,6 +226,14 @@ func main() {
 						return
 					}
 					fields |= proto.PhoneField
+				case `email_lt`:
+					emailLT = v
+					fields |= proto.EmailField
+					return
+				case `email_gt`:
+					emailGT = v
+					fields |= proto.EmailField
+					return
 				default:
 					hasErrors = true
 					return
@@ -251,10 +261,16 @@ func main() {
 					break
 				}
 				*acc = *accountsSvc.Get(2000000 - pseudo)
+				if birthLT > 0 && birthLT < int(acc.BirthTS) {
+					continue
+				}
 				if birthGT > 0 && birthGT > int(acc.BirthTS) {
 					continue
 				}
-				if birthLT > 0 && birthLT < int(acc.BirthTS) {
+				if len(emailLT) > 0 && string(emailLT) < string(acc.Email.Buf[:acc.Email.Len]) {
+					continue
+				}
+				if len(emailGT) > 0 && string(emailLT) > string(acc.Email.Buf[:acc.Email.Len]) {
 					continue
 				}
 				limit--
