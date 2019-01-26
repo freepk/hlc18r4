@@ -14,7 +14,7 @@ import (
 
 const (
 	accountsPerFile = 10000
-	likesPerAccount = 35
+	likesPerAccount = 36
 )
 
 var (
@@ -70,7 +70,9 @@ func readFrom(rep *repo.AccountsRepo, src io.Reader) error {
 					return ReadError
 				} else {
 					dst := *acc
-					dst.LikesTo, likes = append(likes[:0], acc.LikesTo...), likes[len(acc.LikesTo):]
+					x := len(acc.LikesTo) * 105 / 100
+					dst.LikesTo, likes = likes[:0:x], likes[x:]
+					dst.LikesTo = append(dst.LikesTo, acc.LikesTo...)
 					rep.Set(id, &dst)
 				}
 			}

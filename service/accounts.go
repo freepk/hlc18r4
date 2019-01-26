@@ -13,13 +13,13 @@ import (
 )
 
 type AccountsService struct {
-	rep           *repo.AccountsRepo
-	accountsPool  *sync.Pool
-	emailsLock    *sync.Mutex
-	emails        map[uint64]int
-	defaultIndex  *indexes.DefaultIndex
-	countryIndex  *indexes.CountryIndex
-	likeFromIndex *indexes.LikeIndex
+	rep          *repo.AccountsRepo
+	accountsPool *sync.Pool
+	emailsLock   *sync.Mutex
+	emails       map[uint64]int
+	defaultIndex *indexes.DefaultIndex
+	countryIndex *indexes.CountryIndex
+	likeIndex    *indexes.LikeIndex
 }
 
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
@@ -41,22 +41,22 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 	defaultIndex.Rebuild()
 	countryIndex := indexes.NewCountryIndex(rep)
 	countryIndex.Rebuild()
-	likeFromIndex := indexes.NewLikeIndex(rep)
-	likeFromIndex.Rebuild()
+	likeIndex := indexes.NewLikeIndex(rep)
+	likeIndex.Rebuild()
 	return &AccountsService{
-		rep:           rep,
-		accountsPool:  accountsPool,
-		emailsLock:    emailsLock,
-		emails:        emails,
-		defaultIndex:  defaultIndex,
-		countryIndex:  countryIndex,
-		likeFromIndex: likeFromIndex}
+		rep:          rep,
+		accountsPool: accountsPool,
+		emailsLock:   emailsLock,
+		emails:       emails,
+		defaultIndex: defaultIndex,
+		countryIndex: countryIndex,
+		likeIndex:    likeIndex}
 }
 
 func (svc *AccountsService) RebuildIndexes() {
 	svc.defaultIndex.Rebuild()
 	svc.countryIndex.Rebuild()
-	svc.likeFromIndex.Rebuild()
+	svc.likeIndex.Rebuild()
 }
 
 func (svc *AccountsService) Exists(id int) bool {

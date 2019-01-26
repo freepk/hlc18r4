@@ -39,56 +39,36 @@ func NewLikeIndex(rep *repo.AccountsRepo) *LikeIndex {
 }
 
 func (idx *LikeIndex) Rebuild() {
+	var acc proto.Account
 	n := idx.rep.Len()
-	acc := &proto.Account{}
+	need := make([]int, n)
 	for id := 0; id < n; id++ {
-		*acc = *idx.rep.Get(id)
-		prev := uint32(0)
-		for i, like := range acc.LikesTo {
-			if like.TS < prev && i > 0 {
-				println("prev", prev, "TS", like.TS)
-			}
-			prev = like.TS
+		acc = *idx.rep.Get(id)
+		for _, like := range acc.LikesTo {
+			need[like.ID]++
 		}
 	}
-	/*
-		
-		
-		grow := make([]int, n)
-		for id := 0; id < n; id++ {
-			*acc = *idx.rep.Get(id)
-			for i := range acc.LikesTo {
-				if acc.LikesTo[i].TS > idx.last {
-					grow[id]++
-				}
+	grow := 0
+	for id, x := range need {
+		if x > cap(idx.likes[id]) {
+			grow += x * 105 / 100
+		}
+	}
+	likes := make([]proto.Like, grow)
+	for i := 0; i < n; i++ {
+		id := n - i - 1
+		acc = *idx.rep.Get(id)
+		for _, like := range acc.LikesTo {
+			x := need[like.ID]
+			if x > cap(idx.likes[like.ID]) {
+				idx.likes[like.ID], likes = likes[:0:x], likes[x:]
+			}
+			if x > len(idx.likes[like.ID]) {
+				pseudo := 2000000 - uint32(id)
+				idx.likes[like.ID] = append(idx.likes[like.ID], proto.Like{ID: pseudo, TS: like.TS})
 			}
 		}
-		total := 0
-		for id := 0; id < n; id++ {
-			need := grow[id] + len(idx.likes[id])
-			if need > cap(idx.likes[id]) {
-				total += need * 105 / 100
-			}
-		}
-		likes := make([]proto.Like, total)
-		for id := 0; id < n; id++ {
-			if grow[id] == 0 {
-				continue
-			}
-			need := grow[id] + len(idx.likes[id])
-			if need > cap(idx.likes[id]) {
-				need = need * 105 / 100
-				n := copy(likes, idx.likes[id])
-				idx.likes[id], likes = likes[:n:need], likes[need:]
-			}
-			*acc = *idx.rep.Get(id)
-			for i := range acc.LikesTo {
-				ts := acc.LikesTo[i].TS
-				if ts > idx.last {
-				}
-			}
-		}
-	*/
+	}
 }
 
 func (idx *LikeIndex) Iterator(id int) *LikeIter {
