@@ -2,13 +2,11 @@ package inverted
 
 type ArrayIter struct {
 	a []uint32
-	n int
 	i int
 }
 
 func NewArrayIter(a []uint32) *ArrayIter {
-	n := len(a)
-	return &ArrayIter{a: a, n: n, i: 0}
+	return &ArrayIter{a: a, i: 0}
 }
 
 func (it *ArrayIter) Reset() {
@@ -17,7 +15,7 @@ func (it *ArrayIter) Reset() {
 
 func (it *ArrayIter) Next() (int, bool) {
 	i := it.i
-	if i < it.n {
+	if i < len(it.a) {
 		it.i++
 		return int(it.a[i]), true
 	}
