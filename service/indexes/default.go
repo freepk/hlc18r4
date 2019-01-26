@@ -1,11 +1,7 @@
 package indexes
 
 import (
-	"io/ioutil"
-	"log"
-
 	"gitlab.com/freepk/hlc18r4/inverted"
-	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
 )
@@ -17,7 +13,6 @@ const (
 const (
 	sexField = iota
 	statusField
-	emailDomainField
 	fnameField
 	snameField
 	snamePrefixField
@@ -26,19 +21,9 @@ const (
 	interestField
 	birthYearField
 	premiumField
-	phoneField
+	phoneCodeField
+	emailDomainField
 )
-
-var currentTime int
-
-func init() {
-	if options, err := ioutil.ReadFile("tmp/data/options.txt"); err == nil {
-		if _, now, ok := parse.ParseInt(options); ok {
-			currentTime = now
-		}
-	}
-	log.Println("Current time", currentTime)
-}
 
 type defaultIndexer struct {
 	pos int
@@ -109,21 +94,25 @@ func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.
 		}
 		doc.Tokens[interestField] = append(doc.Tokens[interestField], int(acc.Interests[i]))
 	}
-	if token, ok := GetBirthYearTokenByTS(acc.Birth[:]); ok {
-		doc.Tokens[birthYearField] = append(doc.Tokens[birthYearField], token)
-	}
+	doc.Tokens[birthYearField] = append(doc.Tokens[birthYearField], birthYearTokenTS(int(acc.BirthTS)))
 	if acc.PremiumFinish[0] > 0 {
 		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NotNullToken)
-		if _, finish, ok := parse.ParseInt(acc.PremiumFinish[:]); ok && finish > currentTime {
-			doc.Tokens[premiumField] = append(doc.Tokens[premiumField], PremiumNowToken)
-		}
 	} else {
 		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], NullToken)
 	}
+	if premiumNow(acc.PremiumFinish[:]) {
+		doc.Tokens[premiumField] = append(doc.Tokens[premiumField], PremiumNowToken)
+	}
 	if acc.Phone[0] > 0 {
-		doc.Tokens[phoneField] = append(doc.Tokens[phoneField], NotNullToken)
+		doc.Tokens[phoneCodeField] = append(doc.Tokens[phoneCodeField], NotNullToken)
 	} else {
-		doc.Tokens[phoneField] = append(doc.Tokens[phoneField], NullToken)
+		doc.Tokens[phoneCodeField] = append(doc.Tokens[phoneCodeField], NullToken)
+	}
+	if code, ok := phoneCode(acc.Phone[:]); ok {
+		doc.Tokens[phoneCodeField] = append(doc.Tokens[phoneCodeField], phoneCodeToken(code))
+	}
+	if domain, ok := emailDomain(acc.Email.Buf[:acc.Email.Len]); ok {
+		doc.Tokens[emailDomainField] = append(doc.Tokens[emailDomainField], emailDomainToken(domain))
 	}
 	return doc
 }
@@ -193,6 +182,10 @@ func (idx *DefaultIndex) Premium(token int) *inverted.ArrayIter {
 	return idx.inv.Iterator(defaultPartition, premiumField, token)
 }
 
-func (idx *DefaultIndex) Phone(token int) *inverted.ArrayIter {
-	return idx.inv.Iterator(defaultPartition, phoneField, token)
+func (idx *DefaultIndex) PhoneCode(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, phoneCodeField, token)
+}
+
+func (idx *DefaultIndex) EmailDomain(token int) *inverted.ArrayIter {
+	return idx.inv.Iterator(defaultPartition, emailDomainField, token)
 }

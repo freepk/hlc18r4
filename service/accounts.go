@@ -329,7 +329,7 @@ func (svc *AccountsService) ByInterestsContains(interests []byte) iterator.Itera
 }
 
 func (svc *AccountsService) ByBirthYear(year []byte) iterator.Iterator {
-	if token, ok := indexes.GetBirthYearTokenByYear(year); ok {
+	if token, ok := indexes.GetBirthYearToken(year); ok {
 		if iter := svc.defaultIndex.BirthYear(token); iter != nil {
 			return iter
 		}
@@ -350,7 +350,22 @@ func (svc *AccountsService) ByPremiumNull(null []byte) iterator.Iterator {
 
 func (svc *AccountsService) ByPhoneNull(null []byte) iterator.Iterator {
 	if token, ok := indexes.GetNullToken(null); ok {
-		return svc.defaultIndex.Phone(token)
+		return svc.defaultIndex.PhoneCode(token)
 	}
 	return nil
 }
+
+func (svc *AccountsService) ByPhoneCode(code []byte) iterator.Iterator {
+        if token, ok := indexes.GetPhoneCodeToken(code); ok {
+                return svc.defaultIndex.PhoneCode(token)
+        }
+        return nil
+}
+
+func (svc *AccountsService) ByEmailDomain(domain []byte) iterator.Iterator {
+        if token, ok := indexes.GetEmailDomainToken(domain); ok {
+                return svc.defaultIndex.EmailDomain(token)
+        }
+        return nil
+}
+

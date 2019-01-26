@@ -1,8 +1,12 @@
 package indexes
 
 import (
+	"log"
+	"io/ioutil"
+	"bytes"
 	"time"
 
+	"gitlab.com/freepk/hlc18r4/dictionary"
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 )
@@ -29,6 +33,22 @@ const (
 const (
 	PremiumNowToken = 4
 )
+
+var (
+	phoneCodeDict   = dictionary.NewDictionary(4)
+	emailDomainDict = dictionary.NewDictionary(4)
+)
+
+var currentTime int
+
+func init() {
+	if options, err := ioutil.ReadFile("tmp/data/options.txt"); err == nil {
+		if _, now, ok := parse.ParseInt(options); ok {
+			currentTime = now
+		}
+	}
+	log.Println("Current time", currentTime)
+}
 
 func GetNullToken(b []byte) (int, bool) {
 	switch string(b) {
@@ -94,24 +114,64 @@ func GetInterestToken(b []byte) (int, bool) {
 	return proto.GetInterestToken(b)
 }
 
-func birthYearToken(year int) (int, bool) {
-	if year > 1960 && year < 2020 {
-		return year - 1970, true
-	}
-	return 0, false
+func birthYearToken(year int) int {
+	return year - 1950
 }
 
-func GetBirthYearTokenByTS(b []byte) (int, bool) {
-	if _, ts, ok := parse.ParseInt(b); ok {
-		year := time.Unix(int64(ts), 0).UTC().Year()
-		return birthYearToken(year)
-	}
-	return 0, false
+func birthYearTokenTS(ts int) int {
+	year := time.Unix(int64(ts), 0).UTC().Year()
+	return birthYearToken(year)
 }
 
-func GetBirthYearTokenByYear(b []byte) (int, bool) {
+func GetBirthYearToken(b []byte) (int, bool) {
 	if _, year, ok := parse.ParseInt(b); ok {
-		return birthYearToken(year)
+		return birthYearToken(year), true
 	}
 	return 0, false
+}
+
+func GetBirthYearTokenTS(b []byte) (int, bool) {
+	if _, ts, ok := parse.ParseInt(b); ok {
+		return birthYearTokenTS(ts), true
+	}
+	return 0, false
+}
+
+func premiumNow(b []byte) bool {
+	if _, premium, ok := parse.ParseInt(b); ok && premium > currentTime {
+		return true
+	}
+	return false
+}
+
+func phoneCode(b []byte) ([]byte, bool) {
+	if len(b) > 5 && b[1] == '(' && b[5] == ')' {
+		return b[2:5], true
+	}
+	return nil, false
+}
+
+func phoneCodeToken(b []byte) int {
+	token, _ := phoneCodeDict.AddToken(b)
+	return token
+}
+
+func GetPhoneCodeToken(b []byte) (int, bool) {
+	return phoneCodeDict.Token(b)
+}
+
+func emailDomain(b []byte) ([]byte, bool) {
+	if tilda := bytes.IndexByte(b, 0x40) + 1; tilda > 0 {
+		return b[tilda:], true
+	}
+	return nil, false
+}
+
+func emailDomainToken(b []byte) int {
+	token, _ := emailDomainDict.AddToken(b)
+	return token
+}
+
+func GetEmailDomainToken(b []byte) (int, bool) {
+	return emailDomainDict.Token(b)
 }
