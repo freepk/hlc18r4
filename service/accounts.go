@@ -14,6 +14,7 @@ import (
 
 type AccountsService struct {
 	rep          *repo.AccountsRepo
+	accountsPool *sync.Pool
 	emailsLock   *sync.Mutex
 	emails       map[uint64]int
 	defaultIndex *indexes.DefaultIndex
@@ -21,6 +22,9 @@ type AccountsService struct {
 }
 
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
+	accountsPool := &sync.Pool{New: func() interface{} {
+		return &proto.Account{}
+	}}
 	emailsLock := &sync.Mutex{}
 	emails := make(map[uint64]int, rep.Len())
 	acc := &proto.Account{}
@@ -38,6 +42,7 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 	countryIndex.Rebuild()
 	return &AccountsService{
 		rep:          rep,
+		accountsPool: accountsPool,
 		emailsLock:   emailsLock,
 		emails:       emails,
 		defaultIndex: defaultIndex,
@@ -74,7 +79,7 @@ func (svc *AccountsService) Get(id int) *proto.Account {
 }
 
 func (svc *AccountsService) Create(data []byte) bool {
-	src := &proto.Account{}
+	src := svc.accountsPool.Get().(*proto.Account)
 	if _, ok := src.UnmarshalJSON(data); !ok {
 		return false
 	}
@@ -93,6 +98,7 @@ func (svc *AccountsService) Create(data []byte) bool {
 	dst.LikesTo = make([]proto.Like, len(src.LikesTo))
 	copy(dst.LikesTo, src.LikesTo)
 	svc.rep.Set(id, &dst)
+	svc.accountsPool.Put(src)
 	return true
 }
 
@@ -101,7 +107,7 @@ func (svc *AccountsService) Update(id int, buf []byte) bool {
 	if dst == nil || dst.Email.Len == 0 {
 		return false
 	}
-	src := &proto.Account{}
+	src := svc.accountsPool.Get().(*proto.Account)
 	if _, ok := src.UnmarshalJSON(buf); !ok {
 		return false
 	}
@@ -146,6 +152,7 @@ func (svc *AccountsService) Update(id int, buf []byte) bool {
 		dst.LikesTo = append(dst.LikesTo[:0], src.LikesTo...)
 	}
 	svc.rep.Set(id, dst)
+	svc.accountsPool.Put(src)
 	return true
 }
 
