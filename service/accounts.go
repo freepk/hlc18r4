@@ -356,16 +356,15 @@ func (svc *AccountsService) ByPhoneNull(null []byte) iterator.Iterator {
 }
 
 func (svc *AccountsService) ByPhoneCode(code []byte) iterator.Iterator {
-        if token, ok := indexes.GetPhoneCodeToken(code); ok {
-                return svc.defaultIndex.PhoneCode(token)
-        }
-        return nil
+	if token, ok := indexes.GetPhoneCodeToken(code); ok {
+		return svc.defaultIndex.PhoneCode(token)
+	}
+	return nil
 }
 
 func (svc *AccountsService) ByEmailDomain(domain []byte) iterator.Iterator {
-        if token, ok := indexes.GetEmailDomainToken(domain); ok {
-                return svc.defaultIndex.EmailDomain(token)
-        }
-        return nil
+	if token, ok := indexes.GetEmailDomainToken(domain); ok {
+		return svc.defaultIndex.EmailDomain(token)
+	}
+	return nil
 }
-
