@@ -58,24 +58,23 @@ func (idx *LikeIndex) Rebuild() {
 		}
 	}
 	likes := make([]proto.Like, total)
-	last := idx.last
 	for id := 0; id < n; id++ {
 		if grow[id] == 0 {
 			continue
 		}
 		need := grow[id] + len(idx.likes[id])
 		if need > cap(idx.likes[id]) {
+			need = need * 105 / 100
 			n := copy(likes, idx.likes[id])
-			idx.likes[id] = likes[:n:need]
-			likes = likes[need:]
+			idx.likes[id], likes = likes[:n:need], likes[need:]
 		}
 		*acc = *idx.rep.Get(id)
 		for i := range acc.LikesTo {
-			if acc.LikesTo[i].TS > last {
+			ts := acc.LikesTo[i].TS
+			if ts > idx.last {
 			}
 		}
 	}
-
 }
 
 func (idx *LikeIndex) Iterator(id int) *LikeIter {
