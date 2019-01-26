@@ -1,9 +1,9 @@
 package indexes
 
 import (
-	"log"
-	"io/ioutil"
 	"bytes"
+	"io/ioutil"
+	"log"
 	"time"
 
 	"gitlab.com/freepk/hlc18r4/dictionary"
