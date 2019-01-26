@@ -40,16 +40,42 @@ func NewLikeIndex(rep *repo.AccountsRepo) *LikeIndex {
 
 func (idx *LikeIndex) Rebuild() {
 	n := idx.rep.Len()
-	want := make([]uint32, n)
+	grow := make([]int, n)
 	acc := &proto.Account{}
 	for id := 0; id < n; id++ {
 		*acc = *idx.rep.Get(id)
 		for i := range acc.LikesTo {
 			if acc.LikesTo[i].TS > idx.last {
-				want[id]++
+				grow[id]++
 			}
 		}
 	}
+	total := 0
+	for id := 0; id < n; id++ {
+		need := grow[id] + len(idx.likes[id])
+		if need > cap(idx.likes[id]) {
+			total += need * 105 / 100
+		}
+	}
+	likes := make([]proto.Like, total)
+	last := idx.last
+	for id := 0; id < n; id++ {
+		if grow[id] == 0 {
+			continue
+		}
+		need := grow[id] + len(idx.likes[id])
+		if need > cap(idx.likes[id]) {
+			n := copy(likes, idx.likes[id])
+			idx.likes[id] = likes[:n:need]
+			likes = likes[need:]
+		}
+		*acc = *idx.rep.Get(id)
+		for i := range acc.LikesTo {
+			if acc.LikesTo[i].TS > last {
+			}
+		}
+	}
+
 }
 
 func (idx *LikeIndex) Iterator(id int) *LikeIter {
