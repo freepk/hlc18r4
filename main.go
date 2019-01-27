@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"runtime"
 	"sync/atomic"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 )
 
 func main() {
+	log.Println("NumCPU", runtime.NumCPU())
 	log.Println("Restoring accounts")
 	rep, err := backup.Restore("tmp/data/data.zip")
 	if err != nil {
