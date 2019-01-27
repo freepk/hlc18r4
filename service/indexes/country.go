@@ -6,24 +6,24 @@ import (
 	"gitlab.com/freepk/hlc18r4/repo"
 )
 
-type countryIndexer struct {
+type countryIter struct {
 	pos int
 	acc *proto.Account
 	doc *inverted.Document
 	rep *repo.AccountsRepo
 }
 
-func newCountryIndexer(rep *repo.AccountsRepo) *countryIndexer {
+func newCountryIter(rep *repo.AccountsRepo) *countryIter {
 	acc := &proto.Account{}
 	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Fields: make([][]int, 5)}
-	return &countryIndexer{pos: 0, acc: acc, doc: doc, rep: rep}
+	return &countryIter{pos: 0, acc: acc, doc: doc, rep: rep}
 }
 
-func (ix *countryIndexer) Reset() {
+func (ix *countryIter) Reset() {
 	ix.pos = 0
 }
 
-func (ix *countryIndexer) Next() (*inverted.Document, bool) {
+func (ix *countryIter) Next() (*inverted.Document, bool) {
 	n := ix.rep.Len()
 	for i := ix.pos; i < n; i++ {
 		id := n - i - 1
@@ -36,7 +36,7 @@ func (ix *countryIndexer) Next() (*inverted.Document, bool) {
 	return nil, false
 }
 
-func (ix *countryIndexer) resetDocument() *inverted.Document {
+func (ix *countryIter) resetDocument() *inverted.Document {
 	doc := ix.doc
 	doc.ID = 0
 	doc.Parts = doc.Parts[:0]
@@ -46,7 +46,7 @@ func (ix *countryIndexer) resetDocument() *inverted.Document {
 	return doc
 }
 
-func (ix *countryIndexer) processDocument(id int, acc *proto.Account) *inverted.Document {
+func (ix *countryIter) processDocument(id int, acc *proto.Account) *inverted.Document {
 	doc := ix.resetDocument()
 	doc.ID = 2000000 - id
 	if acc.Country > 0 {
@@ -76,7 +76,7 @@ type CountryIndex struct {
 }
 
 func NewCountryIndex(rep *repo.AccountsRepo) *CountryIndex {
-	src := newCountryIndexer(rep)
+	src := newCountryIter(rep)
 	inv := inverted.NewInverted(src)
 	return &CountryIndex{inv: inv}
 }

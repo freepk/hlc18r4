@@ -25,24 +25,24 @@ const (
 	emailDomainField
 )
 
-type defaultIndexer struct {
+type defaultIter struct {
 	pos int
 	acc *proto.Account
 	doc *inverted.Document
 	rep *repo.AccountsRepo
 }
 
-func newDefaultIndexer(rep *repo.AccountsRepo) *defaultIndexer {
+func newDefaultIter(rep *repo.AccountsRepo) *defaultIter {
 	acc := &proto.Account{}
 	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Fields: make([][]int, 12)}
-	return &defaultIndexer{pos: 0, acc: acc, doc: doc, rep: rep}
+	return &defaultIter{pos: 0, acc: acc, doc: doc, rep: rep}
 }
 
-func (ix *defaultIndexer) Reset() {
+func (ix *defaultIter) Reset() {
 	ix.pos = 0
 }
 
-func (ix *defaultIndexer) Next() (*inverted.Document, bool) {
+func (ix *defaultIter) Next() (*inverted.Document, bool) {
 	n := ix.rep.Len()
 	for i := ix.pos; i < n; i++ {
 		id := n - i - 1
@@ -55,7 +55,7 @@ func (ix *defaultIndexer) Next() (*inverted.Document, bool) {
 	return nil, false
 }
 
-func (ix *defaultIndexer) resetDocument() *inverted.Document {
+func (ix *defaultIter) resetDocument() *inverted.Document {
 	doc := ix.doc
 	doc.ID = 0
 	doc.Parts = doc.Parts[:0]
@@ -65,7 +65,7 @@ func (ix *defaultIndexer) resetDocument() *inverted.Document {
 	return doc
 }
 
-func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.Document {
+func (ix *defaultIter) processDocument(id int, acc *proto.Account) *inverted.Document {
 	doc := ix.resetDocument()
 	doc.ID = 2000000 - id
 	doc.Parts = append(doc.Parts, defaultPartition)
@@ -137,7 +137,7 @@ type DefaultIndex struct {
 }
 
 func NewDefaultIndex(rep *repo.AccountsRepo) *DefaultIndex {
-	src := newDefaultIndexer(rep)
+	src := newDefaultIter(rep)
 	inv := inverted.NewInverted(src)
 	return &DefaultIndex{inv: inv}
 }
