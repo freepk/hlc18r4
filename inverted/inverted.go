@@ -156,7 +156,8 @@ func (inv *Inverted) Rebuild() {
 				for t := range doc.Fields[f] {
 					token := &field.tokens[doc.Fields[f][t]]
 					if token.count > cap(token.refs) {
-						token.refs = make([]Ref, 0, token.count*105/100)
+						grow := token.count * 110 / 100
+						token.refs = make([]Ref, 0, grow)
 					}
 					token.refs = append(token.refs, Ref(doc.ID))
 				}
