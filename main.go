@@ -2,7 +2,10 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
 	"runtime"
+	"runtime/pprof"
 	"sync/atomic"
 	"time"
 
@@ -15,6 +18,18 @@ import (
 )
 
 func main() {
+	if true {
+		if fd, err := os.Create("cpu.prof"); err == nil {
+			pprof.StartCPUProfile(fd)
+			defer pprof.StopCPUProfile()
+		}
+		defer func() {
+			if fd, err := os.Create("mem.prof"); err == nil {
+				runtime.GC()
+				pprof.WriteHeapProfile(fd)
+			}
+		}()
+	}
 	log.Println("NumCPU", runtime.NumCPU())
 	log.Println("Restoring accounts")
 	rep, err := backup.Restore("tmp/data/data.zip")
@@ -334,8 +349,13 @@ func main() {
 		case `recommend/`:
 		}
 	}
-	log.Println("Start listen")
-	if err := fasthttp.ListenAndServe(":80", handler); err != nil {
-		log.Fatal(err)
-	}
+	go func() {
+		log.Println("Start listen")
+		if err := fasthttp.ListenAndServe(":80", handler); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, os.Interrupt)
+	<-ch
 }
