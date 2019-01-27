@@ -21,19 +21,41 @@ func (ix *countryIndexer) Reset() {
 	ix.pos = 0
 }
 
+func (ix *countryIndexer) Next() (*inverted.Document, bool) {
+	if id, ok := ix.next(); ok {
+		return ix.processDocument(id), true
+	}
+	return nil, false
+}
+
+func (ix *countryIndexer) next() (int, bool) {
+	n := ix.rep.Len()
+	acc := proto.Account{}
+	for i := ix.pos; i < n; i++ {
+		id := n - i - 1
+		acc = *ix.rep.Get(id)
+		if acc.Email.Len > 0 {
+			ix.pos = i + 1
+			return id, true
+		}
+	}
+	return 0, false
+}
+
 func (ix *countryIndexer) resetDocument() *inverted.Document {
 	doc := ix.doc
 	doc.ID = 0
 	doc.Parts = doc.Parts[:0]
-	for index := range doc.Tokens {
-		doc.Tokens[index] = doc.Tokens[index][:0]
+	for field := range doc.Tokens {
+		doc.Tokens[field] = doc.Tokens[field][:0]
 	}
 	return doc
 }
 
-func (ix *countryIndexer) processDocument(id int, acc *proto.Account) *inverted.Document {
+func (ix *countryIndexer) processDocument(id int) *inverted.Document {
+	acc := *ix.rep.Get(id)
 	doc := ix.resetDocument()
-	doc.ID = id
+	doc.ID = 2000000 - id
 	if acc.Country > 0 {
 		doc.Parts = append(doc.Parts, NotNullToken, int(acc.Country))
 	} else {
@@ -54,21 +76,6 @@ func (ix *countryIndexer) processDocument(id int, acc *proto.Account) *inverted.
 		doc.Tokens[statusField] = append(doc.Tokens[statusField], ComplToken, NotSingleToken, NotInRelToken)
 	}
 	return doc
-}
-
-func (ix *countryIndexer) Next() (*inverted.Document, bool) {
-	var acc proto.Account
-	n := ix.rep.Len()
-	for i := ix.pos; i < n; i++ {
-		id := n - i - 1
-		acc = *ix.rep.Get(id)
-		if acc.Email.Len > 0 {
-			ix.pos = i + 1
-			pseudo := 2000000 - id
-			return ix.processDocument(pseudo, &acc), true
-		}
-	}
-	return nil, false
 }
 
 type CountryIndex struct {
