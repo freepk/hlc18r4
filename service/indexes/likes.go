@@ -58,7 +58,8 @@ func (idx *LikeIndex) Rebuild() {
 		}
 	}
 	likes := make([]proto.Like, grow)
-	for liker := 0; liker < n; liker++ {
+	for i := 0; i < n; i++ {
+		liker := n - i - 1
 		acc = *idx.rep.Get(liker)
 		for _, like := range acc.LikesTo {
 			likee := like.ID
