@@ -8,13 +8,15 @@ import (
 
 type countryIndexer struct {
 	pos int
+	acc *proto.Account
 	doc *inverted.Document
 	rep *repo.AccountsRepo
 }
 
 func newCountryIndexer(rep *repo.AccountsRepo) *countryIndexer {
+	acc := &proto.Account{}
 	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 5)}
-	return &countryIndexer{pos: 0, doc: doc, rep: rep}
+	return &countryIndexer{pos: 0, acc: acc, doc: doc, rep: rep}
 }
 
 func (ix *countryIndexer) Reset() {
@@ -22,24 +24,16 @@ func (ix *countryIndexer) Reset() {
 }
 
 func (ix *countryIndexer) Next() (*inverted.Document, bool) {
-	if id, ok := ix.next(); ok {
-		return ix.processDocument(id), true
-	}
-	return nil, false
-}
-
-func (ix *countryIndexer) next() (int, bool) {
 	n := ix.rep.Len()
-	acc := proto.Account{}
 	for i := ix.pos; i < n; i++ {
 		id := n - i - 1
-		acc = *ix.rep.Get(id)
-		if acc.Email.Len > 0 {
+		*ix.acc = *ix.rep.Get(id)
+		if ix.acc.Email.Len > 0 {
 			ix.pos = i + 1
-			return id, true
+			return ix.processDocument(id, ix.acc), true
 		}
 	}
-	return 0, false
+	return nil, false
 }
 
 func (ix *countryIndexer) resetDocument() *inverted.Document {
@@ -52,8 +46,7 @@ func (ix *countryIndexer) resetDocument() *inverted.Document {
 	return doc
 }
 
-func (ix *countryIndexer) processDocument(id int) *inverted.Document {
-	acc := *ix.rep.Get(id)
+func (ix *countryIndexer) processDocument(id int, acc *proto.Account) *inverted.Document {
 	doc := ix.resetDocument()
 	doc.ID = 2000000 - id
 	if acc.Country > 0 {

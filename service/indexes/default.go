@@ -27,13 +27,15 @@ const (
 
 type defaultIndexer struct {
 	pos int
+	acc *proto.Account
 	doc *inverted.Document
 	rep *repo.AccountsRepo
 }
 
 func newDefaultIndexer(rep *repo.AccountsRepo) *defaultIndexer {
+	acc := &proto.Account{}
 	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 12)}
-	return &defaultIndexer{pos: 0, doc: doc, rep: rep}
+	return &defaultIndexer{pos: 0, acc: acc, doc: doc, rep: rep}
 }
 
 func (ix *defaultIndexer) Reset() {
@@ -41,24 +43,16 @@ func (ix *defaultIndexer) Reset() {
 }
 
 func (ix *defaultIndexer) Next() (*inverted.Document, bool) {
-	if id, ok := ix.next(); ok {
-		return ix.processDocument(id), true
-	}
-	return nil, false
-}
-
-func (ix *defaultIndexer) next() (int, bool) {
 	n := ix.rep.Len()
-	acc := proto.Account{}
 	for i := ix.pos; i < n; i++ {
 		id := n - i - 1
-		acc = *ix.rep.Get(id)
-		if acc.Email.Len > 0 {
+		*ix.acc = *ix.rep.Get(id)
+		if ix.acc.Email.Len > 0 {
 			ix.pos = i + 1
-			return id, true
+			return ix.processDocument(id, ix.acc), true
 		}
 	}
-	return 0, false
+	return nil, false
 }
 
 func (ix *defaultIndexer) resetDocument() *inverted.Document {
@@ -71,8 +65,7 @@ func (ix *defaultIndexer) resetDocument() *inverted.Document {
 	return doc
 }
 
-func (ix *defaultIndexer) processDocument(id int) *inverted.Document {
-	acc := *ix.rep.Get(id)
+func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.Document {
 	doc := ix.resetDocument()
 	doc.ID = 2000000 - id
 	doc.Parts = append(doc.Parts, defaultPartition)
@@ -130,12 +123,12 @@ func (ix *defaultIndexer) processDocument(id int) *inverted.Document {
 	} else {
 		doc.Tokens[phoneCodeField] = append(doc.Tokens[phoneCodeField], NullToken)
 	}
-	//if code, ok := phoneCode(acc.Phone); ok {
-	//	doc.Tokens[phoneCodeField] = append(doc.Tokens[phoneCodeField], phoneCodeToken(code))
-	//}
-	//if domain, ok := emailDomain(acc.Email.Buf[:acc.Email.Len]); ok {
-	//	doc.Tokens[emailDomainField] = append(doc.Tokens[emailDomainField], emailDomainToken(domain))
-	//}
+	if code, ok := phoneCode(acc.Phone[:]); ok {
+		doc.Tokens[phoneCodeField] = append(doc.Tokens[phoneCodeField], phoneCodeToken(code))
+	}
+	if domain, ok := emailDomain(acc.Email.Buf[:acc.Email.Len]); ok {
+		doc.Tokens[emailDomainField] = append(doc.Tokens[emailDomainField], emailDomainToken(domain))
+	}
 	return doc
 }
 
