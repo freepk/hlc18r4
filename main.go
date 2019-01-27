@@ -90,6 +90,7 @@ func main() {
 			birthGT := 0
 			emailLT := []byte{}
 			emailGT := []byte{}
+			snameStarts := []byte{}
 			fields := proto.IDField | proto.EmailField
 			args.VisitAll(func(k, v []byte) {
 				var next iterator.Iterator
@@ -155,6 +156,10 @@ func main() {
 						return
 					}
 					fields |= proto.SnameField
+				case `sname_starts`:
+					snameStarts = v
+					fields |= proto.SnameField
+					return
 				case `sname_null`:
 					if next = accountsSvc.BySnameNull(v); next == nil {
 						hasErrors = true
@@ -306,6 +311,12 @@ func main() {
 				}
 				if len(emailGT) > 0 && string(emailGT) > string(acc.Email.Buf[:acc.Email.Len]) {
 					continue
+				}
+				if n := len(snameStarts); n > 0 {
+					sname := acc.GetSname()
+					if n > len(sname) || string(snameStarts) != string(sname[:n]) {
+						continue
+					}
 				}
 				limit--
 				if comma {
