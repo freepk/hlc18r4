@@ -15,7 +15,7 @@ type countryIndexer struct {
 
 func newCountryIndexer(rep *repo.AccountsRepo) *countryIndexer {
 	acc := &proto.Account{}
-	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Tokens: make([][]int, 5)}
+	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Fields: make([][]int, 5)}
 	return &countryIndexer{pos: 0, acc: acc, doc: doc, rep: rep}
 }
 
@@ -40,8 +40,8 @@ func (ix *countryIndexer) resetDocument() *inverted.Document {
 	doc := ix.doc
 	doc.ID = 0
 	doc.Parts = doc.Parts[:0]
-	for field := range doc.Tokens {
-		doc.Tokens[field] = doc.Tokens[field][:0]
+	for field := range doc.Fields {
+		doc.Fields[field] = doc.Fields[field][:0]
 	}
 	return doc
 }
@@ -56,17 +56,17 @@ func (ix *countryIndexer) processDocument(id int, acc *proto.Account) *inverted.
 	}
 	switch acc.Sex {
 	case proto.MaleSex:
-		doc.Tokens[sexField] = append(doc.Tokens[sexField], MaleToken)
+		doc.Fields[sexField] = append(doc.Fields[sexField], MaleToken)
 	case proto.FemaleSex:
-		doc.Tokens[sexField] = append(doc.Tokens[sexField], FemaleToken)
+		doc.Fields[sexField] = append(doc.Fields[sexField], FemaleToken)
 	}
 	switch acc.Status {
 	case proto.SingleStatus:
-		doc.Tokens[statusField] = append(doc.Tokens[statusField], SingleToken, NotInRelToken, NotComplToken)
+		doc.Fields[statusField] = append(doc.Fields[statusField], SingleToken, NotInRelToken, NotComplToken)
 	case proto.InRelStatus:
-		doc.Tokens[statusField] = append(doc.Tokens[statusField], InRelToken, NotSingleToken, NotComplToken)
+		doc.Fields[statusField] = append(doc.Fields[statusField], InRelToken, NotSingleToken, NotComplToken)
 	case proto.ComplStatus:
-		doc.Tokens[statusField] = append(doc.Tokens[statusField], ComplToken, NotSingleToken, NotInRelToken)
+		doc.Fields[statusField] = append(doc.Fields[statusField], ComplToken, NotSingleToken, NotInRelToken)
 	}
 	return doc
 }
@@ -85,10 +85,10 @@ func (idx *CountryIndex) Rebuild() {
 	idx.inv.Rebuild()
 }
 
-func (idx *CountryIndex) Sex(country, sex int) *inverted.ArrayIter {
+func (idx *CountryIndex) Sex(country, sex int) *inverted.TokenIter {
 	return idx.inv.Iterator(country, sexField, sex)
 }
 
-func (idx *CountryIndex) Status(country, status int) *inverted.ArrayIter {
+func (idx *CountryIndex) Status(country, status int) *inverted.TokenIter {
 	return idx.inv.Iterator(country, statusField, status)
 }
