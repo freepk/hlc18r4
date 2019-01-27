@@ -40,6 +40,27 @@ func (ix *defaultIndexer) Reset() {
 	ix.pos = 0
 }
 
+func (ix *defaultIndexer) Next() (*inverted.Document, bool) {
+	if id, ok := ix.next(); ok {
+		return ix.processDocument(id), true
+	}
+	return nil, false
+}
+
+func (ix *defaultIndexer) next() (int, bool) {
+	n := ix.rep.Len()
+	acc := proto.Account{}
+	for i := ix.pos; i < n; i++ {
+		id := n - i - 1
+		acc = *ix.rep.Get(id)
+		if acc.Email.Len > 0 {
+			ix.pos = i + 1
+			return id, true
+		}
+	}
+	return 0, false
+}
+
 func (ix *defaultIndexer) resetDocument() *inverted.Document {
 	doc := ix.doc
 	doc.ID = 0
@@ -50,9 +71,10 @@ func (ix *defaultIndexer) resetDocument() *inverted.Document {
 	return doc
 }
 
-func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.Document {
+func (ix *defaultIndexer) processDocument(id int) *inverted.Document {
+	acc := *ix.rep.Get(id)
 	doc := ix.resetDocument()
-	doc.ID = id
+	doc.ID = 2000000 - id
 	doc.Parts = append(doc.Parts, defaultPartition)
 	switch acc.Sex {
 	case proto.MaleSex:
@@ -108,28 +130,13 @@ func (ix *defaultIndexer) processDocument(id int, acc *proto.Account) *inverted.
 	} else {
 		doc.Tokens[phoneCodeField] = append(doc.Tokens[phoneCodeField], NullToken)
 	}
-	if code, ok := phoneCode(acc.Phone[:]); ok {
-		doc.Tokens[phoneCodeField] = append(doc.Tokens[phoneCodeField], phoneCodeToken(code))
-	}
-	if domain, ok := emailDomain(acc.Email.Buf[:acc.Email.Len]); ok {
-		doc.Tokens[emailDomainField] = append(doc.Tokens[emailDomainField], emailDomainToken(domain))
-	}
+	//if code, ok := phoneCode(acc.Phone); ok {
+	//	doc.Tokens[phoneCodeField] = append(doc.Tokens[phoneCodeField], phoneCodeToken(code))
+	//}
+	//if domain, ok := emailDomain(acc.Email.Buf[:acc.Email.Len]); ok {
+	//	doc.Tokens[emailDomainField] = append(doc.Tokens[emailDomainField], emailDomainToken(domain))
+	//}
 	return doc
-}
-
-func (ix *defaultIndexer) Next() (*inverted.Document, bool) {
-	n := ix.rep.Len()
-	acc := &proto.Account{}
-	for i := ix.pos; i < n; i++ {
-		id := n - i - 1
-		*acc = *ix.rep.Get(id)
-		if acc.Email.Len > 0 {
-			ix.pos = i + 1
-			pseudo := 2000000 - id
-			return ix.processDocument(pseudo, acc), true
-		}
-	}
-	return nil, false
 }
 
 type DefaultIndex struct {

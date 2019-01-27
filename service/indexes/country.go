@@ -57,15 +57,15 @@ func (ix *countryIndexer) processDocument(id int, acc *proto.Account) *inverted.
 }
 
 func (ix *countryIndexer) Next() (*inverted.Document, bool) {
+	var acc proto.Account
 	n := ix.rep.Len()
-	acc := &proto.Account{}
 	for i := ix.pos; i < n; i++ {
 		id := n - i - 1
-		*acc = *ix.rep.Get(id)
+		acc = *ix.rep.Get(id)
 		if acc.Email.Len > 0 {
 			ix.pos = i + 1
 			pseudo := 2000000 - id
-			return ix.processDocument(pseudo, acc), true
+			return ix.processDocument(pseudo, &acc), true
 		}
 	}
 	return nil, false

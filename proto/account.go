@@ -169,7 +169,7 @@ func (a *Account) WriteJSON(fields int, w extendedWriter) {
 		}
 	}
 	if (fields&PremiumField) == PremiumField && a.PremiumFinish[0] > 0 {
-		w.WriteString(`',"premium":{"finish":`)
+		w.WriteString(`,"premium":{"finish":`)
 		w.Write(trim(a.PremiumFinish[:]))
 		w.WriteString(`,"start":`)
 		w.Write(trim(a.PremiumStart[:]))

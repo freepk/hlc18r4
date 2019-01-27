@@ -28,9 +28,9 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 	}}
 	emailsLock := &sync.Mutex{}
 	emails := make(map[uint64]int, rep.Len())
-	acc := &proto.Account{}
+	acc := proto.Account{}
 	for id := 0; id < rep.Len(); id++ {
-		*acc = *rep.Get(id)
+		acc = *rep.Get(id)
 		if acc.Email.Len > 0 {
 			email := acc.Email.Buf[:acc.Email.Len]
 			hash := murmur3.Sum64(email)
@@ -372,4 +372,21 @@ func (svc *AccountsService) ByEmailDomain(domain []byte) iterator.Iterator {
 		return svc.defaultIndex.EmailDomain(token)
 	}
 	return nil
+}
+
+func (svc *AccountsService) ByLikesContains(likes []byte) iterator.Iterator {
+	var iter iterator.Iterator
+	likes, like := parse.ScanSymbol(likes, 0x2C)
+	for len(like) > 0 {
+		if _, id, ok := parse.ParseInt(like); ok {
+			next := svc.likeIndex.Iterator(id)
+			if iter == nil {
+				iter = next
+			} else {
+				iter = iterator.NewInterIter(iter, next)
+			}
+		}
+		likes, like = parse.ScanSymbol(likes, 0x2C)
+	}
+	return iter
 }

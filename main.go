@@ -226,20 +226,25 @@ func main() {
 						return
 					}
 					fields |= proto.PhoneField
-				case `phone_code`:
-					if next = accountsSvc.ByPhoneCode(v); next == nil {
-						hasErrors = true
-						return
-					}
-					fields |= proto.PhoneField
+				//case `phone_code`:
+				//	if next = accountsSvc.ByPhoneCode(v); next == nil {
+				//		hasErrors = true
+				//		return
+				//	}
+				//	fields |= proto.PhoneField
 				case `email_lt`:
 					emailLT = v
 					return
 				case `email_gt`:
 					emailGT = v
 					return
-				case `email_domain`:
-					if next = accountsSvc.ByEmailDomain(v); next == nil {
+				//case `email_domain`:
+				//	if next = accountsSvc.ByEmailDomain(v); next == nil {
+				//		hasErrors = true
+				//		return
+				//	}
+				case `likes_contains`:
+					if next = accountsSvc.ByLikesContains(v); next == nil {
 						hasErrors = true
 						return
 					}
