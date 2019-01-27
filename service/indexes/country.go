@@ -7,48 +7,25 @@ import (
 )
 
 type countryIter struct {
-	pos int
-	acc *proto.Account
-	doc *inverted.Document
-	rep *repo.AccountsRepo
+	accountsIter
 }
 
 func newCountryIter(rep *repo.AccountsRepo) *countryIter {
-	acc := &proto.Account{}
-	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Fields: make([][]int, 5)}
-	return &countryIter{pos: 0, acc: acc, doc: doc, rep: rep}
-}
-
-func (it *countryIter) Reset() {
-	it.pos = 0
+	return &countryIter{accountsIter: *newAccountsIter(rep, 5)}
 }
 
 func (it *countryIter) Next() (*inverted.Document, bool) {
-	n := it.rep.Len()
-	for i := it.pos; i < n; i++ {
-		id := n - i - 1
-		*it.acc = *it.rep.Get(id)
-		if it.acc.Email.Len > 0 {
-			it.pos = i + 1
-			return it.processDocument(id, it.acc), true
-		}
+	if it.next() {
+		return it.processDocument(), true
 	}
 	return nil, false
 }
 
-func (it *countryIter) resetDocument() *inverted.Document {
+func (it *countryIter) processDocument() *inverted.Document {
+	it.resetDocument()
+	acc := it.acc
 	doc := it.doc
-	doc.ID = 0
-	doc.Parts = doc.Parts[:0]
-	for field := range doc.Fields {
-		doc.Fields[field] = doc.Fields[field][:0]
-	}
-	return doc
-}
-
-func (it *countryIter) processDocument(id int, acc *proto.Account) *inverted.Document {
-	doc := it.resetDocument()
-	doc.ID = 2000000 - id
+	doc.ID = 2000000 - it.id()
 	if acc.Country > 0 {
 		doc.Parts = append(doc.Parts, NotNullToken, int(acc.Country))
 	} else {

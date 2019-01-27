@@ -26,48 +26,25 @@ const (
 )
 
 type defaultIter struct {
-	pos int
-	acc *proto.Account
-	doc *inverted.Document
-	rep *repo.AccountsRepo
+	accountsIter
 }
 
 func newDefaultIter(rep *repo.AccountsRepo) *defaultIter {
-	acc := &proto.Account{}
-	doc := &inverted.Document{ID: 0, Parts: make([]int, 1), Fields: make([][]int, 12)}
-	return &defaultIter{pos: 0, acc: acc, doc: doc, rep: rep}
-}
-
-func (it *defaultIter) Reset() {
-	it.pos = 0
+	return &defaultIter{accountsIter: *newAccountsIter(rep, 12)}
 }
 
 func (it *defaultIter) Next() (*inverted.Document, bool) {
-	n := it.rep.Len()
-	for i := it.pos; i < n; i++ {
-		id := n - i - 1
-		*it.acc = *it.rep.Get(id)
-		if it.acc.Email.Len > 0 {
-			it.pos = i + 1
-			return it.processDocument(id, it.acc), true
-		}
+	if it.next() {
+		return it.processDocument(), true
 	}
 	return nil, false
 }
 
-func (it *defaultIter) resetDocument() *inverted.Document {
+func (it *defaultIter) processDocument() *inverted.Document {
+	it.resetDocument()
+	acc := it.acc
 	doc := it.doc
-	doc.ID = 0
-	doc.Parts = doc.Parts[:0]
-	for field := range doc.Fields {
-		doc.Fields[field] = doc.Fields[field][:0]
-	}
-	return doc
-}
-
-func (it *defaultIter) processDocument(id int, acc *proto.Account) *inverted.Document {
-	doc := it.resetDocument()
-	doc.ID = 2000000 - id
+	doc.ID = 2000000 - it.id()
 	doc.Parts = append(doc.Parts, defaultPartition)
 	switch acc.Sex {
 	case proto.MaleSex:
