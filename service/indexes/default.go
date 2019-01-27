@@ -38,25 +38,25 @@ func newDefaultIter(rep *repo.AccountsRepo) *defaultIter {
 	return &defaultIter{pos: 0, acc: acc, doc: doc, rep: rep}
 }
 
-func (ix *defaultIter) Reset() {
-	ix.pos = 0
+func (it *defaultIter) Reset() {
+	it.pos = 0
 }
 
-func (ix *defaultIter) Next() (*inverted.Document, bool) {
-	n := ix.rep.Len()
-	for i := ix.pos; i < n; i++ {
+func (it *defaultIter) Next() (*inverted.Document, bool) {
+	n := it.rep.Len()
+	for i := it.pos; i < n; i++ {
 		id := n - i - 1
-		*ix.acc = *ix.rep.Get(id)
-		if ix.acc.Email.Len > 0 {
-			ix.pos = i + 1
-			return ix.processDocument(id, ix.acc), true
+		*it.acc = *it.rep.Get(id)
+		if it.acc.Email.Len > 0 {
+			it.pos = i + 1
+			return it.processDocument(id, it.acc), true
 		}
 	}
 	return nil, false
 }
 
-func (ix *defaultIter) resetDocument() *inverted.Document {
-	doc := ix.doc
+func (it *defaultIter) resetDocument() *inverted.Document {
+	doc := it.doc
 	doc.ID = 0
 	doc.Parts = doc.Parts[:0]
 	for field := range doc.Fields {
@@ -65,8 +65,8 @@ func (ix *defaultIter) resetDocument() *inverted.Document {
 	return doc
 }
 
-func (ix *defaultIter) processDocument(id int, acc *proto.Account) *inverted.Document {
-	doc := ix.resetDocument()
+func (it *defaultIter) processDocument(id int, acc *proto.Account) *inverted.Document {
+	doc := it.resetDocument()
 	doc.ID = 2000000 - id
 	doc.Parts = append(doc.Parts, defaultPartition)
 	switch acc.Sex {

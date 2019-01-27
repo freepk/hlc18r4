@@ -57,6 +57,22 @@ func main() {
 		case `/accounts/likes/`:
 			ctx.SetStatusCode(fasthttp.StatusAccepted)
 			return
+		case `/accounts/group/`:
+			args := ctx.QueryArgs()
+			if args.Len() < 4 {
+				ctx.SetStatusCode(fasthttp.StatusBadRequest)
+				return
+			}
+			limit, err := args.GetUint(`limit`)
+			if err != nil || limit > 50 {
+				ctx.SetStatusCode(fasthttp.StatusBadRequest)
+				return
+			}
+			order := args.Peek(`order`)
+			if string(order) != `-1` && string(order) != `1` {
+				ctx.SetStatusCode(fasthttp.StatusBadRequest)
+				return
+			}
 		case `/accounts/filter/`:
 			args := ctx.QueryArgs()
 			if args.Len() < 3 {

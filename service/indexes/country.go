@@ -19,25 +19,25 @@ func newCountryIter(rep *repo.AccountsRepo) *countryIter {
 	return &countryIter{pos: 0, acc: acc, doc: doc, rep: rep}
 }
 
-func (ix *countryIter) Reset() {
-	ix.pos = 0
+func (it *countryIter) Reset() {
+	it.pos = 0
 }
 
-func (ix *countryIter) Next() (*inverted.Document, bool) {
-	n := ix.rep.Len()
-	for i := ix.pos; i < n; i++ {
+func (it *countryIter) Next() (*inverted.Document, bool) {
+	n := it.rep.Len()
+	for i := it.pos; i < n; i++ {
 		id := n - i - 1
-		*ix.acc = *ix.rep.Get(id)
-		if ix.acc.Email.Len > 0 {
-			ix.pos = i + 1
-			return ix.processDocument(id, ix.acc), true
+		*it.acc = *it.rep.Get(id)
+		if it.acc.Email.Len > 0 {
+			it.pos = i + 1
+			return it.processDocument(id, it.acc), true
 		}
 	}
 	return nil, false
 }
 
-func (ix *countryIter) resetDocument() *inverted.Document {
-	doc := ix.doc
+func (it *countryIter) resetDocument() *inverted.Document {
+	doc := it.doc
 	doc.ID = 0
 	doc.Parts = doc.Parts[:0]
 	for field := range doc.Fields {
@@ -46,8 +46,8 @@ func (ix *countryIter) resetDocument() *inverted.Document {
 	return doc
 }
 
-func (ix *countryIter) processDocument(id int, acc *proto.Account) *inverted.Document {
-	doc := ix.resetDocument()
+func (it *countryIter) processDocument(id int, acc *proto.Account) *inverted.Document {
+	doc := it.resetDocument()
 	doc.ID = 2000000 - id
 	if acc.Country > 0 {
 		doc.Parts = append(doc.Parts, NotNullToken, int(acc.Country))
