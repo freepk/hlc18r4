@@ -286,7 +286,7 @@ func main() {
 				if len(emailLT) > 0 && string(emailLT) < string(acc.Email.Buf[:acc.Email.Len]) {
 					continue
 				}
-				if len(emailGT) > 0 && string(emailLT) > string(acc.Email.Buf[:acc.Email.Len]) {
+				if len(emailGT) > 0 && string(emailGT) > string(acc.Email.Buf[:acc.Email.Len]) {
 					continue
 				}
 				limit--
