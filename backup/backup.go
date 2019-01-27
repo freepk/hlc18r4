@@ -14,7 +14,7 @@ import (
 
 const (
 	accountsPerFile = 10000
-	likesPerAccount = 36
+	likesPerAccount = 38
 )
 
 var (
