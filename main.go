@@ -19,8 +19,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Accounts", rep.Len())
+	log.Println("Restored", rep.Len())
 	accountsSvc := service.NewAccountsService(rep)
+	log.Println("Service created")
 	writesCount := uint64(0)
 	go func() {
 		writeProcess := false
@@ -31,8 +32,9 @@ func main() {
 				atomic.StoreUint64(&writesCount, 0)
 			} else if writeProcess {
 				writeProcess = false
+				log.Println("Rebuild indexes")
 				accountsSvc.RebuildIndexes()
-				log.Println("Indexes rebuilded")
+				log.Println("Rebuild done")
 			}
 			time.Sleep(time.Second)
 		}

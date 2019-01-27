@@ -54,9 +54,12 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 }
 
 func (svc *AccountsService) RebuildIndexes() {
-	svc.defaultIndex.Rebuild()
-	svc.countryIndex.Rebuild()
-	svc.likeIndex.Rebuild()
+	gr := &sync.WaitGroup{}
+	gr.Add(3)
+	go func() { defer gr.Done(); svc.defaultIndex.Rebuild() }()
+	go func() { defer gr.Done(); svc.countryIndex.Rebuild() }()
+	go func() { defer gr.Done(); svc.likeIndex.Rebuild() }()
+	gr.Wait()
 }
 
 func (svc *AccountsService) Exists(id int) bool {
