@@ -11,8 +11,10 @@ import (
 	"gitlab.com/freepk/hlc18r4/service"
 )
 
-var writesCount uint64
-var accountsSvc *service.AccountsService
+var (
+	writesCount uint64
+	accountsSvc *service.AccountsService
+)
 
 func routerHandler(ctx *fasthttp.RequestCtx) {
 	if ctx.IsPost() {
