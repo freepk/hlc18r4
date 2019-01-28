@@ -122,13 +122,29 @@ func (idx *DefaultIndex) Rebuild() {
 	idx.inv.Rebuild()
 }
 
-func (idx *DefaultIndex) SexEq() {
+func (idx *DefaultIndex) part() *inverted.Part {
+	return idx.inv.Part(defaultPartition)
 }
 
-func (idx *DefaultIndex) StatusEq() {
+func (idx *DefaultIndex) SexEq(sex []byte) *inverted.Token {
+	if t, ok := GetSexToken(sex); ok {
+		return idx.part().Field(sexField).Token(t)
+	}
+	return nil
 }
 
-func (idx *DefaultIndex) StatusNeq() {
+func (idx *DefaultIndex) StatusEq(status []byte) *inverted.Token {
+	if t, ok := GetStatusToken(status); ok {
+		return idx.part().Field(statusField).Token(t)
+	}
+	return nil
+}
+
+func (idx *DefaultIndex) StatusNeq(status []byte) *inverted.Token {
+	if t, ok := GetNotStatusToken(status); ok {
+		return idx.part().Field(statusField).Token(t)
+	}
+	return nil
 }
 
 func (idx *DefaultIndex) EmailDomain() {

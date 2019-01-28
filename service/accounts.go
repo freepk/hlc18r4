@@ -193,3 +193,7 @@ func (svc *AccountsService) Update(id int, buf []byte) bool {
 	svc.accountsPool.Put(src)
 	return true
 }
+
+func (svc *AccountsService) Default() *indexes.DefaultIndex {
+	return svc.defaultIndex
+}
