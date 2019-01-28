@@ -13,18 +13,19 @@ import (
 )
 
 type AccountsService struct {
-	rep          *repo.AccountsRepo
-	accountsPool *sync.Pool
-	emailsLock   *sync.Mutex
-	emails       map[uint64]int
-	defaultIndex *indexes.DefaultIndex
-	sexIndex     *indexes.SexIndex
-	statusIndex  *indexes.StatusIndex
-	countryIndex *indexes.CountryIndex
-	cityIndex    *indexes.CityIndex
-	birthIndex   *indexes.BirthIndex
-	joinedIndex  *indexes.JoinedIndex
-	likeIndex    *indexes.LikeIndex
+	rep           *repo.AccountsRepo
+	accountsPool  *sync.Pool
+	emailsLock    *sync.Mutex
+	emails        map[uint64]int
+	defaultIndex  *indexes.DefaultIndex
+	sexIndex      *indexes.SexIndex
+	statusIndex   *indexes.StatusIndex
+	countryIndex  *indexes.CountryIndex
+	cityIndex     *indexes.CityIndex
+	interestIndex *indexes.InterestIndex
+	birthIndex    *indexes.BirthIndex
+	joinedIndex   *indexes.JoinedIndex
+	likeIndex     *indexes.LikeIndex
 }
 
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
@@ -48,22 +49,24 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 	statusIndex := indexes.NewStatusIndex(rep)
 	countryIndex := indexes.NewCountryIndex(rep)
 	cityIndex := indexes.NewCityIndex(rep)
+	interestIndex := indexes.NewInterestIndex(rep)
 	birthIndex := indexes.NewBirthIndex(rep)
 	joinedIndex := indexes.NewJoinedIndex(rep)
 	likeIndex := indexes.NewLikeIndex(rep)
 	return &AccountsService{
-		rep:          rep,
-		accountsPool: accountsPool,
-		emailsLock:   emailsLock,
-		emails:       emails,
-		defaultIndex: defaultIndex,
-		sexIndex:     sexIndex,
-		statusIndex:  statusIndex,
-		countryIndex: countryIndex,
-		cityIndex:    cityIndex,
-		birthIndex:   birthIndex,
-		joinedIndex:  joinedIndex,
-		likeIndex:    likeIndex}
+		rep:           rep,
+		accountsPool:  accountsPool,
+		emailsLock:    emailsLock,
+		emails:        emails,
+		defaultIndex:  defaultIndex,
+		sexIndex:      sexIndex,
+		statusIndex:   statusIndex,
+		countryIndex:  countryIndex,
+		cityIndex:     cityIndex,
+		interestIndex: interestIndex,
+		birthIndex:    birthIndex,
+		joinedIndex:   joinedIndex,
+		likeIndex:     likeIndex}
 }
 
 func (svc *AccountsService) RebuildIndexes() {
@@ -74,6 +77,7 @@ func (svc *AccountsService) RebuildIndexes() {
 		svc.defaultIndex.Rebuild()
 		svc.sexIndex.Rebuild()
 		svc.statusIndex.Rebuild()
+		svc.interestIndex.Rebuild()
 	}()
 	go func() {
 		defer gr.Done()
