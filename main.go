@@ -143,6 +143,24 @@ func filterHandler(ctx *fasthttp.RequestCtx) {
 	if iter == nil {
 		return
 	}
+	println(string(args.QueryString()))
+	acc := &proto.Account{}
+	comma := false
+	ctx.WriteString(`{"accounts":[`)
+	for limit > 0 {
+		pseudo, ok := iter.Next()
+		if !ok {
+			break
+		}
+		*acc = *accountsSvc.Get(2000000 - pseudo)
+		if comma {
+			ctx.WriteString(`,`)
+		}
+		comma = true
+		acc.WriteJSON(fields, ctx)
+		limit--
+	}
+	ctx.WriteString(`]}`)
 }
 
 func groupHandler(ctx *fasthttp.RequestCtx) {
