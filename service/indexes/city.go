@@ -6,28 +6,28 @@ import (
 	"gitlab.com/freepk/hlc18r4/repo"
 )
 
-type countryIter struct {
+type cityIter struct {
 	accountsIter
 }
 
-func newCountryIter(rep *repo.AccountsRepo) *countryIter {
-	return &countryIter{accountsIter: *newAccountsIter(rep, 5)}
+func newCityIter(rep *repo.AccountsRepo) *cityIter {
+	return &cityIter{accountsIter: *newAccountsIter(rep, 5)}
 }
 
-func (it *countryIter) Next() (*inverted.Document, bool) {
+func (it *cityIter) Next() (*inverted.Document, bool) {
 	if it.next() {
 		return it.processDocument(), true
 	}
 	return nil, false
 }
 
-func (it *countryIter) processDocument() *inverted.Document {
+func (it *cityIter) processDocument() *inverted.Document {
 	it.resetDocument()
 	acc := it.acc
 	doc := it.doc
 	doc.ID = 2000000 - it.id()
-	if acc.Country > 0 {
-		doc.Parts = append(doc.Parts, NotNullToken, int(acc.Country))
+	if acc.City > 0 {
+		doc.Parts = append(doc.Parts, NotNullToken, int(acc.City))
 	} else {
 		doc.Parts = append(doc.Parts, NullToken)
 	}
@@ -54,28 +54,28 @@ func (it *countryIter) processDocument() *inverted.Document {
 	return doc
 }
 
-type CountryIndex struct {
+type CityIndex struct {
 	inv *inverted.Inverted
 }
 
-func NewCountryIndex(rep *repo.AccountsRepo) *CountryIndex {
-	src := newCountryIter(rep)
+func NewCityIndex(rep *repo.AccountsRepo) *CityIndex {
+	src := newCityIter(rep)
 	inv := inverted.NewInverted(src)
-	return &CountryIndex{inv: inv}
+	return &CityIndex{inv: inv}
 }
 
-func (idx *CountryIndex) Rebuild() {
+func (idx *CityIndex) Rebuild() {
 	idx.inv.Rebuild()
 }
 
-func (idx *CountryIndex) SexIter(country, sex int) *inverted.TokenIter {
-	return idx.inv.Iterator(country, sexField, sex)
+func (idx *CityIndex) Sex(city, sex int) *inverted.Token {
+	return idx.inv.Token(city, sexField, sex)
 }
 
-func (idx *CountryIndex) StatusIter(country, status int) *inverted.TokenIter {
-	return idx.inv.Iterator(country, statusField, status)
+func (idx *CityIndex) Status(city, status int) *inverted.Token {
+	return idx.inv.Token(city, statusField, status)
 }
 
-func (idx *CountryIndex) InterestIter(country, interest int) *inverted.TokenIter {
-	return idx.inv.Iterator(country, interestField, interest)
+func (idx *CityIndex) Interest(city, interest int) *inverted.Token {
+	return idx.inv.Token(city, interestField, interest)
 }

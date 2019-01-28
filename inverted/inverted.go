@@ -187,3 +187,12 @@ func (inv *Inverted) Iterator(part, field, token int) *TokenIter {
 	}
 	return nil
 }
+
+func (inv *Inverted) Token(part, field, token int) *Token {
+	if part := inv.Part(part); part != nil {
+		if field := part.Field(field); field != nil {
+			return field.Token(token)
+		}
+	}
+	return nil
+}

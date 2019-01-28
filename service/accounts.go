@@ -248,7 +248,7 @@ func (svc *AccountsService) ByCountryNull(null []byte) iterator.Iterator {
 func (svc *AccountsService) ByCountryEqSexEq(country, sex []byte) iterator.Iterator {
 	if country, ok := indexes.GetCountryToken(country); ok {
 		if sex, ok := indexes.GetSexToken(sex); ok {
-			return svc.countryIndex.Sex(country, sex)
+			return svc.countryIndex.SexIter(country, sex)
 		}
 	}
 	return nil
@@ -257,7 +257,7 @@ func (svc *AccountsService) ByCountryEqSexEq(country, sex []byte) iterator.Itera
 func (svc *AccountsService) ByCountryEqStatusEq(country, status []byte) iterator.Iterator {
 	if country, ok := indexes.GetCountryToken(country); ok {
 		if status, ok := indexes.GetStatusToken(status); ok {
-			return svc.countryIndex.Status(country, status)
+			return svc.countryIndex.StatusIter(country, status)
 		}
 	}
 	return nil
@@ -266,7 +266,7 @@ func (svc *AccountsService) ByCountryEqStatusEq(country, status []byte) iterator
 func (svc *AccountsService) ByCountryEqStatusNeq(country, status []byte) iterator.Iterator {
 	if country, ok := indexes.GetCountryToken(country); ok {
 		if status, ok := indexes.GetNotStatusToken(status); ok {
-			return svc.countryIndex.Status(country, status)
+			return svc.countryIndex.StatusIter(country, status)
 		}
 	}
 	return nil
