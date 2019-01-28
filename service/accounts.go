@@ -21,6 +21,7 @@ type AccountsService struct {
 	countryIndex *indexes.CountryIndex
 	cityIndex    *indexes.CityIndex
 	birthIndex   *indexes.BirthIndex
+	joinedIndex  *indexes.JoinedIndex
 	likeIndex    *indexes.LikeIndex
 }
 
@@ -44,6 +45,7 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 	countryIndex := indexes.NewCountryIndex(rep)
 	cityIndex := indexes.NewCityIndex(rep)
 	birthIndex := indexes.NewBirthIndex(rep)
+	joinedIndex := indexes.NewJoinedIndex(rep)
 	likeIndex := indexes.NewLikeIndex(rep)
 	return &AccountsService{
 		rep:          rep,
@@ -54,6 +56,7 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 		countryIndex: countryIndex,
 		cityIndex:    cityIndex,
 		birthIndex:   birthIndex,
+		joinedIndex:  joinedIndex,
 		likeIndex:    likeIndex}
 }
 
@@ -69,6 +72,7 @@ func (svc *AccountsService) RebuildIndexes() {
 		svc.countryIndex.Rebuild()
 		svc.cityIndex.Rebuild()
 		svc.birthIndex.Rebuild()
+		svc.joinedIndex.Rebuild()
 	}()
 	go func() {
 		defer gr.Done()
