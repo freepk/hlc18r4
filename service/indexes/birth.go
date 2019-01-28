@@ -69,23 +69,3 @@ func NewBirthIndex(rep *repo.AccountsRepo) *BirthIndex {
 func (idx *BirthIndex) Rebuild() {
 	idx.inv.Rebuild()
 }
-
-func (idx *BirthIndex) Sex(year, sex int) *inverted.Token {
-	return nil
-}
-
-func (idx *BirthIndex) Status(year, status int) *inverted.Token {
-	return nil
-}
-
-func (idx *BirthIndex) Country(year, country int) *inverted.Token {
-	return nil
-}
-
-func (idx *BirthIndex) City(year, city int) *inverted.Token {
-	return nil
-}
-
-func (idx *BirthIndex) Interests(year, interest int) *inverted.Token {
-	return nil
-}

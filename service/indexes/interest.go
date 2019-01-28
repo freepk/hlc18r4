@@ -72,19 +72,3 @@ func NewInterestIndex(rep *repo.AccountsRepo) *InterestIndex {
 func (idx *InterestIndex) Rebuild() {
 	idx.inv.Rebuild()
 }
-
-func (idx *InterestIndex) SexIter(interest, sex int) *inverted.TokenIter {
-	return idx.inv.Iterator(interest, sexField, sex)
-}
-
-func (idx *InterestIndex) StatusIter(interest, status int) *inverted.TokenIter {
-	return idx.inv.Iterator(interest, statusField, status)
-}
-
-func (idx *InterestIndex) CountryIter(interest, country int) *inverted.TokenIter {
-	return idx.inv.Iterator(interest, countryField, country)
-}
-
-func (idx *InterestIndex) CityIter(interest, city int) *inverted.TokenIter {
-	return idx.inv.Iterator(interest, cityField, city)
-}

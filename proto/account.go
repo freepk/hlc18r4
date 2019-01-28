@@ -64,26 +64,6 @@ type Account struct {
 	LikesTo       []Like
 }
 
-func (a *Account) GetFname() []byte {
-	b, _ := fnameDict.Value(int(a.Fname))
-	return b
-}
-
-func (a *Account) GetSname() []byte {
-	b, _ := snameDict.Value(int(a.Sname))
-	return b
-}
-
-func (a *Account) GetCountry() []byte {
-	b, _ := countryDict.Value(int(a.Country))
-	return b
-}
-
-func (a *Account) GetCity() []byte {
-	b, _ := cityDict.Value(int(a.City))
-	return b
-}
-
 func (a *Account) reset() {
 	var number NumberBuf
 	var email EmailBuf

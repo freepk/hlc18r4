@@ -69,23 +69,3 @@ func NewJoinedIndex(rep *repo.AccountsRepo) *JoinedIndex {
 func (idx *JoinedIndex) Rebuild() {
 	idx.inv.Rebuild()
 }
-
-func (idx *JoinedIndex) Sex(year, sex int) *inverted.Token {
-	return nil
-}
-
-func (idx *JoinedIndex) Status(year, status int) *inverted.Token {
-	return nil
-}
-
-func (idx *JoinedIndex) Country(year, country int) *inverted.Token {
-	return nil
-}
-
-func (idx *JoinedIndex) City(year, city int) *inverted.Token {
-	return nil
-}
-
-func (idx *JoinedIndex) Interests(year, interest int) *inverted.Token {
-	return nil
-}
