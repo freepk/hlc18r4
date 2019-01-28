@@ -16,14 +16,16 @@ import (
 
 func main() {
 	log.Println("NumCPU", runtime.NumCPU())
-	log.Println("Restoring accounts")
+	log.Println("Restoring")
 	rep, err := backup.Restore("tmp/data/data.zip")
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Restored", rep.Len())
+	log.Println("Creating Service", rep.Len())
 	accountsSvc := service.NewAccountsService(rep)
-	log.Println("Service created")
+	log.Println("Rebuild indexes")
+	accountsSvc.RebuildIndexes()
+	log.Println("Rebuild done")
 	writesCount := uint64(0)
 	go func() {
 		writeProcess := false

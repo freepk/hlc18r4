@@ -66,8 +66,8 @@ func NewBirthIndex(rep *repo.AccountsRepo) *BirthIndex {
 	return &BirthIndex{inv: inv}
 }
 
-func (idx *BirthIndex) Prepare() {
-	idx.inv.Prepare()
+func (idx *BirthIndex) Rebuild() {
+	idx.inv.Rebuild()
 }
 
 func (idx *BirthIndex) Sex(year, sex int) *inverted.Token {

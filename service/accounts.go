@@ -19,6 +19,8 @@ type AccountsService struct {
 	emails       map[uint64]int
 	defaultIndex *indexes.DefaultIndex
 	countryIndex *indexes.CountryIndex
+	cityIndex    *indexes.CityIndex
+	birthIndex   *indexes.BirthIndex
 	likeIndex    *indexes.LikeIndex
 }
 
@@ -39,11 +41,10 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 		emails[hash] = id
 	}
 	defaultIndex := indexes.NewDefaultIndex(rep)
-	defaultIndex.Rebuild()
 	countryIndex := indexes.NewCountryIndex(rep)
-	countryIndex.Rebuild()
+	cityIndex := indexes.NewCityIndex(rep)
+	birthIndex := indexes.NewBirthIndex(rep)
 	likeIndex := indexes.NewLikeIndex(rep)
-	likeIndex.Rebuild()
 	return &AccountsService{
 		rep:          rep,
 		accountsPool: accountsPool,
@@ -51,15 +52,28 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 		emails:       emails,
 		defaultIndex: defaultIndex,
 		countryIndex: countryIndex,
+		cityIndex:    cityIndex,
+		birthIndex:   birthIndex,
 		likeIndex:    likeIndex}
 }
 
 func (svc *AccountsService) RebuildIndexes() {
 	gr := &sync.WaitGroup{}
 	gr.Add(3)
-	go func() { defer gr.Done(); svc.defaultIndex.Rebuild() }()
-	go func() { defer gr.Done(); svc.countryIndex.Rebuild() }()
-	go func() { defer gr.Done(); svc.likeIndex.Rebuild() }()
+	go func() {
+		defer gr.Done()
+		svc.defaultIndex.Rebuild()
+	}()
+	go func() {
+		defer gr.Done()
+		svc.countryIndex.Rebuild()
+		svc.cityIndex.Rebuild()
+		svc.birthIndex.Rebuild()
+	}()
+	go func() {
+		defer gr.Done()
+		svc.likeIndex.Rebuild()
+	}()
 	gr.Wait()
 }
 
