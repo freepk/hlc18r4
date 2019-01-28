@@ -11,7 +11,7 @@ type sexIter struct {
 }
 
 func newSexIter(rep *repo.AccountsRepo) *sexIter {
-	return &sexIter{accountsIter: *newAccountsIter(rep, 12)}
+	return &sexIter{accountsIter: *newAccountsIter(rep, 4)}
 }
 
 func (it *sexIter) Next() (*inverted.Document, bool) {

@@ -122,46 +122,46 @@ func (idx *DefaultIndex) Rebuild() {
 	idx.inv.Rebuild()
 }
 
-func (idx *DefaultIndex) Sex(token int) *inverted.TokenIter {
+func (idx *DefaultIndex) SexIter(token int) *inverted.TokenIter {
 	return idx.inv.Iterator(defaultPartition, sexField, token)
 }
 
-func (idx *DefaultIndex) Status(token int) *inverted.TokenIter {
+func (idx *DefaultIndex) StatusIter(token int) *inverted.TokenIter {
 	return idx.inv.Iterator(defaultPartition, statusField, token)
 }
 
-func (idx *DefaultIndex) Fname(token int) *inverted.TokenIter {
+func (idx *DefaultIndex) FnameIter(token int) *inverted.TokenIter {
 	return idx.inv.Iterator(defaultPartition, fnameField, token)
 }
 
-func (idx *DefaultIndex) Sname(token int) *inverted.TokenIter {
+func (idx *DefaultIndex) SnameIter(token int) *inverted.TokenIter {
 	return idx.inv.Iterator(defaultPartition, snameField, token)
 }
 
-func (idx *DefaultIndex) Country(token int) *inverted.TokenIter {
+func (idx *DefaultIndex) CountryIter(token int) *inverted.TokenIter {
 	return idx.inv.Iterator(defaultPartition, countryField, token)
 }
 
-func (idx *DefaultIndex) City(token int) *inverted.TokenIter {
+func (idx *DefaultIndex) CityIter(token int) *inverted.TokenIter {
 	return idx.inv.Iterator(defaultPartition, cityField, token)
 }
 
-func (idx *DefaultIndex) Interest(token int) *inverted.TokenIter {
+func (idx *DefaultIndex) InterestIter(token int) *inverted.TokenIter {
 	return idx.inv.Iterator(defaultPartition, interestField, token)
 }
 
-func (idx *DefaultIndex) BirthYear(token int) *inverted.TokenIter {
+func (idx *DefaultIndex) BirthYearIter(token int) *inverted.TokenIter {
 	return idx.inv.Iterator(defaultPartition, birthYearField, token)
 }
 
-func (idx *DefaultIndex) Premium(token int) *inverted.TokenIter {
+func (idx *DefaultIndex) PremiumIter(token int) *inverted.TokenIter {
 	return idx.inv.Iterator(defaultPartition, premiumField, token)
 }
 
-func (idx *DefaultIndex) PhoneCode(token int) *inverted.TokenIter {
+func (idx *DefaultIndex) PhoneCodeIter(token int) *inverted.TokenIter {
 	return idx.inv.Iterator(defaultPartition, phoneCodeField, token)
 }
 
-func (idx *DefaultIndex) EmailDomain(token int) *inverted.TokenIter {
+func (idx *DefaultIndex) EmailDomainIter(token int) *inverted.TokenIter {
 	return idx.inv.Iterator(defaultPartition, emailDomainField, token)
 }

@@ -47,7 +47,6 @@ func (f *Field) Reset() {
 	for i := range f.tokens {
 		f.tokens[i].Reset()
 	}
-	f.tokens = f.tokens[:0]
 }
 
 func (f *Field) token(token int) *Token {
@@ -76,7 +75,6 @@ func (p *Part) Reset() {
 	for i := range p.fields {
 		p.fields[i].Reset()
 	}
-	p.fields = p.fields[:0]
 }
 
 func (p *Part) field(field int) *Field {
@@ -110,7 +108,6 @@ func (inv *Inverted) Reset() {
 	for i := range inv.parts {
 		inv.parts[i].Reset()
 	}
-	inv.parts = inv.parts[:0]
 }
 
 func (inv *Inverted) part(part int) *Part {
@@ -156,7 +153,7 @@ func (inv *Inverted) Rebuild() {
 				for t := range doc.Fields[f] {
 					token := &field.tokens[doc.Fields[f][t]]
 					if token.count > cap(token.refs) {
-						grow := token.count * 110 / 100
+						grow := token.count * 105 / 100
 						token.refs = make([]Ref, 0, grow)
 					}
 					token.refs = append(token.refs, Ref(doc.ID))

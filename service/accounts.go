@@ -197,35 +197,35 @@ func (svc *AccountsService) Update(id int, buf []byte) bool {
 
 func (svc *AccountsService) BySexEq(sex []byte) iterator.Iterator {
 	if token, ok := indexes.GetSexToken(sex); ok {
-		return svc.defaultIndex.Sex(token)
+		return svc.defaultIndex.SexIter(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByStatusEq(status []byte) iterator.Iterator {
 	if token, ok := indexes.GetStatusToken(status); ok {
-		return svc.defaultIndex.Status(token)
+		return svc.defaultIndex.StatusIter(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByStatusNeq(status []byte) iterator.Iterator {
 	if token, ok := indexes.GetNotStatusToken(status); ok {
-		return svc.defaultIndex.Status(token)
+		return svc.defaultIndex.StatusIter(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByFnameEq(fname []byte) iterator.Iterator {
 	if token, ok := indexes.GetFnameToken(fname); ok {
-		return svc.defaultIndex.Fname(token)
+		return svc.defaultIndex.FnameIter(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByFnameNull(null []byte) iterator.Iterator {
 	if token, ok := indexes.GetNullToken(null); ok {
-		return svc.defaultIndex.Fname(token)
+		return svc.defaultIndex.FnameIter(token)
 	}
 	return nil
 }
@@ -235,7 +235,7 @@ func (svc *AccountsService) ByFnameAny(fnames []byte) iterator.Iterator {
 	fnames, fname := parse.ScanSymbol(fnames, 0x2C)
 	for len(fname) > 0 {
 		if token, ok := indexes.GetFnameToken(fname); ok {
-			next := svc.defaultIndex.Fname(token)
+			next := svc.defaultIndex.FnameIter(token)
 			if iter == nil {
 				iter = next
 			} else {
@@ -249,28 +249,28 @@ func (svc *AccountsService) ByFnameAny(fnames []byte) iterator.Iterator {
 
 func (svc *AccountsService) BySnameEq(sname []byte) iterator.Iterator {
 	if token, ok := indexes.GetSnameToken(sname); ok {
-		return svc.defaultIndex.Sname(token)
+		return svc.defaultIndex.SnameIter(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) BySnameNull(null []byte) iterator.Iterator {
 	if token, ok := indexes.GetNullToken(null); ok {
-		return svc.defaultIndex.Sname(token)
+		return svc.defaultIndex.SnameIter(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByCountryEq(country []byte) iterator.Iterator {
 	if token, ok := indexes.GetCountryToken(country); ok {
-		return svc.defaultIndex.Country(token)
+		return svc.defaultIndex.CountryIter(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByCountryNull(null []byte) iterator.Iterator {
 	if token, ok := indexes.GetNullToken(null); ok {
-		return svc.defaultIndex.Country(token)
+		return svc.defaultIndex.CountryIter(token)
 	}
 	return nil
 }
@@ -304,14 +304,14 @@ func (svc *AccountsService) ByCountryEqStatusNeq(country, status []byte) iterato
 
 func (svc *AccountsService) ByCityEq(city []byte) iterator.Iterator {
 	if token, ok := indexes.GetCityToken(city); ok {
-		return svc.defaultIndex.City(token)
+		return svc.defaultIndex.CityIter(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByCityNull(null []byte) iterator.Iterator {
 	if token, ok := indexes.GetNullToken(null); ok {
-		return svc.defaultIndex.City(token)
+		return svc.defaultIndex.CityIter(token)
 	}
 	return nil
 }
@@ -321,7 +321,7 @@ func (svc *AccountsService) ByCityAny(cities []byte) iterator.Iterator {
 	cities, city := parse.ScanSymbol(cities, 0x2C)
 	for len(city) > 0 {
 		if token, ok := indexes.GetCityToken(city); ok {
-			next := svc.defaultIndex.City(token)
+			next := svc.defaultIndex.CityIter(token)
 			if iter == nil {
 				iter = next
 			} else {
@@ -338,7 +338,7 @@ func (svc *AccountsService) ByInterestsAny(interests []byte) iterator.Iterator {
 	interests, interest := parse.ScanSymbol(interests, 0x2C)
 	for len(interest) > 0 {
 		if token, ok := indexes.GetInterestToken(interest); ok {
-			next := svc.defaultIndex.Interest(token)
+			next := svc.defaultIndex.InterestIter(token)
 			if iter == nil {
 				iter = next
 			} else {
@@ -355,7 +355,7 @@ func (svc *AccountsService) ByInterestsContains(interests []byte) iterator.Itera
 	interests, interest := parse.ScanSymbol(interests, 0x2C)
 	for len(interest) > 0 {
 		if token, ok := indexes.GetInterestToken(interest); ok {
-			next := svc.defaultIndex.Interest(token)
+			next := svc.defaultIndex.InterestIter(token)
 			if iter == nil {
 				iter = next
 			} else {
@@ -369,7 +369,7 @@ func (svc *AccountsService) ByInterestsContains(interests []byte) iterator.Itera
 
 func (svc *AccountsService) ByBirthYear(year []byte) iterator.Iterator {
 	if token, ok := indexes.GetYearToken(year); ok {
-		if iter := svc.defaultIndex.BirthYear(token); iter != nil {
+		if iter := svc.defaultIndex.BirthYearIter(token); iter != nil {
 			return iter
 		}
 	}
@@ -377,33 +377,33 @@ func (svc *AccountsService) ByBirthYear(year []byte) iterator.Iterator {
 }
 
 func (svc *AccountsService) ByPremiumNow() iterator.Iterator {
-	return svc.defaultIndex.Premium(indexes.PremiumNowToken)
+	return svc.defaultIndex.PremiumIter(indexes.PremiumNowToken)
 }
 
 func (svc *AccountsService) ByPremiumNull(null []byte) iterator.Iterator {
 	if token, ok := indexes.GetNullToken(null); ok {
-		return svc.defaultIndex.Premium(token)
+		return svc.defaultIndex.PremiumIter(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByPhoneNull(null []byte) iterator.Iterator {
 	if token, ok := indexes.GetNullToken(null); ok {
-		return svc.defaultIndex.PhoneCode(token)
+		return svc.defaultIndex.PhoneCodeIter(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByPhoneCode(code []byte) iterator.Iterator {
 	if token, ok := indexes.GetPhoneCodeToken(code); ok {
-		return svc.defaultIndex.PhoneCode(token)
+		return svc.defaultIndex.PhoneCodeIter(token)
 	}
 	return nil
 }
 
 func (svc *AccountsService) ByEmailDomain(domain []byte) iterator.Iterator {
 	if token, ok := indexes.GetEmailDomainToken(domain); ok {
-		return svc.defaultIndex.EmailDomain(token)
+		return svc.defaultIndex.EmailDomainIter(token)
 	}
 	return nil
 }

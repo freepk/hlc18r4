@@ -22,8 +22,8 @@ func TestDefaultIndex(t *testing.T) {
 	if !ok {
 		t.Fail()
 	}
-	it := iterator.Iterator(index.Country(country))
-	it = iterator.NewInterIter(it, index.Sex(MaleToken))
+	it := iterator.Iterator(index.CountryIter(country))
+	it = iterator.NewInterIter(it, index.SexIter(MaleToken))
 	limit := 32
 	for limit > 0 {
 		limit--
@@ -47,8 +47,8 @@ func BenchmarkDefaultIndex(b *testing.B) {
 	if !ok {
 		b.Fail()
 	}
-	it := iterator.Iterator(defaultIdx.Country(country))
-	it = iterator.NewInterIter(it, defaultIdx.Sex(MaleToken))
+	it := iterator.Iterator(defaultIdx.CountryIter(country))
+	it = iterator.NewInterIter(it, defaultIdx.SexIter(MaleToken))
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -82,8 +82,8 @@ func BenchmarkCountryIndex(b *testing.B) {
 	if !ok {
 		b.Fail()
 	}
-	it := iterator.Iterator(defaultIdx.Country(country))
-	it = iterator.NewInterIter(it, countryIdx.Sex(country, MaleToken))
+	it := iterator.Iterator(defaultIdx.CountryIter(country))
+	it = iterator.NewInterIter(it, countryIdx.SexIter(country, MaleToken))
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

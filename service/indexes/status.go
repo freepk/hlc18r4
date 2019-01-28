@@ -11,7 +11,7 @@ type statusIter struct {
 }
 
 func newStatusIter(rep *repo.AccountsRepo) *statusIter {
-	return &statusIter{accountsIter: *newAccountsIter(rep, 12)}
+	return &statusIter{accountsIter: *newAccountsIter(rep, 4)}
 }
 
 func (it *statusIter) Next() (*inverted.Document, bool) {
