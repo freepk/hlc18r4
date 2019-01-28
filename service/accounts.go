@@ -338,7 +338,7 @@ func (svc *AccountsService) ByInterestsContains(interests []byte) iterator.Itera
 }
 
 func (svc *AccountsService) ByBirthYear(year []byte) iterator.Iterator {
-	if token, ok := indexes.GetBirthYearToken(year); ok {
+	if token, ok := indexes.GetYearToken(year); ok {
 		if iter := svc.defaultIndex.BirthYear(token); iter != nil {
 			return iter
 		}

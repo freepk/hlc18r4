@@ -114,25 +114,25 @@ func GetInterestToken(b []byte) (int, bool) {
 	return proto.GetInterestToken(b)
 }
 
-func birthYearToken(year int) int {
+func yearToken(year int) int {
 	return year - 1950
 }
 
-func birthYearTokenTS(ts int) int {
+func yearTokenTS(ts int) int {
 	year := time.Unix(int64(ts), 0).UTC().Year()
-	return birthYearToken(year)
+	return yearToken(year)
 }
 
-func GetBirthYearToken(b []byte) (int, bool) {
+func GetYearToken(b []byte) (int, bool) {
 	if _, year, ok := parse.ParseInt(b); ok {
-		return birthYearToken(year), true
+		return yearToken(year), true
 	}
 	return 0, false
 }
 
-func GetBirthYearTokenTS(b []byte) (int, bool) {
+func GetYearTokenTS(b []byte) (int, bool) {
 	if _, ts, ok := parse.ParseInt(b); ok {
-		return birthYearTokenTS(ts), true
+		return yearTokenTS(ts), true
 	}
 	return 0, false
 }

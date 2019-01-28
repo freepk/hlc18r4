@@ -13,12 +13,11 @@ const (
 const (
 	sexField = iota
 	statusField
-	fnameField
-	snameField
-	snamePrefixField
 	countryField
 	cityField
 	interestField
+	fnameField
+	snameField
 	birthYearField
 	premiumField
 	phoneCodeField
@@ -86,7 +85,7 @@ func (it *defaultIter) processDocument() *inverted.Document {
 		}
 		doc.Fields[interestField] = append(doc.Fields[interestField], int(acc.Interests[i]))
 	}
-	doc.Fields[birthYearField] = append(doc.Fields[birthYearField], birthYearTokenTS(int(acc.BirthTS)))
+	doc.Fields[birthYearField] = append(doc.Fields[birthYearField], yearTokenTS(int(acc.BirthTS)))
 	if acc.PremiumFinish[0] > 0 {
 		doc.Fields[premiumField] = append(doc.Fields[premiumField], NotNullToken)
 	} else {

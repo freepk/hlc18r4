@@ -1,9 +1,10 @@
 package indexes
 
 import (
+	"testing"
+
 	"github.com/freepk/iterator"
 	"gitlab.com/freepk/hlc18r4/backup"
-	"testing"
 )
 
 func TestDefaultIndex(t *testing.T) {
@@ -69,6 +70,17 @@ func TestCountryIndex(t *testing.T) {
 		id := 2000000 - pseudo
 		t.Log(limit, id)
 	}
+}
+
+func TestBirthIndex(t *testing.T) {
+	t.Log("Restore")
+	rep, err := backup.Restore("../../tmp/data/data.zip")
+	if err != nil {
+		t.Fatal(err)
+	}
+	index := NewBirthIndex(rep)
+	index.Prepare()
+	t.Log(index.inv)
 }
 
 func BenchmarkDefaultIndex(b *testing.B) {
