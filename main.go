@@ -54,45 +54,49 @@ func filterHandler(ctx *fasthttp.RequestCtx) {
 		switch string(k) {
 		case `sex_eq`:
 			if t := accountsSvc.Default().Sex(v); t == nil {
-				//log.Println(string(k), string(v), t.Len())
 			}
 		case `status_eq`:
 			if t := accountsSvc.Default().Status(v); t == nil {
-				//log.Println(string(k), string(v), t.Len())
 			}
 		case `status_neq`:
 			if t := accountsSvc.Default().NotStatus(v); t != nil {
-				//log.Println(string(k), string(v), t.Len())
 			}
 		case `email_domain`:
 			if t := accountsSvc.Default().EmailDomain(v); t != nil {
-				//log.Println(string(k), string(v), t.Len())
 			}
 		case `fname_eq`:
 			if t := accountsSvc.Default().Fname(v); t != nil {
-				//log.Println(string(k), string(v), t.Len())
 			}
 		case `fname_null`:
 			if t := accountsSvc.Default().FnameNull(v); t != nil {
-				//log.Println(string(k), string(v), t.Len())
 			}
 		case `sname_eq`:
 			if t := accountsSvc.Default().Sname(v); t != nil {
-				//log.Println(string(k), string(v), t.Len())
 			}
 		case `sname_null`:
 			if t := accountsSvc.Default().SnameNull(v); t != nil {
-				//log.Println(string(k), string(v), t.Len())
 			}
 		case `phone_code`:
 			if t := accountsSvc.Default().PhoneCode(v); t != nil {
-				log.Println(string(k), string(v), t.Len())
 			}
 		case `phone_null`:
 			if t := accountsSvc.Default().PhoneNull(v); t != nil {
-				log.Println(string(k), string(v), t.Len())
 			}
-
+		case `country_eq`:
+			if t := accountsSvc.Default().Country(v); t != nil {
+			}
+		case `country_null`:
+			if t := accountsSvc.Default().CountryNull(v); t != nil {
+			}
+		case `city_eq`:
+			if t := accountsSvc.Default().City(v); t != nil {
+			}
+		case `city_null`:
+			if t := accountsSvc.Default().CityNull(v); t != nil {
+			}
+		case `birth_year`:
+			if t := accountsSvc.Default().BirthYear(v); t != nil {
+			}
 		}
 	})
 }

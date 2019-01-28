@@ -196,26 +196,44 @@ func (idx *DefaultIndex) PhoneNull(null []byte) *inverted.Token {
 	return nil
 }
 
-func (idx *DefaultIndex) CountryEq() {
+func (idx *DefaultIndex) Country(country []byte) *inverted.Token {
+	if t, ok := GetCountryToken(country); ok {
+		return idx.part().Field(countryField).Token(t)
+	}
+	return nil
 }
 
-func (idx *DefaultIndex) CountryNull() {
+func (idx *DefaultIndex) CountryNull(null []byte) *inverted.Token {
+	if t, ok := GetNullToken(null); ok {
+		return idx.part().Field(countryField).Token(t)
+	}
+	return nil
 }
 
-func (idx *DefaultIndex) CityEq() {
+func (idx *DefaultIndex) City(city []byte) *inverted.Token {
+	if t, ok := GetCityToken(city); ok {
+		return idx.part().Field(cityField).Token(t)
+	}
+	return nil
 }
 
-func (idx *DefaultIndex) CityAny() {
+func (idx *DefaultIndex) CityNull(null []byte) *inverted.Token {
+	if t, ok := GetNullToken(null); ok {
+		return idx.part().Field(cityField).Token(t)
+	}
+	return nil
 }
 
-func (idx *DefaultIndex) CityNull() {
+func (idx *DefaultIndex) BirthYear(year []byte) *inverted.Token {
+	if t, ok := GetYearToken(year); ok {
+		return idx.part().Field(birthYearField).Token(t)
+	}
+	return nil
 }
 
-func (idx *DefaultIndex) BirthYear() {
-}
-
-func (idx *DefaultIndex) InterestsAny() {
-}
-
-func (idx *DefaultIndex) InterestsContains() {
+func (idx *DefaultIndex) Interests(interest []byte) *inverted.Token {
+	if t, ok := GetInterestToken(interest); ok {
+		return idx.part().Field(interestField).Token(t)
+	}
+	return nil
 }
