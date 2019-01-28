@@ -122,46 +122,59 @@ func (idx *DefaultIndex) Rebuild() {
 	idx.inv.Rebuild()
 }
 
-func (idx *DefaultIndex) SexIter(token int) *inverted.TokenIter {
-	return idx.inv.Iterator(defaultPartition, sexField, token)
+func (idx *DefaultIndex) SexEq() {
 }
 
-func (idx *DefaultIndex) StatusIter(token int) *inverted.TokenIter {
-	return idx.inv.Iterator(defaultPartition, statusField, token)
+func (idx *DefaultIndex) StatusEq() {
 }
 
-func (idx *DefaultIndex) FnameIter(token int) *inverted.TokenIter {
-	return idx.inv.Iterator(defaultPartition, fnameField, token)
+func (idx *DefaultIndex) StatusNeq() {
 }
 
-func (idx *DefaultIndex) SnameIter(token int) *inverted.TokenIter {
-	return idx.inv.Iterator(defaultPartition, snameField, token)
+func (idx *DefaultIndex) EmailDomain() {
 }
 
-func (idx *DefaultIndex) CountryIter(token int) *inverted.TokenIter {
-	return idx.inv.Iterator(defaultPartition, countryField, token)
+func (idx *DefaultIndex) FnameEq() {
 }
 
-func (idx *DefaultIndex) CityIter(token int) *inverted.TokenIter {
-	return idx.inv.Iterator(defaultPartition, cityField, token)
+func (idx *DefaultIndex) FnameAny() {
 }
 
-func (idx *DefaultIndex) InterestIter(token int) *inverted.TokenIter {
-	return idx.inv.Iterator(defaultPartition, interestField, token)
+func (idx *DefaultIndex) FnameNull() {
 }
 
-func (idx *DefaultIndex) BirthYearIter(token int) *inverted.TokenIter {
-	return idx.inv.Iterator(defaultPartition, birthYearField, token)
+func (idx *DefaultIndex) SnameEq() {
 }
 
-func (idx *DefaultIndex) PremiumIter(token int) *inverted.TokenIter {
-	return idx.inv.Iterator(defaultPartition, premiumField, token)
+func (idx *DefaultIndex) SnameNull() {
 }
 
-func (idx *DefaultIndex) PhoneCodeIter(token int) *inverted.TokenIter {
-	return idx.inv.Iterator(defaultPartition, phoneCodeField, token)
+func (idx *DefaultIndex) PhoneCode() {
 }
 
-func (idx *DefaultIndex) EmailDomainIter(token int) *inverted.TokenIter {
-	return idx.inv.Iterator(defaultPartition, emailDomainField, token)
+func (idx *DefaultIndex) PhoneNull() {
+}
+
+func (idx *DefaultIndex) CountryEq() {
+}
+
+func (idx *DefaultIndex) CountryNull() {
+}
+
+func (idx *DefaultIndex) CityEq() {
+}
+
+func (idx *DefaultIndex) CityAny() {
+}
+
+func (idx *DefaultIndex) CityNull() {
+}
+
+func (idx *DefaultIndex) BirthYear() {
+}
+
+func (idx *DefaultIndex) InterestsAny() {
+}
+
+func (idx *DefaultIndex) InterestsContains() {
 }
