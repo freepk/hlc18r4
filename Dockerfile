@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM centos
 
 ADD hlc18r4 /
 
