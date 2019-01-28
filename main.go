@@ -84,6 +84,15 @@ func filterHandler(ctx *fasthttp.RequestCtx) {
 			if t := accountsSvc.Default().SnameNull(v); t != nil {
 				//log.Println(string(k), string(v), t.Len())
 			}
+		case `phone_code`:
+			if t := accountsSvc.Default().PhoneCode(v); t != nil {
+				log.Println(string(k), string(v), t.Len())
+			}
+		case `phone_null`:
+			if t := accountsSvc.Default().PhoneNull(v); t != nil {
+				log.Println(string(k), string(v), t.Len())
+			}
+
 		}
 	})
 }
