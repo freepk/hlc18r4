@@ -147,7 +147,11 @@ func (idx *DefaultIndex) StatusNeq(status []byte) *inverted.Token {
 	return nil
 }
 
-func (idx *DefaultIndex) EmailDomain() {
+func (idx *DefaultIndex) EmailDomain(domain []byte) *inverted.Token {
+	if t, ok := GetEmailDomainToken(domain); ok {
+		return idx.part().Field(emailDomainField).Token(t)
+	}
+	return nil
 }
 
 func (idx *DefaultIndex) FnameEq() {
