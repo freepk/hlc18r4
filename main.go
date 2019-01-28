@@ -5,9 +5,11 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/freepk/iterator"
 	"github.com/valyala/fasthttp"
 	"gitlab.com/freepk/hlc18r4/backup"
 	"gitlab.com/freepk/hlc18r4/parse"
+	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/service"
 )
 
@@ -44,6 +46,8 @@ func routerHandler(ctx *fasthttp.RequestCtx) {
 }
 
 func filterHandler(ctx *fasthttp.RequestCtx) {
+	var iter iterator.Iterator
+	fields := proto.IDField | proto.EmailField
 	args := ctx.QueryArgs()
 	limit, err := args.GetUint(`limit`)
 	if err != nil || limit > 50 {
@@ -51,54 +55,94 @@ func filterHandler(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	args.VisitAll(func(k, v []byte) {
+		var next iterator.Iterator
 		switch string(k) {
 		case `sex_eq`:
 			if t := accountsSvc.Default().Sex(v); t == nil {
+				next = t.Iterator()
 			}
+			fields |= proto.SexField
 		case `status_eq`:
 			if t := accountsSvc.Default().Status(v); t == nil {
+				next = t.Iterator()
 			}
+			fields |= proto.StatusField
 		case `status_neq`:
 			if t := accountsSvc.Default().NotStatus(v); t != nil {
+				next = t.Iterator()
 			}
+			fields |= proto.StatusField
 		case `email_domain`:
 			if t := accountsSvc.Default().EmailDomain(v); t != nil {
+				next = t.Iterator()
 			}
 		case `fname_eq`:
 			if t := accountsSvc.Default().Fname(v); t != nil {
+				next = t.Iterator()
 			}
+			fields |= proto.FnameField
 		case `fname_null`:
 			if t := accountsSvc.Default().FnameNull(v); t != nil {
+				next = t.Iterator()
 			}
+			fields |= proto.FnameField
 		case `sname_eq`:
 			if t := accountsSvc.Default().Sname(v); t != nil {
+				next = t.Iterator()
 			}
+			fields |= proto.SnameField
 		case `sname_null`:
 			if t := accountsSvc.Default().SnameNull(v); t != nil {
+				next = t.Iterator()
 			}
+			fields |= proto.SnameField
 		case `phone_code`:
 			if t := accountsSvc.Default().PhoneCode(v); t != nil {
+				next = t.Iterator()
 			}
+			fields |= proto.PhoneField
 		case `phone_null`:
 			if t := accountsSvc.Default().PhoneNull(v); t != nil {
+				next = t.Iterator()
 			}
+			fields |= proto.PhoneField
 		case `country_eq`:
 			if t := accountsSvc.Default().Country(v); t != nil {
+				next = t.Iterator()
 			}
+			fields |= proto.CountryField
 		case `country_null`:
 			if t := accountsSvc.Default().CountryNull(v); t != nil {
+				next = t.Iterator()
 			}
+			fields |= proto.CountryField
 		case `city_eq`:
 			if t := accountsSvc.Default().City(v); t != nil {
+				next = t.Iterator()
 			}
+			fields |= proto.CityField
 		case `city_null`:
 			if t := accountsSvc.Default().CityNull(v); t != nil {
+				next = t.Iterator()
 			}
+			fields |= proto.CityField
 		case `birth_year`:
 			if t := accountsSvc.Default().BirthYear(v); t != nil {
+				next = t.Iterator()
+			}
+			fields |= proto.BirthField
+		}
+		if next != nil {
+			if iter == nil {
+				iter = next
+			} else {
+				iter = iterator.NewInterIter(next, iter)
 			}
 		}
 	})
+	if iter == nil {
+		return
+	}
 }
 
 func groupHandler(ctx *fasthttp.RequestCtx) {
