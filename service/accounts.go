@@ -18,6 +18,8 @@ type AccountsService struct {
 	emailsLock   *sync.Mutex
 	emails       map[uint64]int
 	defaultIndex *indexes.DefaultIndex
+	sexIndex     *indexes.SexIndex
+	statusIndex  *indexes.StatusIndex
 	countryIndex *indexes.CountryIndex
 	cityIndex    *indexes.CityIndex
 	birthIndex   *indexes.BirthIndex
@@ -42,6 +44,8 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 		emails[hash] = id
 	}
 	defaultIndex := indexes.NewDefaultIndex(rep)
+	sexIndex := indexes.NewSexIndex(rep)
+	statusIndex := indexes.NewStatusIndex(rep)
 	countryIndex := indexes.NewCountryIndex(rep)
 	cityIndex := indexes.NewCityIndex(rep)
 	birthIndex := indexes.NewBirthIndex(rep)
@@ -53,6 +57,8 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 		emailsLock:   emailsLock,
 		emails:       emails,
 		defaultIndex: defaultIndex,
+		sexIndex:     sexIndex,
+		statusIndex:  statusIndex,
 		countryIndex: countryIndex,
 		cityIndex:    cityIndex,
 		birthIndex:   birthIndex,
@@ -66,6 +72,8 @@ func (svc *AccountsService) RebuildIndexes() {
 	go func() {
 		defer gr.Done()
 		svc.defaultIndex.Rebuild()
+		svc.sexIndex.Rebuild()
+		svc.statusIndex.Rebuild()
 	}()
 	go func() {
 		defer gr.Done()

@@ -68,14 +68,14 @@ func (idx *CityIndex) Rebuild() {
 	idx.inv.Rebuild()
 }
 
-func (idx *CityIndex) Sex(city, sex int) *inverted.Token {
-	return idx.inv.Token(city, sexField, sex)
+func (idx *CityIndex) SexIter(city, sex int) *inverted.TokenIter {
+	return idx.inv.Iterator(city, sexField, sex)
 }
 
-func (idx *CityIndex) Status(city, status int) *inverted.Token {
-	return idx.inv.Token(city, statusField, status)
+func (idx *CityIndex) StatusIter(city, status int) *inverted.TokenIter {
+	return idx.inv.Iterator(city, statusField, status)
 }
 
-func (idx *CityIndex) Interest(city, interest int) *inverted.Token {
-	return idx.inv.Token(city, interestField, interest)
+func (idx *CityIndex) InterestIter(city, interest int) *inverted.TokenIter {
+	return idx.inv.Iterator(city, interestField, interest)
 }
