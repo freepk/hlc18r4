@@ -126,21 +126,21 @@ func (idx *DefaultIndex) part() *inverted.Part {
 	return idx.inv.Part(defaultPartition)
 }
 
-func (idx *DefaultIndex) SexEq(sex []byte) *inverted.Token {
+func (idx *DefaultIndex) Sex(sex []byte) *inverted.Token {
 	if t, ok := GetSexToken(sex); ok {
 		return idx.part().Field(sexField).Token(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) StatusEq(status []byte) *inverted.Token {
+func (idx *DefaultIndex) Status(status []byte) *inverted.Token {
 	if t, ok := GetStatusToken(status); ok {
 		return idx.part().Field(statusField).Token(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) StatusNeq(status []byte) *inverted.Token {
+func (idx *DefaultIndex) NotStatus(status []byte) *inverted.Token {
 	if t, ok := GetNotStatusToken(status); ok {
 		return idx.part().Field(statusField).Token(t)
 	}
@@ -154,25 +154,46 @@ func (idx *DefaultIndex) EmailDomain(domain []byte) *inverted.Token {
 	return nil
 }
 
-func (idx *DefaultIndex) FnameEq() {
+func (idx *DefaultIndex) Fname(fname []byte) *inverted.Token {
+	if t, ok := GetFnameToken(fname); ok {
+		return idx.part().Field(fnameField).Token(t)
+	}
+	return nil
 }
 
-func (idx *DefaultIndex) FnameAny() {
+func (idx *DefaultIndex) FnameNull(null []byte) *inverted.Token {
+	if t, ok := GetNullToken(null); ok {
+		return idx.part().Field(fnameField).Token(t)
+	}
+	return nil
 }
 
-func (idx *DefaultIndex) FnameNull() {
+func (idx *DefaultIndex) Sname(sname []byte) *inverted.Token {
+	if t, ok := GetSnameToken(sname); ok {
+		return idx.part().Field(snameField).Token(t)
+	}
+	return nil
 }
 
-func (idx *DefaultIndex) SnameEq() {
+func (idx *DefaultIndex) SnameNull(null []byte) *inverted.Token {
+	if t, ok := GetNullToken(null); ok {
+		return idx.part().Field(snameField).Token(t)
+	}
+	return nil
 }
 
-func (idx *DefaultIndex) SnameNull() {
+func (idx *DefaultIndex) PhoneCode(code []byte) *inverted.Token {
+	if t, ok := GetPhoneCodeToken(code); ok {
+		return idx.part().Field(phoneCodeField).Token(t)
+	}
+	return nil
 }
 
-func (idx *DefaultIndex) PhoneCode() {
-}
-
-func (idx *DefaultIndex) PhoneNull() {
+func (idx *DefaultIndex) PhoneNull(null []byte) *inverted.Token {
+	if t, ok := GetNullToken(null); ok {
+		return idx.part().Field(phoneCodeField).Token(t)
+	}
+	return nil
 }
 
 func (idx *DefaultIndex) CountryEq() {

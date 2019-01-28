@@ -53,20 +53,36 @@ func filterHandler(ctx *fasthttp.RequestCtx) {
 	args.VisitAll(func(k, v []byte) {
 		switch string(k) {
 		case `sex_eq`:
-			if t := accountsSvc.Default().SexEq(v); t == nil {
-				log.Println(string(k), string(v), t.Len())
+			if t := accountsSvc.Default().Sex(v); t == nil {
+				//log.Println(string(k), string(v), t.Len())
 			}
 		case `status_eq`:
-			if t := accountsSvc.Default().StatusEq(v); t == nil {
-				log.Println(string(k), string(v), t.Len())
+			if t := accountsSvc.Default().Status(v); t == nil {
+				//log.Println(string(k), string(v), t.Len())
 			}
 		case `status_neq`:
-			if t := accountsSvc.Default().StatusNeq(v); t != nil {
-				log.Println(string(k), string(v), t.Len())
+			if t := accountsSvc.Default().NotStatus(v); t != nil {
+				//log.Println(string(k), string(v), t.Len())
 			}
 		case `email_domain`:
 			if t := accountsSvc.Default().EmailDomain(v); t != nil {
-				log.Println(string(k), string(v), t.Len())
+				//log.Println(string(k), string(v), t.Len())
+			}
+		case `fname_eq`:
+			if t := accountsSvc.Default().Fname(v); t != nil {
+				//log.Println(string(k), string(v), t.Len())
+			}
+		case `fname_null`:
+			if t := accountsSvc.Default().FnameNull(v); t != nil {
+				//log.Println(string(k), string(v), t.Len())
+			}
+		case `sname_eq`:
+			if t := accountsSvc.Default().Sname(v); t != nil {
+				//log.Println(string(k), string(v), t.Len())
+			}
+		case `sname_null`:
+			if t := accountsSvc.Default().SnameNull(v); t != nil {
+				//log.Println(string(k), string(v), t.Len())
 			}
 		}
 	})
