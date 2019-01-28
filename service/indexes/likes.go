@@ -51,7 +51,7 @@ func (idx *LikeIndex) Rebuild() {
 	grow := 0
 	for likee, x := range need {
 		if x > cap(idx.likes[likee]) {
-			grow += x * 110 / 100
+			grow += x * 105 / 100
 		}
 		if x > len(idx.likes[likee]) {
 			idx.likes[likee] = idx.likes[likee][:0]
@@ -65,7 +65,7 @@ func (idx *LikeIndex) Rebuild() {
 			likee := like.ID
 			x := need[likee]
 			if x > cap(idx.likes[likee]) {
-				x = x * 110 / 100
+				x = x * 105 / 100
 				idx.likes[likee] = likes[:0:x]
 				likes = likes[x:]
 			}

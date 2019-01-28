@@ -71,7 +71,7 @@ func readFrom(rep *repo.AccountsRepo, src io.Reader) error {
 					return ReadError
 				} else {
 					dst := *acc
-					x := len(acc.LikesTo) * 110 / 100
+					x := len(acc.LikesTo) * 105 / 100
 					dst.LikesTo, likes = likes[:0:x], likes[x:]
 					dst.LikesTo = append(dst.LikesTo, acc.LikesTo...)
 					rep.Set(id, &dst)
