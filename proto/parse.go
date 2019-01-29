@@ -11,7 +11,8 @@ func parseFname(b []byte, c *buffer) ([]byte, uint8, bool) {
 		return b, 0, false
 	}
 	c.B = append(c.B[:0], v...)
-	k := tokens.AddFname(parse.Unquote(c.B))
+	c.B = parse.Unquote(c.B)
+	k := tokens.AddFname(c.B)
 	return t, uint8(k), true
 }
 
@@ -21,7 +22,8 @@ func parseSname(b []byte, c *buffer) ([]byte, uint16, bool) {
 		return b, 0, false
 	}
 	c.B = append(c.B[:0], v...)
-	k := tokens.AddSname(parse.Unquote(c.B))
+	c.B = parse.Unquote(c.B)
+	k := tokens.AddSname(c.B)
 	return t, uint16(k), true
 }
 
@@ -31,7 +33,8 @@ func parseCountry(b []byte, c *buffer) ([]byte, uint8, bool) {
 		return b, 0, false
 	}
 	c.B = append(c.B[:0], v...)
-	k := tokens.AddCountry(parse.Unquote(c.B))
+	c.B = parse.Unquote(c.B)
+	k := tokens.AddCountry(c.B)
 	return t, uint8(k), true
 }
 
@@ -41,7 +44,8 @@ func parseCity(b []byte, c *buffer) ([]byte, uint16, bool) {
 		return b, 0, false
 	}
 	c.B = append(c.B[:0], v...)
-	k := tokens.AddCity(parse.Unquote(c.B))
+	c.B = parse.Unquote(c.B)
+	k := tokens.AddCity(c.B)
 	return t, uint16(k), true
 }
 
@@ -51,7 +55,8 @@ func parseInterest(b []byte, c *buffer) ([]byte, uint8, bool) {
 		return b, 0, false
 	}
 	c.B = append(c.B[:0], v...)
-	k := tokens.AddInterest(parse.Unquote(c.B))
+	c.B = parse.Unquote(c.B)
+	k := tokens.AddInterest(c.B)
 	return t, uint8(k), true
 }
 

@@ -1,8 +1,10 @@
 package proto
 
 import (
-	"github.com/freepk/parse"
 	"sync"
+
+	"github.com/freepk/parse"
+	"gitlab.com/freepk/hlc18r4/tokens"
 )
 
 type buffer struct {
@@ -129,15 +131,15 @@ func (a *Account) WriteJSON(fields int, w extendedWriter) {
 		w.WriteString(`"`)
 	}
 	if (fields&FnameField) == FnameField && a.Fname > 0 {
-		//fname, _ := fnameDict.Value(int(a.Fname))
+		fname, _ := tokens.FnameVal(int(a.Fname))
 		w.WriteString(`,"fname":"`)
-		//w.Write(fname)
+		w.Write(fname)
 		w.WriteString(`"`)
 	}
 	if (fields&SnameField) == SnameField && a.Sname > 0 {
-		//sname, _ := snameDict.Value(int(a.Sname))
+		sname, _ := tokens.SnameVal(int(a.Sname))
 		w.WriteString(`,"sname":"`)
-		//w.Write(sname)
+		w.Write(sname)
 		w.WriteString(`"`)
 	}
 	if (fields&PhoneField) == PhoneField && a.Phone[0] > 0 {
@@ -154,15 +156,15 @@ func (a *Account) WriteJSON(fields int, w extendedWriter) {
 		//}
 	}
 	if (fields&CountryField) == CountryField && a.Country > 0 {
-		//country, _ := countryDict.Value(int(a.Country))
+		country, _ := tokens.CountryVal(int(a.Country))
 		w.WriteString(`,"country":"`)
-		//w.Write(country)
+		w.Write(country)
 		w.WriteString(`"`)
 	}
 	if (fields&CityField) == CityField && a.City > 0 {
-		//city, _ := cityDict.Value(int(a.City))
+		city, _ := tokens.CityVal(int(a.City))
 		w.WriteString(`,"city":"`)
-		//w.Write(city)
+		w.Write(city)
 		w.WriteString(`"`)
 	}
 	if (fields & StatusField) == StatusField {

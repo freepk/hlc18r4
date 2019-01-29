@@ -36,3 +36,23 @@ func AddInterest(b []byte) int {
 	k, _ := interestDict.AddKey(b)
 	return k
 }
+
+func FnameVal(k int) ([]byte, bool) {
+	return fnameDict.Val(k)
+}
+
+func SnameVal(k int) ([]byte, bool) {
+	return snameDict.Val(k)
+}
+
+func CountryVal(k int) ([]byte, bool) {
+	return countryDict.Val(k)
+}
+
+func CityVal(k int) ([]byte, bool) {
+	return cityDict.Val(k)
+}
+
+func InterestVal(k int) ([]byte, bool) {
+	return interestDict.Val(k)
+}
