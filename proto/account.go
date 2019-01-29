@@ -1,7 +1,7 @@
 package proto
 
 import (
-	"gitlab.com/freepk/hlc18r4/parse"
+	"github.com/freepk/parse"
 )
 
 const (
@@ -89,26 +89,6 @@ func (a *Account) reset() {
 	a.LikesTo = a.LikesTo[:0]
 }
 
-func (a *Account) GetFname() []byte {
-	b, _ := fnameDict.Value(int(a.Fname))
-	return b
-}
-
-func (a *Account) GetSname() []byte {
-	b, _ := snameDict.Value(int(a.Sname))
-	return b
-}
-
-func (a *Account) GetCountry() []byte {
-	b, _ := countryDict.Value(int(a.Country))
-	return b
-}
-
-func (a *Account) GetCity() []byte {
-	b, _ := cityDict.Value(int(a.City))
-	return b
-}
-
 func trim(b []byte) []byte {
 	n := len(b)
 	for n > 0 {
@@ -142,15 +122,15 @@ func (a *Account) WriteJSON(fields int, w extendedWriter) {
 		w.WriteString(`"`)
 	}
 	if (fields&FnameField) == FnameField && a.Fname > 0 {
-		fname, _ := fnameDict.Value(int(a.Fname))
+		//fname, _ := fnameDict.Value(int(a.Fname))
 		w.WriteString(`,"fname":"`)
-		w.Write(fname)
+		//w.Write(fname)
 		w.WriteString(`"`)
 	}
 	if (fields&SnameField) == SnameField && a.Sname > 0 {
-		sname, _ := snameDict.Value(int(a.Sname))
+		//sname, _ := snameDict.Value(int(a.Sname))
 		w.WriteString(`,"sname":"`)
-		w.Write(sname)
+		//w.Write(sname)
 		w.WriteString(`"`)
 	}
 	if (fields&PhoneField) == PhoneField && a.Phone[0] > 0 {
@@ -159,34 +139,34 @@ func (a *Account) WriteJSON(fields int, w extendedWriter) {
 		w.WriteString(`"`)
 	}
 	if (fields & SexField) == SexField {
-		switch a.Sex {
-		case MaleSex:
-			w.WriteString(`,"sex":"m"`)
-		case FemaleSex:
-			w.WriteString(`,"sex":"f"`)
-		}
+		//switch a.Sex {
+		//case MaleSex:
+		//	w.WriteString(`,"sex":"m"`)
+		//case FemaleSex:
+		//	w.WriteString(`,"sex":"f"`)
+		//}
 	}
 	if (fields&CountryField) == CountryField && a.Country > 0 {
-		country, _ := countryDict.Value(int(a.Country))
+		//country, _ := countryDict.Value(int(a.Country))
 		w.WriteString(`,"country":"`)
-		w.Write(country)
+		//w.Write(country)
 		w.WriteString(`"`)
 	}
 	if (fields&CityField) == CityField && a.City > 0 {
-		city, _ := cityDict.Value(int(a.City))
+		//city, _ := cityDict.Value(int(a.City))
 		w.WriteString(`,"city":"`)
-		w.Write(city)
+		//w.Write(city)
 		w.WriteString(`"`)
 	}
 	if (fields & StatusField) == StatusField {
-		switch a.Status {
-		case SingleStatus:
-			w.WriteString(`,"status":"свободны"`)
-		case InRelStatus:
-			w.WriteString(`,"status":"заняты"`)
-		case ComplStatus:
-			w.WriteString(`,"status":"всё сложно"`)
-		}
+		//switch a.Status {
+		//case SingleStatus:
+		//	w.WriteString(`,"status":"свободны"`)
+		//case InRelStatus:
+		//	w.WriteString(`,"status":"заняты"`)
+		//case ComplStatus:
+		//	w.WriteString(`,"status":"всё сложно"`)
+		//}
 	}
 	if (fields&PremiumField) == PremiumField && a.PremiumFinish[0] > 0 {
 		w.WriteString(`,"premium":{"finish":`)
