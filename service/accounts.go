@@ -8,23 +8,13 @@ import (
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
-	"gitlab.com/freepk/hlc18r4/service/indexes"
 )
 
 type AccountsService struct {
-	rep           *repo.AccountsRepo
-	accountsPool  *sync.Pool
-	emailsLock    *sync.Mutex
-	emails        map[uint64]int
-	defaultIndex  *indexes.DefaultIndex
-	sexIndex      *indexes.SexIndex
-	statusIndex   *indexes.StatusIndex
-	countryIndex  *indexes.CountryIndex
-	cityIndex     *indexes.CityIndex
-	interestIndex *indexes.InterestIndex
-	birthIndex    *indexes.BirthIndex
-	joinedIndex   *indexes.JoinedIndex
-	likeIndex     *indexes.LikeIndex
+	rep          *repo.AccountsRepo
+	accountsPool *sync.Pool
+	emailsLock   *sync.Mutex
+	emails       map[uint64]int
 }
 
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
@@ -43,61 +33,12 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 		hash := murmur3.Sum64(email)
 		emails[hash] = id
 	}
-	defaultIndex := indexes.NewDefaultIndex(rep)
-	sexIndex := indexes.NewSexIndex(rep)
-	statusIndex := indexes.NewStatusIndex(rep)
-	countryIndex := indexes.NewCountryIndex(rep)
-	cityIndex := indexes.NewCityIndex(rep)
-	interestIndex := indexes.NewInterestIndex(rep)
-	birthIndex := indexes.NewBirthIndex(rep)
-	joinedIndex := indexes.NewJoinedIndex(rep)
-	likeIndex := indexes.NewLikeIndex(rep)
 	return &AccountsService{
-		rep:           rep,
-		accountsPool:  accountsPool,
-		emailsLock:    emailsLock,
-		emails:        emails,
-		defaultIndex:  defaultIndex,
-		sexIndex:      sexIndex,
-		statusIndex:   statusIndex,
-		countryIndex:  countryIndex,
-		cityIndex:     cityIndex,
-		interestIndex: interestIndex,
-		birthIndex:    birthIndex,
-		joinedIndex:   joinedIndex,
-		likeIndex:     likeIndex}
-}
-
-func (svc *AccountsService) RebuildIndexes() {
-	gr := &sync.WaitGroup{}
-	gr.Add(3)
-	go func() {
-		defer gr.Done()
-		svc.defaultIndex.Rebuild()
-		svc.sexIndex.Rebuild()
-		svc.statusIndex.Rebuild()
-		svc.interestIndex.Rebuild()
-	}()
-	go func() {
-		defer gr.Done()
-		svc.countryIndex.Rebuild()
-		svc.cityIndex.Rebuild()
-		svc.birthIndex.Rebuild()
-		svc.joinedIndex.Rebuild()
-	}()
-	go func() {
-		defer gr.Done()
-		svc.likeIndex.Rebuild()
-	}()
-	gr.Wait()
-}
-
-func (svc *AccountsService) Exists(id int) bool {
-	acc := svc.rep.Get(id)
-	if acc == nil || acc.Email.Len == 0 {
-		return false
+		rep:          rep,
+		accountsPool: accountsPool,
+		emailsLock:   emailsLock,
+		emails:       emails,
 	}
-	return true
 }
 
 func (svc *AccountsService) assignEmail(id int, email []byte) (int, bool) {
@@ -114,6 +55,14 @@ func (svc *AccountsService) assignEmail(id int, email []byte) (int, bool) {
 
 func (svc *AccountsService) Get(id int) *proto.Account {
 	return svc.rep.Get(id)
+}
+
+func (svc *AccountsService) Exists(id int) bool {
+	acc := svc.rep.Get(id)
+	if acc == nil || acc.Email.Len == 0 {
+		return false
+	}
+	return true
 }
 
 func (svc *AccountsService) Create(data []byte) bool {
@@ -192,8 +141,4 @@ func (svc *AccountsService) Update(id int, buf []byte) bool {
 	svc.rep.Set(id, dst)
 	svc.accountsPool.Put(src)
 	return true
-}
-
-func (svc *AccountsService) Default() *indexes.DefaultIndex {
-	return svc.defaultIndex
 }
