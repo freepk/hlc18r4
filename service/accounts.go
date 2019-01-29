@@ -2,12 +2,18 @@ package service
 
 import (
 	"bytes"
+	"errors"
 	"sync"
 
 	"github.com/spaolacci/murmur3"
 	"gitlab.com/freepk/hlc18r4/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
+)
+
+var (
+	NotFoundError   = errors.New("NotFound")
+	BadRequestError = errors.New("BadRequest")
 )
 
 type AccountsService struct {
@@ -65,46 +71,46 @@ func (svc *AccountsService) Exists(id int) bool {
 	return true
 }
 
-func (svc *AccountsService) Create(data []byte) bool {
+func (svc *AccountsService) Create(data []byte) error {
 	src := svc.accountsPool.Get().(*proto.Account)
 	if _, ok := src.UnmarshalJSON(data); !ok {
-		return false
+		return BadRequestError
 	}
 	_, id, ok := parse.ParseInt(src.ID[:])
 	if !ok || svc.Exists(id) {
-		return false
+		return BadRequestError
 	}
 	email := src.Email.Buf[:src.Email.Len]
 	if len(email) == 0 || bytes.IndexByte(email, 0x40) == -1 {
-		return false
+		return BadRequestError
 	}
 	if _, ok := svc.assignEmail(id, email); !ok {
-		return false
+		return BadRequestError
 	}
 	dst := *src
 	dst.LikesTo = make([]proto.Like, len(src.LikesTo))
 	copy(dst.LikesTo, src.LikesTo)
 	svc.rep.Set(id, &dst)
 	svc.accountsPool.Put(src)
-	return true
+	return nil
 }
 
-func (svc *AccountsService) Update(id int, buf []byte) bool {
+func (svc *AccountsService) Update(id int, buf []byte) error {
 	dst := svc.rep.Get(id)
 	if dst == nil || dst.Email.Len == 0 {
-		return false
+		return NotFoundError
 	}
 	src := svc.accountsPool.Get().(*proto.Account)
 	if _, ok := src.UnmarshalJSON(buf); !ok {
-		return false
+		return BadRequestError
 	}
 	email := src.Email.Buf[:src.Email.Len]
 	if len(email) > 0 {
 		if bytes.IndexByte(email, 0x40) == -1 {
-			return false
+			return BadRequestError
 		}
 		if _, ok := svc.assignEmail(id, email); !ok {
-			return false
+			return BadRequestError
 		}
 		dst.Email = src.Email
 	}
@@ -140,5 +146,5 @@ func (svc *AccountsService) Update(id int, buf []byte) bool {
 	}
 	svc.rep.Set(id, dst)
 	svc.accountsPool.Put(src)
-	return true
+	return nil
 }
