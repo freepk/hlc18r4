@@ -63,6 +63,13 @@ func (f *Field) Token(token int) *Token {
 	return nil
 }
 
+func (f *Field) Iterator(token int) *TokenIter {
+	if t := f.Token(token); t != nil {
+		return t.Iterator()
+	}
+	return nil
+}
+
 func (f *Field) Len() int {
 	return len(f.tokens)
 }
@@ -172,24 +179,4 @@ func (inv *Inverted) Part(part int) *Part {
 
 func (inv *Inverted) Len() int {
 	return len(inv.parts)
-}
-
-func (inv *Inverted) Iterator(part, field, token int) *TokenIter {
-	if part := inv.Part(part); part != nil {
-		if field := part.Field(field); field != nil {
-			if token := field.Token(token); token != nil {
-				return token.Iterator()
-			}
-		}
-	}
-	return nil
-}
-
-func (inv *Inverted) Token(part, field, token int) *Token {
-	if part := inv.Part(part); part != nil {
-		if field := part.Field(field); field != nil {
-			return field.Token(token)
-		}
-	}
-	return nil
 }

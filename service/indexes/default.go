@@ -126,114 +126,114 @@ func (idx *DefaultIndex) part() *inverted.Part {
 	return idx.inv.Part(defaultPartition)
 }
 
-func (idx *DefaultIndex) Sex(sex []byte) *inverted.Token {
+func (idx *DefaultIndex) Sex(sex []byte) *inverted.TokenIter {
 	if t, ok := GetSexToken(sex); ok {
-		return idx.part().Field(sexField).Token(t)
+		return idx.part().Field(sexField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) Status(status []byte) *inverted.Token {
+func (idx *DefaultIndex) Status(status []byte) *inverted.TokenIter {
 	if t, ok := GetStatusToken(status); ok {
-		return idx.part().Field(statusField).Token(t)
+		return idx.part().Field(statusField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) NotStatus(status []byte) *inverted.Token {
+func (idx *DefaultIndex) NotStatus(status []byte) *inverted.TokenIter {
 	if t, ok := GetNotStatusToken(status); ok {
-		return idx.part().Field(statusField).Token(t)
+		return idx.part().Field(statusField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) EmailDomain(domain []byte) *inverted.Token {
+func (idx *DefaultIndex) EmailDomain(domain []byte) *inverted.TokenIter {
 	if t, ok := GetEmailDomainToken(domain); ok {
-		return idx.part().Field(emailDomainField).Token(t)
+		return idx.part().Field(emailDomainField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) Fname(fname []byte) *inverted.Token {
+func (idx *DefaultIndex) Fname(fname []byte) *inverted.TokenIter {
 	if t, ok := GetFnameToken(fname); ok {
-		return idx.part().Field(fnameField).Token(t)
+		return idx.part().Field(fnameField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) FnameNull(null []byte) *inverted.Token {
+func (idx *DefaultIndex) FnameNull(null []byte) *inverted.TokenIter {
 	if t, ok := GetNullToken(null); ok {
-		return idx.part().Field(fnameField).Token(t)
+		return idx.part().Field(fnameField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) Sname(sname []byte) *inverted.Token {
+func (idx *DefaultIndex) Sname(sname []byte) *inverted.TokenIter {
 	if t, ok := GetSnameToken(sname); ok {
-		return idx.part().Field(snameField).Token(t)
+		return idx.part().Field(snameField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) SnameNull(null []byte) *inverted.Token {
+func (idx *DefaultIndex) SnameNull(null []byte) *inverted.TokenIter {
 	if t, ok := GetNullToken(null); ok {
-		return idx.part().Field(snameField).Token(t)
+		return idx.part().Field(snameField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) PhoneCode(code []byte) *inverted.Token {
+func (idx *DefaultIndex) PhoneCode(code []byte) *inverted.TokenIter {
 	if t, ok := GetPhoneCodeToken(code); ok {
-		return idx.part().Field(phoneCodeField).Token(t)
+		return idx.part().Field(phoneCodeField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) PhoneNull(null []byte) *inverted.Token {
+func (idx *DefaultIndex) PhoneNull(null []byte) *inverted.TokenIter {
 	if t, ok := GetNullToken(null); ok {
-		return idx.part().Field(phoneCodeField).Token(t)
+		return idx.part().Field(phoneCodeField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) Country(country []byte) *inverted.Token {
+func (idx *DefaultIndex) Country(country []byte) *inverted.TokenIter {
 	if t, ok := GetCountryToken(country); ok {
-		return idx.part().Field(countryField).Token(t)
+		return idx.part().Field(countryField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) CountryNull(null []byte) *inverted.Token {
+func (idx *DefaultIndex) CountryNull(null []byte) *inverted.TokenIter {
 	if t, ok := GetNullToken(null); ok {
-		return idx.part().Field(countryField).Token(t)
+		return idx.part().Field(countryField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) City(city []byte) *inverted.Token {
+func (idx *DefaultIndex) City(city []byte) *inverted.TokenIter {
 	if t, ok := GetCityToken(city); ok {
-		return idx.part().Field(cityField).Token(t)
+		return idx.part().Field(cityField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) CityNull(null []byte) *inverted.Token {
+func (idx *DefaultIndex) CityNull(null []byte) *inverted.TokenIter {
 	if t, ok := GetNullToken(null); ok {
-		return idx.part().Field(cityField).Token(t)
+		return idx.part().Field(cityField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) BirthYear(year []byte) *inverted.Token {
+func (idx *DefaultIndex) BirthYear(year []byte) *inverted.TokenIter {
 	if t, ok := GetYearToken(year); ok {
-		return idx.part().Field(birthYearField).Token(t)
+		return idx.part().Field(birthYearField).Iterator(t)
 	}
 	return nil
 }
 
-func (idx *DefaultIndex) Interests(interest []byte) *inverted.Token {
+func (idx *DefaultIndex) Interests(interest []byte) *inverted.TokenIter {
 	if t, ok := GetInterestToken(interest); ok {
-		return idx.part().Field(interestField).Token(t)
+		return idx.part().Field(interestField).Iterator(t)
 	}
 	return nil
 }
