@@ -1,81 +1,57 @@
 package proto
 
 import (
-	"sync"
-
 	"github.com/freepk/parse"
 	"gitlab.com/freepk/hlc18r4/tokens"
 )
 
-var bytesPool = sync.Pool{
-	New: func() interface{} {
-		println("New")
-		return []byte{}
-	},
-}
-
-func parseFname(b []byte) ([]byte, uint8, bool) {
+func parseFname(b []byte, c *buffer) ([]byte, uint8, bool) {
 	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
 	}
-	c := bytesPool.Get().([]byte)
-	c = append(c[:0], v...)
-	c = parse.Unquote(c)
-	k := tokens.AddFname(c)
-	bytesPool.Put(c)
+	c.B = append(c.B[:0], v...)
+	k := tokens.AddFname(parse.Unquote(c.B))
 	return t, uint8(k), true
 }
 
-func parseSname(b []byte) ([]byte, uint16, bool) {
+func parseSname(b []byte, c *buffer) ([]byte, uint16, bool) {
 	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
 	}
-	c := bytesPool.Get().([]byte)
-	c = append(c[:0], v...)
-	c = parse.Unquote(c)
-	k := tokens.AddSname(c)
-	bytesPool.Put(c)
+	c.B = append(c.B[:0], v...)
+	k := tokens.AddSname(parse.Unquote(c.B))
 	return t, uint16(k), true
 }
 
-func parseCountry(b []byte) ([]byte, uint8, bool) {
+func parseCountry(b []byte, c *buffer) ([]byte, uint8, bool) {
 	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
 	}
-	c := bytesPool.Get().([]byte)
-	c = append(c[:0], v...)
-	c = parse.Unquote(c)
-	k := tokens.AddCountry(c)
-	bytesPool.Put(c)
+	c.B = append(c.B[:0], v...)
+	k := tokens.AddCountry(parse.Unquote(c.B))
 	return t, uint8(k), true
 }
 
-func parseCity(b []byte) ([]byte, uint16, bool) {
+func parseCity(b []byte, c *buffer) ([]byte, uint16, bool) {
 	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
 	}
-	c := bytesPool.Get().([]byte)
-	c = append(c[:0], v...)
-	c = parse.Unquote(c)
-	k := tokens.AddCity(c)
-	bytesPool.Put(c)
+	c.B = append(c.B[:0], v...)
+	k := tokens.AddCity(parse.Unquote(c.B))
 	return t, uint16(k), true
 }
 
-func parseInterest(b []byte) ([]byte, uint8, bool) {
+func parseInterest(b []byte, c *buffer) ([]byte, uint8, bool) {
 	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
 	}
-	c := bytesPool.Get().([]byte)
-	c = append(c[:0], v...)
-	c = parse.Unquote(c)
-	k := tokens.AddInterest(c)
-	bytesPool.Put(c)
+	c.B = append(c.B[:0], v...)
+	k := tokens.AddInterest(parse.Unquote(c.B))
 	return t, uint8(k), true
 }
 

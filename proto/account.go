@@ -2,7 +2,14 @@ package proto
 
 import (
 	"github.com/freepk/parse"
+	"sync"
 )
+
+type buffer struct {
+	B []byte
+}
+
+var bufferPool = &sync.Pool{New: func() interface{} { return new(buffer) }}
 
 const (
 	IDField        = 1
@@ -185,6 +192,9 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 
 	a.reset()
 
+	enc := bufferPool.Get().(*buffer)
+	defer bufferPool.Put(enc)
+
 	if tail, ok = parse.SkipSymbol(buf, '{'); !ok {
 		return buf, false
 	}
@@ -214,11 +224,11 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			}
 			a.Email.Len = uint8(copy(a.Email.Buf[:], temp))
 		case len(tail) > 8 && string(tail[:8]) == `"fname":`:
-			if tail, a.Fname, ok = parseFname(tail[8:]); !ok {
+			if tail, a.Fname, ok = parseFname(tail[8:], enc); !ok {
 				return buf, false
 			}
 		case len(tail) > 8 && string(tail[:8]) == `"sname":`:
-			if tail, a.Sname, ok = parseSname(tail[8:]); !ok {
+			if tail, a.Sname, ok = parseSname(tail[8:], enc); !ok {
 				return buf, false
 			}
 		case len(tail) > 8 && string(tail[:8]) == `"phone":`:
@@ -231,11 +241,11 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				return buf, false
 			}
 		case len(tail) > 10 && string(tail[:10]) == `"country":`:
-			if tail, a.Country, ok = parseCountry(tail[10:]); !ok {
+			if tail, a.Country, ok = parseCountry(tail[10:], enc); !ok {
 				return buf, false
 			}
 		case len(tail) > 7 && string(tail[:7]) == `"city":`:
-			if tail, a.City, ok = parseCity(tail[7:]); !ok {
+			if tail, a.City, ok = parseCity(tail[7:], enc); !ok {
 				return buf, false
 			}
 		case len(tail) > 9 && string(tail[:9]) == `"status":`:
@@ -274,7 +284,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			var i uint8
 			var interest uint8
 			for {
-				if tail, interest, ok = parseInterest(tail); !ok {
+				if tail, interest, ok = parseInterest(tail, enc); !ok {
 					return buf, false
 				}
 				a.Interests[i] = interest
