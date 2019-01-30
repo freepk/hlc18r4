@@ -69,11 +69,7 @@ func (svc *AccountsService) Get(id int) *proto.Account {
 }
 
 func (svc *AccountsService) Exists(id int) bool {
-	acc := svc.rep.Get(id)
-	if acc == nil || acc.Email.Len == 0 {
-		return false
-	}
-	return true
+	return svc.rep.IsSet(id)
 }
 
 func (svc *AccountsService) AddLikes(data []byte) error {
@@ -84,7 +80,7 @@ func (svc *AccountsService) AddLikes(data []byte) error {
 		return BadRequestError
 	}
 	for _, like := range likes.Likes {
-		if !svc.Exists(int(like.Liker)) || !svc.Exists(int(like.Likee)) {
+		if !svc.rep.IsSet(int(like.Liker)) || !svc.rep.IsSet(int(like.Likee)) {
 			return BadRequestError
 		}
 	}
@@ -104,7 +100,7 @@ func (svc *AccountsService) Create(data []byte) error {
 		return BadRequestError
 	}
 	_, id, ok := parse.ParseInt(src.ID[:])
-	if !ok || svc.Exists(id) {
+	if !ok || svc.rep.IsSet(id) {
 		return BadRequestError
 	}
 	email := src.Email.Buf[:src.Email.Len]

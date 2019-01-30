@@ -75,7 +75,9 @@ func updateHandler(id int, ctx *fasthttp.RequestCtx) {
 	}
 }
 
-type iterFunc func([]byte) iterator.Iterator
+type tokenFunc func([]byte) (int, bool)
+
+type iterFunc func(int) iterator.Iterator
 
 type operFunc func(iterator.Iterator, iterator.Iterator) iterator.Iterator
 
@@ -87,27 +89,43 @@ func unionOper(a, b iterator.Iterator) iterator.Iterator {
 	return iterator.NewUnionIter(a, b)
 }
 
-// appendIter - for each comma separated value from "vals" creates iterator with "iterFn",
-// concat all iterators with "operFn" and at the and intersect it with "iter"
-func appendIter(iter iterator.Iterator, vals []byte, iterFn iterFunc, operFn operFunc) (iterator.Iterator, bool) {
-	var next iterator.Iterator
+func buildIter(iter iterator.Iterator, vals []byte, tokenFn tokenFunc, iterFn iterFunc, operFn operFunc) (iterator.Iterator, bool) {
+	var res iterator.Iterator
+	println("vals", vals)
 	vals, val := parse.ScanSymbol(vals, 0x2C)
 	for len(val) > 0 {
-		if it := iterFn(val); it != nil {
-			if next == nil {
-				next = it
+		println("val", string(val))
+		if token, ok := tokenFn(val); ok {
+			println("token", token)
+			if it := iterFn(token); it != nil {
+				if res == nil {
+					res = it
+					println("res = it", res)
+				} else {
+					res = operFn(res, it)
+					println("res = operFn(res, it)", res)
+				}
 			} else {
-				next = operFn(it, next)
+				println("it == nil, return iter, false")
+				return iter, false
 			}
 		} else {
+			println("token !ok, return iter, false")
 			return iter, false
 		}
 		vals, val = parse.ScanSymbol(vals, 0x2C)
 	}
-	if next == nil {
+	if res == nil {
+		println("res == nil, return iter, true")
 		return iter, true
 	}
-	return iterator.NewInterIter(iter, next), true
+	println("return NewInterIter, true")
+	return iterator.NewInterIter(iter, res), true
+}
+
+func intToken(b []byte) (int, bool) {
+	_, token, ok := parse.ParseInt(b)
+	return token, ok
 }
 
 func filterHandler(ctx *fasthttp.RequestCtx) {
@@ -121,7 +139,7 @@ func filterHandler(ctx *fasthttp.RequestCtx) {
 	args.VisitAll(func(k, v []byte) {
 		switch string(k) {
 		case `likes_contains`:
-			iter = appendIter(iter, v, searchSvc.Likes, interOper)
+			iter, _ = buildIter(iter, v, intToken, searchSvc.Likes, interOper)
 		}
 	})
 }

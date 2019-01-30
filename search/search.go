@@ -1,6 +1,7 @@
 package search
 
 import (
+	"github.com/freepk/iterator"
 	"gitlab.com/freepk/hlc18r4/repo"
 )
 
@@ -18,6 +19,9 @@ func (svc *SearchService) Rebuild() {
 	svc.likes.Rebuild()
 }
 
-func (svc *SearchService) Likes(id int) *LikeIter {
-	return svc.likes.Iterator(id)
+func (svc *SearchService) Likes(id int) iterator.Iterator {
+	if svc.rep.IsSet(id) {
+		return svc.likes.Iterator(id)
+	}
+	return nil
 }

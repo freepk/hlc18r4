@@ -13,6 +13,13 @@ func NewAccountsRepo(num int) *AccountsRepo {
 	return &AccountsRepo{accounts: accounts}
 }
 
+func (rep *AccountsRepo) IsSet(id int) bool {
+	if id < len(rep.accounts) && rep.accounts[id].Email.Len > 0 {
+		return true
+	}
+	return false
+}
+
 func (rep *AccountsRepo) Get(id int) *proto.Account {
 	if id < len(rep.accounts) {
 		acc := rep.accounts[id]
