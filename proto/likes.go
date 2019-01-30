@@ -39,7 +39,7 @@ func (l *Likes) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				likee := 0
 				ts := 0
 				if tail, ok = parse.SkipSymbol(tail, '{'); !ok {
-					return buf, false
+					break
 				}
 				for {
 					tail = parse.SkipSpaces(tail)

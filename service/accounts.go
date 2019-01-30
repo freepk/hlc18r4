@@ -19,6 +19,7 @@ var (
 type AccountsService struct {
 	rep          *repo.AccountsRepo
 	accountsPool *sync.Pool
+	likesPool    *sync.Pool
 	emailsLock   *sync.Mutex
 	emails       map[uint64]int
 }
@@ -26,6 +27,9 @@ type AccountsService struct {
 func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 	accountsPool := &sync.Pool{New: func() interface{} {
 		return &proto.Account{}
+	}}
+	likesPool := &sync.Pool{New: func() interface{} {
+		return &proto.Likes{}
 	}}
 	emailsLock := &sync.Mutex{}
 	emails := make(map[uint64]int, rep.Len())
@@ -42,6 +46,7 @@ func NewAccountsService(rep *repo.AccountsRepo) *AccountsService {
 	return &AccountsService{
 		rep:          rep,
 		accountsPool: accountsPool,
+		likesPool:    likesPool,
 		emailsLock:   emailsLock,
 		emails:       emails,
 	}
@@ -71,8 +76,24 @@ func (svc *AccountsService) Exists(id int) bool {
 	return true
 }
 
+func (svc *AccountsService) AddLikes(data []byte) error {
+	likes := svc.likesPool.Get().(*proto.Likes)
+	defer svc.likesPool.Put(likes)
+	if _, ok := likes.UnmarshalJSON(data); !ok {
+
+		return BadRequestError
+	}
+	for _, like := range likes.Likes {
+		if !svc.Exists(int(like.Liker)) || !svc.Exists(int(like.Likee)) {
+			return BadRequestError
+		}
+	}
+	return nil
+}
+
 func (svc *AccountsService) Create(data []byte) error {
 	src := svc.accountsPool.Get().(*proto.Account)
+	defer svc.accountsPool.Put(src)
 	if _, ok := src.UnmarshalJSON(data); !ok {
 		return BadRequestError
 	}
@@ -91,7 +112,6 @@ func (svc *AccountsService) Create(data []byte) error {
 	dst.LikesTo = make([]proto.Like, len(src.LikesTo))
 	copy(dst.LikesTo, src.LikesTo)
 	svc.rep.Set(id, &dst)
-	svc.accountsPool.Put(src)
 	return nil
 }
 
@@ -101,6 +121,7 @@ func (svc *AccountsService) Update(id int, buf []byte) error {
 		return NotFoundError
 	}
 	src := svc.accountsPool.Get().(*proto.Account)
+	defer svc.accountsPool.Put(src)
 	if _, ok := src.UnmarshalJSON(buf); !ok {
 		return BadRequestError
 	}
@@ -145,6 +166,5 @@ func (svc *AccountsService) Update(id int, buf []byte) error {
 		dst.LikesTo = append(dst.LikesTo[:0], src.LikesTo...)
 	}
 	svc.rep.Set(id, dst)
-	svc.accountsPool.Put(src)
 	return nil
 }

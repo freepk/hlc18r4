@@ -287,7 +287,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			var interest uint8
 			for {
 				if tail, interest, ok = parseInterest(tail, enc); !ok {
-					return buf, false
+					break
 				}
 				a.Interests[i] = interest
 				i++
@@ -306,7 +306,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				id := 0
 				ts := 0
 				if tail, ok = parse.SkipSymbol(tail, '{'); !ok {
-					return buf, false
+					break
 				}
 				for {
 					tail = parse.SkipSpaces(tail)

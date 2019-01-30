@@ -22,17 +22,19 @@ var (
 
 func TestLikesUnmarshalJSON(t *testing.T) {
 	likes := &Likes{}
-	_, ok := likes.UnmarshalJSON(testLikes)
-	if !ok {
+	if _, ok := likes.UnmarshalJSON(testLikes); !ok {
 		t.Fatal()
 	}
+	if _, ok := likes.UnmarshalJSON([]byte(`{"likes":[]}`)); !ok {
+		t.Fatal()
+	}
+
 }
 
 func BenchmarkLikesUnmarshalJSON(b *testing.B) {
 	likes := &Likes{}
 	for i := 0; i < b.N; i++ {
-		_, ok := likes.UnmarshalJSON(testLikes)
-		if !ok {
+		if _, ok := likes.UnmarshalJSON(testLikes); !ok {
 			b.Fatal()
 		}
 	}

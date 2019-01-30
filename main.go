@@ -47,7 +47,11 @@ func routerHandler(ctx *fasthttp.RequestCtx) {
 }
 
 func likesHandler(ctx *fasthttp.RequestCtx) {
-	ctx.SetStatusCode(fasthttp.StatusAccepted)
+	if err := accountsSvc.AddLikes(ctx.PostBody()); err == nil {
+		ctx.SetStatusCode(fasthttp.StatusAccepted)
+	} else {
+		ctx.SetStatusCode(fasthttp.StatusBadRequest)
+	}
 }
 
 func createHandler(ctx *fasthttp.RequestCtx) {
