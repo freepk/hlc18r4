@@ -5,6 +5,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/freepk/iterator"
 	"github.com/freepk/parse"
 	"github.com/valyala/fasthttp"
 	"gitlab.com/freepk/hlc18r4/accounts"
@@ -74,7 +75,55 @@ func updateHandler(id int, ctx *fasthttp.RequestCtx) {
 	}
 }
 
+type iterFunc func([]byte) iterator.Iterator
+
+type operFunc func(iterator.Iterator, iterator.Iterator) iterator.Iterator
+
+func interOper(a, b iterator.Iterator) iterator.Iterator {
+	return iterator.NewInterIter(a, b)
+}
+
+func unionOper(a, b iterator.Iterator) iterator.Iterator {
+	return iterator.NewUnionIter(a, b)
+}
+
+// appendIter - for each comma separated value from "vals" creates iterator with "iterFn",
+// concat all iterators with "operFn" and at the and intersect it with "iter"
+func appendIter(iter iterator.Iterator, vals []byte, iterFn iterFunc, operFn operFunc) (iterator.Iterator, bool) {
+	var next iterator.Iterator
+	vals, val := parse.ScanSymbol(vals, 0x2C)
+	for len(val) > 0 {
+		if it := iterFn(val); it != nil {
+			if next == nil {
+				next = it
+			} else {
+				next = operFn(it, next)
+			}
+		} else {
+			return iter, false
+		}
+		vals, val = parse.ScanSymbol(vals, 0x2C)
+	}
+	if next == nil {
+		return iter, true
+	}
+	return iterator.NewInterIter(iter, next), true
+}
+
 func filterHandler(ctx *fasthttp.RequestCtx) {
+	args := ctx.QueryArgs()
+	limit, err := args.GetUint(`limit`)
+	if err != nil || limit > 50 {
+		ctx.SetStatusCode(fasthttp.StatusBadRequest)
+		return
+	}
+	var iter iterator.Iterator
+	args.VisitAll(func(k, v []byte) {
+		switch string(k) {
+		case `likes_contains`:
+			iter = appendIter(iter, v, searchSvc.Likes, interOper)
+		}
+	})
 }
 
 func groupHandler(ctx *fasthttp.RequestCtx) {
