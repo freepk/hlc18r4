@@ -148,12 +148,12 @@ func (a *Account) WriteJSON(fields int, w extendedWriter) {
 		w.WriteString(`"`)
 	}
 	if (fields & SexField) == SexField {
-		//switch a.Sex {
-		//case MaleSex:
-		//	w.WriteString(`,"sex":"m"`)
-		//case FemaleSex:
-		//	w.WriteString(`,"sex":"f"`)
-		//}
+		switch a.Sex {
+		case tokens.MaleSex:
+			w.WriteString(`,"sex":"m"`)
+		case tokens.FemaleSex:
+			w.WriteString(`,"sex":"f"`)
+		}
 	}
 	if (fields&CountryField) == CountryField && a.Country > 0 {
 		country, _ := tokens.CountryVal(int(a.Country))
@@ -168,14 +168,14 @@ func (a *Account) WriteJSON(fields int, w extendedWriter) {
 		w.WriteString(`"`)
 	}
 	if (fields & StatusField) == StatusField {
-		//switch a.Status {
-		//case SingleStatus:
-		//	w.WriteString(`,"status":"свободны"`)
-		//case InRelStatus:
-		//	w.WriteString(`,"status":"заняты"`)
-		//case ComplStatus:
-		//	w.WriteString(`,"status":"всё сложно"`)
-		//}
+		switch a.Status {
+		case tokens.SingleStatus:
+			w.WriteString(`,"status":"свободны"`)
+		case tokens.InRelStatus:
+			w.WriteString(`,"status":"заняты"`)
+		case tokens.ComplStatus:
+			w.WriteString(`,"status":"всё сложно"`)
+		}
 	}
 	if (fields&PremiumField) == PremiumField && a.PremiumFinish[0] > 0 {
 		w.WriteString(`,"premium":{"finish":`)
