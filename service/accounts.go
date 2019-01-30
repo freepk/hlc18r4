@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/spaolacci/murmur3"
-	"gitlab.com/freepk/hlc18r4/parse"
+	"github.com/freepk/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
 )

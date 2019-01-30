@@ -67,7 +67,7 @@ func readFrom(rep *repo.AccountsRepo, src io.Reader) error {
 				if tail, ok = acc.UnmarshalJSON(tail); !ok {
 					break
 				}
-				if _, id, ok := parse.ParseInt(acc.ID[:]); !ok {
+				if _, id, ok := parse.ParseInt(acc.ID[:]); ok {
 					return ReadError
 				} else {
 					dst := *acc
