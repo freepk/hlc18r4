@@ -88,6 +88,12 @@ func (svc *AccountsService) AddLikes(data []byte) error {
 			return BadRequestError
 		}
 	}
+	for _, like := range likes.Likes {
+		id := int(like.Liker)
+		dst := svc.rep.Get(id)
+		dst.LikesTo = append(dst.LikesTo, proto.Like{ID: like.Likee, TS: like.TS})
+		svc.rep.Set(id, dst)
+	}
 	return nil
 }
 
