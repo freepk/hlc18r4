@@ -303,8 +303,8 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				return buf, false
 			}
 			for {
-				ID := 0
-				TS := 0
+				id := 0
+				ts := 0
 				if tail, ok = parse.SkipSymbol(tail, '{'); !ok {
 					return buf, false
 				}
@@ -312,11 +312,11 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 					tail = parse.SkipSpaces(tail)
 					switch {
 					case len(tail) > 5 && string(tail[:5]) == `"id":`:
-						if tail, ID, ok = parse.ParseInt(tail[5:]); !ok {
+						if tail, id, ok = parse.ParseInt(tail[5:]); !ok {
 							return buf, false
 						}
 					case len(tail) > 5 && string(tail[:5]) == `"ts":`:
-						if tail, TS, ok = parse.ParseInt(tail[5:]); !ok {
+						if tail, ts, ok = parse.ParseInt(tail[5:]); !ok {
 							return buf, false
 						}
 					}
@@ -327,7 +327,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				if tail, ok = parse.SkipSymbol(tail, '}'); !ok {
 					return buf, false
 				}
-				a.LikesTo = append(a.LikesTo, Like{ID: uint32(ID), TS: uint32(TS)})
+				a.LikesTo = append(a.LikesTo, Like{ID: uint32(id), TS: uint32(ts)})
 				if tail, ok = parse.SkipSymbol(tail, ','); !ok {
 					break
 				}
