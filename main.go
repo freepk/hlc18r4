@@ -7,13 +7,13 @@ import (
 
 	"github.com/freepk/parse"
 	"github.com/valyala/fasthttp"
+	"gitlab.com/freepk/hlc18r4/accounts"
 	"gitlab.com/freepk/hlc18r4/backup"
-	"gitlab.com/freepk/hlc18r4/service"
 )
 
 var (
 	writesCount uint64
-	accountsSvc *service.AccountsService
+	accountsSvc *accounts.AccountsService
 )
 
 func routerHandler(ctx *fasthttp.RequestCtx) {
@@ -65,7 +65,7 @@ func createHandler(ctx *fasthttp.RequestCtx) {
 func updateHandler(id int, ctx *fasthttp.RequestCtx) {
 	if err := accountsSvc.Update(id, ctx.PostBody()); err == nil {
 		ctx.SetStatusCode(fasthttp.StatusAccepted)
-	} else if err == service.NotFoundError {
+	} else if err == accounts.NotFoundError {
 		ctx.SetStatusCode(fasthttp.StatusNotFound)
 	} else {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -90,7 +90,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	accountsSvc = service.NewAccountsService(rep)
+	accountsSvc = accounts.NewAccountsService(rep)
 	go func() {
 		writeProcess := false
 		for {

@@ -1,4 +1,4 @@
-package service
+package accounts
 
 import (
 	"bytes"
