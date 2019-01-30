@@ -9,11 +9,13 @@ import (
 	"github.com/valyala/fasthttp"
 	"gitlab.com/freepk/hlc18r4/accounts"
 	"gitlab.com/freepk/hlc18r4/backup"
+	"gitlab.com/freepk/hlc18r4/search"
 )
 
 var (
 	writesCount uint64
 	accountsSvc *accounts.AccountsService
+	searchSvc   *search.SearchService
 )
 
 func routerHandler(ctx *fasthttp.RequestCtx) {
@@ -90,7 +92,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println("Accounts service")
 	accountsSvc = accounts.NewAccountsService(rep)
+	log.Println("Search service")
+	searchSvc = search.NewSearchService(rep)
+	searchSvc.Rebuild()
 	go func() {
 		writeProcess := false
 		for {
@@ -100,6 +106,8 @@ func main() {
 				atomic.StoreUint64(&writesCount, 0)
 			} else if writeProcess {
 				writeProcess = false
+				log.Println("Write process finished")
+				searchSvc.Rebuild()
 			}
 			time.Sleep(time.Second)
 		}
