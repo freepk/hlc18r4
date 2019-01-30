@@ -5,8 +5,8 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/spaolacci/murmur3"
 	"github.com/freepk/parse"
+	"github.com/spaolacci/murmur3"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
 )
