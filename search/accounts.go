@@ -6,7 +6,7 @@ import (
 	"gitlab.com/freepk/hlc18r4/repo"
 )
 
-type ProcessFunc func(ref inverted.Ref, acc *proto.Account, doc *inverted.Document)
+type ProcessFunc func(ref inverted.Ref, doc *inverted.Document, acc *proto.Account)
 
 type AccountsProcessor struct {
 	rep  *repo.AccountsRepo
@@ -31,9 +31,9 @@ func (prc *AccountsProcessor) Next() (*inverted.Document, bool) {
 	for i := prc.i; i < n; i++ {
 		id := n - i - 1
 		if prc.rep.IsSet(id) {
-			*prc.acc = *prc.rep.Get(id)
 			ref := inverted.Ref(2000000 - id)
-			prc.proc(ref, prc.acc, prc.doc)
+			*prc.acc = *prc.rep.Get(id)
+			prc.proc(ref, prc.doc, prc.acc)
 			prc.i = i + 1
 			return prc.doc, true
 		}
