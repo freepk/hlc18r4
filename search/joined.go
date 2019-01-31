@@ -7,8 +7,7 @@ import (
 )
 
 func joinedProc(doc *inverted.Document, acc *proto.Account) {
-	//joinedYear, _ := tokens.IntYearTS(int(acc.JoinedTS))
-	//doc.Parts = append(doc.Parts, joinedYear)
+	//doc.Parts = append(doc.Parts, yearTokenTS(int(acc.JoinedTS)))
 	switch acc.Sex {
 	case tokens.MaleSex:
 		doc.Fields[SexField] = append(doc.Fields[SexField], tokens.MaleSex)

@@ -7,8 +7,7 @@ import (
 )
 
 func birthProc(doc *inverted.Document, acc *proto.Account) {
-	//birthYear, _ := tokens.IntYearTS(int(acc.BirthTS))
-	//doc.Parts = append(doc.Parts, birthYear)
+	//doc.Parts = append(doc.Parts, yearTokenTS(int(acc.BirthTS)))
 	switch acc.Sex {
 	case tokens.MaleSex:
 		doc.Fields[SexField] = append(doc.Fields[SexField], tokens.MaleSex)

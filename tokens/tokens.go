@@ -27,6 +27,10 @@ const (
 	PremiumNow = 4
 )
 
+const (
+	EpochYear = 1950
+)
+
 var (
 	fnameDict       = dictionary.NewDictionary(4)
 	snameDict       = dictionary.NewDictionary(4)
@@ -134,33 +138,13 @@ func EmailDomain(b []byte) (int, bool) {
 	return emailDomainDict.Key(b)
 }
 
-/*
-func IntYear(year int) (int, bool) {
-	if year < 1950 {
-		return year - 1950, true
-	}
-	return 0, false
-}
+//func Year(b []byte) (int, bool) {
+//	return 0, false
+//}
 
-func IntYearTS(ts int) (int, bool) {
-	year := time.Unix(int64(ts), 0).UTC().Year()
-	return IntYear(year)
-}
-
-func Year(b []byte) (int, bool) {
-	if _, year, ok := parse.ParseInt(b); ok {
-		return IntYear(year)
-	}
-	return 0, false
-}
-
-func YearTS(b []byte) (int, bool) {
-	if _, ts, ok := parse.ParseInt(b); ok {
-		return IntYearTS(ts)
-	}
-	return 0, false
-}
-*/
+//func YearTS(b []byte) (int, bool) {
+//	return 0, false
+//}
 
 func FnameVal(k int) ([]byte, bool) {
 	return fnameDict.Val(k)
