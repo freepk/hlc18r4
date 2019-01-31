@@ -18,7 +18,6 @@ func phoneCode(b []byte) ([]byte, bool) {
 
 func emailDomain(b []byte) ([]byte, bool) {
 	if domain, _ := parse.ScanSymbol(b, 0x40); len(domain) > 0 {
-		println(string(domain))
 		return domain, true
 	}
 	return nil, false
