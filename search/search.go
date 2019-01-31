@@ -1,6 +1,7 @@
 package search
 
 import (
+	"github.com/freepk/inverted"
 	"gitlab.com/freepk/hlc18r4/repo"
 )
 
@@ -38,4 +39,35 @@ func (svc *SearchService) Rebuild() {
 
 func (svc *SearchService) Likes(t int) *LikeIter {
 	return svc.likes.Likes(t)
+}
+
+func (svc *SearchService) Sex(t int) *inverted.TokenIter {
+	return nil
+}
+
+func (svc *SearchService) Status(t int) *inverted.TokenIter {
+	return nil
+}
+
+func (svc *SearchService) Country(t int) *inverted.TokenIter {
+	return nil
+}
+
+func (svc *SearchService) Countries(country int) *CountryIndex {
+	return nil
+}
+
+type CountryIndex struct {
+}
+
+func (idx *CountryIndex) Sex(t int) *inverted.TokenIter {
+	return nil
+}
+
+func (idx *CountryIndex) Status(t int) *inverted.TokenIter {
+	return nil
+}
+
+func (idx *CountryIndex) Interest(t int) *inverted.TokenIter {
+	return nil
 }
