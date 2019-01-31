@@ -1,13 +1,16 @@
 package search
 
 import (
+	"time"
+
 	"github.com/freepk/inverted"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/tokens"
 )
 
 func birthProc(doc *inverted.Document, acc *proto.Account) {
-	//doc.Parts = append(doc.Parts, yearTokenTS(int(acc.BirthTS)))
+	birthYear := time.Unix(int64(acc.BirthTS), 0).UTC().Year()
+	doc.Parts = append(doc.Parts, birthYear-tokens.EpochYear)
 	switch acc.Sex {
 	case tokens.MaleSex:
 		doc.Fields[SexField] = append(doc.Fields[SexField], tokens.MaleSex)

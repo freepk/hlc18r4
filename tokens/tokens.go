@@ -165,3 +165,14 @@ func CityVal(k int) ([]byte, bool) {
 func InterestVal(k int) ([]byte, bool) {
 	return interestDict.Val(k)
 }
+
+//func phoneCodeToken(b []byte) int {
+//        token, _ := phoneCodeDict.AddToken(b)
+//        return token
+//}
+
+//func emailDomainToken(b []byte) int {
+//        token, _ := emailDomainDict.AddToken(b)
+//        return token
+//}
+

@@ -1,10 +1,28 @@
 package search
 
 import (
+	"time"
+
 	"github.com/freepk/inverted"
+	"github.com/freepk/parse"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/tokens"
 )
+
+func phoneCode(b []byte) ([]byte, bool) {
+	if len(b) > 5 && b[1] == '(' && b[5] == ')' {
+		return b[2:5], true
+	}
+	return nil, false
+}
+
+func emailDomain(b []byte) ([]byte, bool) {
+	if domain, _ := parse.ScanSymbol(b, 0x40); len(domain) > 0 {
+		println(string(domain))
+		return domain, true
+	}
+	return nil, false
+}
 
 func commonProc(doc *inverted.Document, acc *proto.Account) {
 	doc.Parts = append(doc.Parts, CommonPart)
@@ -48,9 +66,8 @@ func commonProc(doc *inverted.Document, acc *proto.Account) {
 		}
 		doc.Fields[InterestField] = append(doc.Fields[InterestField], int(acc.Interests[i]))
 	}
-	//if birthYear, ok := tokens.YearFromTS(int(acc.BirthTS)); ok {
-	//	doc.Fields[BirthYearField] = append(doc.Fields[BirthYearField], birthYear)
-	//}
+	birthYear := time.Unix(int64(acc.BirthTS), 0).UTC().Year()
+	doc.Fields[BirthYearField] = append(doc.Fields[BirthYearField], birthYear-tokens.EpochYear)
 	if acc.PremiumFinish[0] > 0 {
 		doc.Fields[PremiumField] = append(doc.Fields[PremiumField], tokens.NotNull)
 	} else {
@@ -64,10 +81,10 @@ func commonProc(doc *inverted.Document, acc *proto.Account) {
 	} else {
 		doc.Fields[PhoneCodeField] = append(doc.Fields[PhoneCodeField], tokens.Null)
 	}
-	//if code, ok := phoneCode(acc.Phone[:]); ok {
-	//	doc.Fields[phoneCodeField] = append(doc.Fields[phoneCodeField], phoneCodeToken(code))
-	//}
-	//if domain, ok := emailDomain(acc.Email.Buf[:acc.Email.Len]); ok {
-	//	doc.Fields[emailDomainField] = append(doc.Fields[emailDomainField], emailDomainToken(domain))
-	//}
+	if code, ok := phoneCode(acc.Phone[:]); ok {
+		doc.Fields[PhoneCodeField] = append(doc.Fields[PhoneCodeField], tokens.AddPhoneCode(code))
+	}
+	if domain, ok := emailDomain(acc.Email.Buf[:acc.Email.Len]); ok {
+		doc.Fields[EmailDomainField] = append(doc.Fields[EmailDomainField], tokens.AddEmailDomain(domain))
+	}
 }
