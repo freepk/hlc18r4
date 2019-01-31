@@ -3,25 +3,10 @@ package search
 import (
 	"github.com/freepk/inverted"
 	"gitlab.com/freepk/hlc18r4/proto"
-	"gitlab.com/freepk/hlc18r4/repo"
 	"gitlab.com/freepk/hlc18r4/tokens"
 )
 
-type CommonIndex struct {
-	inv *inverted.Inverted
-}
-
-func NewCommonIndex(rep *repo.AccountsRepo) *CommonIndex {
-	proc := NewAccountsProcessor(rep, CommonProc, 1, 12)
-	inv := inverted.NewInverted(proc)
-	return &CommonIndex{inv: inv}
-}
-
-func (idx *CommonIndex) Rebuild() {
-	idx.inv.Rebuild()
-}
-
-func CommonProc(doc *inverted.Document, acc *proto.Account) {
+func commonProc(doc *inverted.Document, acc *proto.Account) {
 	doc.Parts = append(doc.Parts, CommonPartition)
 	switch acc.Sex {
 	case tokens.MaleSex:
@@ -86,61 +71,3 @@ func CommonProc(doc *inverted.Document, acc *proto.Account) {
 	//	doc.Fields[emailDomainField] = append(doc.Fields[emailDomainField], emailDomainToken(domain))
 	//}
 }
-
-/*
-func iterFromField(field *inverted.Field, token int)
-
-func (idx *CommonIndex) part() *inverted.Part {
-	return idx.inv.Part(CommonPartition)
-}
-
-func (idx *CommonIndex) Sex(t int) *inverted.TokenIter {
-	if field := idx.part().Field(SexField); field != nil {
-		if token := field.Token(t); token != nil {
-			return token.Iterator()
-		}
-	}
-	return nil
-}
-
-func (idx *CommonIndex) Status(t int) *inverted.TokenIter {
-	return idx.part().Field(StatusField).Iterator(t)
-}
-
-//func (idx *CommonIndex) EmailDomain(t int) *inverted.TokenIter {
-//	return idx.part().Field(emailDomainField).Iterator(t)
-//}
-
-func (idx *CommonIndex) Fname(t int) *inverted.TokenIter {
-	return idx.part().Field(FnameField).Iterator(t)
-}
-
-func (idx *CommonIndex) Sname(t int) *inverted.TokenIter {
-	return idx.part().Field(SnameField).Iterator(t)
-}
-
-//func (idx *CommonIndex) PhoneCode(t int) *inverted.TokenIter {
-//	return idx.part().Field(phoneCodeField).Iterator(t)
-//}
-
-func (idx *CommonIndex) Country(t int) *inverted.TokenIter {
-	return idx.part().Field(CountryField).Iterator(t)
-}
-
-func (idx *CommonIndex) City(t int) *inverted.TokenIter {
-	return idx.part().Field(CityField).Iterator(t)
-}
-
-//func (idx *CommonIndex) BirthYear(t int) *inverted.TokenIter {
-//	return idx.part().Field(birthYearField).Iterator(t)
-//}
-
-func (idx *CommonIndex) Interest(t int) *inverted.TokenIter {
-	return idx.part().Field(InterestField).Iterator(t)
-}
-
-//func (idx *CommonIndex) Premium(t int) *inverted.TokenIter {
-//	return idx.part().Field(premiumField).Iterator(t)
-//}
-
-*/
