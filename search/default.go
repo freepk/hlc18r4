@@ -55,54 +55,52 @@ func DefaultProc(doc *inverted.Document, acc *proto.Account) {
 	case tokens.ComplStatus:
 		doc.Fields[StatusField] = append(doc.Fields[StatusField], tokens.ComplStatus, tokens.NotSingleStatus, tokens.NotInRelStatus)
 	}
-	/*
-		if acc.Fname > 0 {
-			doc.Fields[fnameField] = append(doc.Fields[fnameField], NotNullToken, int(acc.Fname))
-		} else {
-			doc.Fields[fnameField] = append(doc.Fields[fnameField], NullToken)
+	if acc.Fname > 0 {
+		doc.Fields[FnameField] = append(doc.Fields[FnameField], tokens.NotNull, int(acc.Fname))
+	} else {
+		doc.Fields[FnameField] = append(doc.Fields[FnameField], tokens.Null)
+	}
+	if acc.Sname > 0 {
+		doc.Fields[SnameField] = append(doc.Fields[SnameField], tokens.NotNull, int(acc.Sname))
+	} else {
+		doc.Fields[SnameField] = append(doc.Fields[SnameField], tokens.Null)
+	}
+	if acc.Country > 0 {
+		doc.Fields[CountryField] = append(doc.Fields[CountryField], tokens.NotNull, int(acc.Country))
+	} else {
+		doc.Fields[CountryField] = append(doc.Fields[CountryField], tokens.Null)
+	}
+	if acc.City > 0 {
+		doc.Fields[CityField] = append(doc.Fields[CityField], tokens.NotNull, int(acc.City))
+	} else {
+		doc.Fields[CityField] = append(doc.Fields[CityField], tokens.Null)
+	}
+	for i := range acc.Interests {
+		if acc.Interests[i] == 0 {
+			break
 		}
-		if acc.Sname > 0 {
-			doc.Fields[snameField] = append(doc.Fields[snameField], NotNullToken, int(acc.Sname))
-		} else {
-			doc.Fields[snameField] = append(doc.Fields[snameField], NullToken)
-		}
-		if acc.Country > 0 {
-			doc.Fields[countryField] = append(doc.Fields[countryField], NotNullToken, int(acc.Country))
-		} else {
-			doc.Fields[countryField] = append(doc.Fields[countryField], NullToken)
-		}
-		if acc.City > 0 {
-			doc.Fields[cityField] = append(doc.Fields[cityField], NotNullToken, int(acc.City))
-		} else {
-			doc.Fields[cityField] = append(doc.Fields[cityField], NullToken)
-		}
-		for i := range acc.Interests {
-			if acc.Interests[i] == 0 {
-				break
-			}
-			doc.Fields[interestField] = append(doc.Fields[interestField], int(acc.Interests[i]))
-		}
-		doc.Fields[birthYearField] = append(doc.Fields[birthYearField], yearTokenTS(int(acc.BirthTS)))
-		if acc.PremiumFinish[0] > 0 {
-			doc.Fields[premiumField] = append(doc.Fields[premiumField], NotNullToken)
-		} else {
-			doc.Fields[premiumField] = append(doc.Fields[premiumField], NullToken)
-		}
-		if premiumNow(acc.PremiumFinish[:]) {
-			doc.Fields[premiumField] = append(doc.Fields[premiumField], PremiumNowToken)
-		}
-		if acc.Phone[0] > 0 {
-			doc.Fields[phoneCodeField] = append(doc.Fields[phoneCodeField], NotNullToken)
-		} else {
-			doc.Fields[phoneCodeField] = append(doc.Fields[phoneCodeField], NullToken)
-		}
-		if code, ok := phoneCode(acc.Phone[:]); ok {
-			doc.Fields[phoneCodeField] = append(doc.Fields[phoneCodeField], phoneCodeToken(code))
-		}
-		if domain, ok := emailDomain(acc.Email.Buf[:acc.Email.Len]); ok {
-			doc.Fields[emailDomainField] = append(doc.Fields[emailDomainField], emailDomainToken(domain))
-		}
-	*/
+		doc.Fields[InterestField] = append(doc.Fields[InterestField], int(acc.Interests[i]))
+	}
+	//doc.Fields[birthYearField] = append(doc.Fields[birthYearField], yearTokenTS(int(acc.BirthTS)))
+	if acc.PremiumFinish[0] > 0 {
+		doc.Fields[PremiumField] = append(doc.Fields[PremiumField], tokens.NotNull)
+	} else {
+		doc.Fields[PremiumField] = append(doc.Fields[PremiumField], tokens.Null)
+	}
+	//if premiumNow(acc.PremiumFinish[:]) {
+	//	doc.Fields[premiumField] = append(doc.Fields[premiumField], PremiumNowToken)
+	//}
+	if acc.Phone[0] > 0 {
+		doc.Fields[PhoneCodeField] = append(doc.Fields[PhoneCodeField], tokens.NotNull)
+	} else {
+		doc.Fields[PhoneCodeField] = append(doc.Fields[PhoneCodeField], tokens.Null)
+	}
+	//if code, ok := phoneCode(acc.Phone[:]); ok {
+	//	doc.Fields[phoneCodeField] = append(doc.Fields[phoneCodeField], phoneCodeToken(code))
+	//}
+	//if domain, ok := emailDomain(acc.Email.Buf[:acc.Email.Len]); ok {
+	//	doc.Fields[emailDomainField] = append(doc.Fields[emailDomainField], emailDomainToken(domain))
+	//}
 }
 
 /*
