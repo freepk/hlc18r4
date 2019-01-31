@@ -134,13 +134,33 @@ func EmailDomain(b []byte) (int, bool) {
 	return emailDomainDict.Key(b)
 }
 
-func Year(b []byte) (int, bool) {
+/*
+func IntYear(year int) (int, bool) {
+	if year < 1950 {
+		return year - 1950, true
+	}
 	return 0, false
 }
 
-func YearFromTS(b []byte) (int, bool) {
+func IntYearTS(ts int) (int, bool) {
+	year := time.Unix(int64(ts), 0).UTC().Year()
+	return IntYear(year)
+}
+
+func Year(b []byte) (int, bool) {
+	if _, year, ok := parse.ParseInt(b); ok {
+		return IntYear(year)
+	}
 	return 0, false
 }
+
+func YearTS(b []byte) (int, bool) {
+	if _, ts, ok := parse.ParseInt(b); ok {
+		return IntYearTS(ts)
+	}
+	return 0, false
+}
+*/
 
 func FnameVal(k int) ([]byte, bool) {
 	return fnameDict.Val(k)
