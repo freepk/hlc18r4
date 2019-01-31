@@ -10,16 +10,16 @@ type ProcessFunc func(doc *inverted.Document, acc *proto.Account)
 
 type AccountsProcessor struct {
 	rep  *repo.AccountsRepo
-	doc  *inverted.Document
 	acc  *proto.Account
+	doc  *inverted.Document
 	proc ProcessFunc
 	i    int
 }
 
-func NewAccountsProcessor(rep *repo.AccountsRepo, proc ProcessFunc) *AccountsProcessor {
-	doc := &inverted.Document{ID: 0, Parts: make([]int, 0, 16), Fields: make([][]int, 4)}
+func NewAccountsProcessor(rep *repo.AccountsRepo, proc ProcessFunc, parts, fields int) *AccountsProcessor {
 	acc := &proto.Account{}
-	return &AccountsProcessor{rep: rep, doc: doc, acc: acc, proc: proc, i: 0}
+	doc := &inverted.Document{ID: 0, Parts: make([]int, 0, parts), Fields: make([][]int, fields)}
+	return &AccountsProcessor{rep: rep, acc: acc, doc: doc, proc: proc, i: 0}
 }
 
 func (prc *AccountsProcessor) Reset() {
@@ -32,6 +32,7 @@ func (prc *AccountsProcessor) Next() (*inverted.Document, bool) {
 		id := n - i - 1
 		if prc.rep.IsSet(id) {
 			*prc.acc = *prc.rep.Get(id)
+			prc.doc.Reset()
 			prc.doc.ID = 2000000 - id
 			prc.proc(prc.doc, prc.acc)
 			prc.i = i + 1

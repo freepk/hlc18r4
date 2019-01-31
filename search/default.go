@@ -1,8 +1,6 @@
 package search
 
 import (
-	//"fmt"
-
 	"github.com/freepk/inverted"
 	"gitlab.com/freepk/hlc18r4/proto"
 	"gitlab.com/freepk/hlc18r4/repo"
@@ -32,7 +30,7 @@ type DefaultIndex struct {
 }
 
 func NewDefaultIndex(rep *repo.AccountsRepo) *DefaultIndex {
-	proc := NewAccountsProcessor(rep, DefaultProc)
+	proc := NewAccountsProcessor(rep, DefaultProc, 1, 12)
 	inv := inverted.NewInverted(proc)
 	return &DefaultIndex{inv: inv}
 }
@@ -42,8 +40,6 @@ func (idx *DefaultIndex) Rebuild() {
 }
 
 func DefaultProc(doc *inverted.Document, acc *proto.Account) {
-	//fmt.Println(doc.ID)
-	return
 	doc.Parts = append(doc.Parts, DefaultPartition)
 	switch acc.Sex {
 	case tokens.MaleSex:
@@ -51,15 +47,15 @@ func DefaultProc(doc *inverted.Document, acc *proto.Account) {
 	case tokens.FemaleSex:
 		doc.Fields[SexField] = append(doc.Fields[SexField], tokens.FemaleSex)
 	}
+	switch acc.Status {
+	case tokens.SingleStatus:
+		doc.Fields[StatusField] = append(doc.Fields[StatusField], tokens.SingleStatus, tokens.NotInRelStatus, tokens.NotComplStatus)
+	case tokens.InRelStatus:
+		doc.Fields[StatusField] = append(doc.Fields[StatusField], tokens.InRelStatus, tokens.NotSingleStatus, tokens.NotComplStatus)
+	case tokens.ComplStatus:
+		doc.Fields[StatusField] = append(doc.Fields[StatusField], tokens.ComplStatus, tokens.NotSingleStatus, tokens.NotInRelStatus)
+	}
 	/*
-		switch acc.Status {
-		case proto.SingleStatus:
-			doc.Fields[StatusField] = append(doc.Fields[StatusField], SingleToken, NotInRelToken, NotComplToken)
-		case proto.InRelStatus:
-			doc.Fields[StatusField] = append(doc.Fields[StatusField], InRelToken, NotSingleToken, NotComplToken)
-		case proto.ComplStatus:
-			doc.Fields[StatusField] = append(doc.Fields[StatusField], ComplToken, NotSingleToken, NotInRelToken)
-		}
 		if acc.Fname > 0 {
 			doc.Fields[fnameField] = append(doc.Fields[fnameField], NotNullToken, int(acc.Fname))
 		} else {
