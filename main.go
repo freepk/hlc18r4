@@ -135,11 +135,11 @@ func filterHandler(ctx *fasthttp.RequestCtx) {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		return
 	}
-	var iter iterator.Iterator
+	//var iter iterator.Iterator
 	args.VisitAll(func(k, v []byte) {
 		switch string(k) {
 		case `likes_contains`:
-			iter, _ = buildIter(iter, v, intToken, searchSvc.Likes, interOper)
+			//iter, _ = buildIter(iter, v, intToken, searchSvc.Likes, interOper)
 		}
 	})
 }

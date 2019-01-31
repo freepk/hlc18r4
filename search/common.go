@@ -7,7 +7,7 @@ import (
 )
 
 func commonProc(doc *inverted.Document, acc *proto.Account) {
-	doc.Parts = append(doc.Parts, CommonPartition)
+	doc.Parts = append(doc.Parts, CommonPart)
 	switch acc.Sex {
 	case tokens.MaleSex:
 		doc.Fields[SexField] = append(doc.Fields[SexField], tokens.MaleSex)
