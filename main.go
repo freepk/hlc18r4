@@ -91,35 +91,27 @@ func unionOper(a, b iterator.Iterator) iterator.Iterator {
 
 func buildIter(iter iterator.Iterator, vals []byte, tokenFn tokenFunc, iterFn iterFunc, operFn operFunc) (iterator.Iterator, bool) {
 	var res iterator.Iterator
-	println("vals", vals)
 	vals, val := parse.ScanSymbol(vals, 0x2C)
 	for len(val) > 0 {
-		println("val", string(val))
-		if token, ok := tokenFn(val); ok {
-			println("token", token)
-			if it := iterFn(token); it != nil {
-				if res == nil {
-					res = it
-					println("res = it", res)
-				} else {
-					res = operFn(res, it)
-					println("res = operFn(res, it)", res)
-				}
-			} else {
-				println("it == nil, return iter, false")
-				return iter, false
-			}
-		} else {
-			println("token !ok, return iter, false")
+		token, ok := tokenFn(val)
+		if !ok {
 			return iter, false
+		}
+		it := iterFn(token)
+		if it == nil {
+			return iter, false
+		}
+		if res != nil {
+			res = operFn(res, it)
+		}
+		if res == nil {
+			res = it
 		}
 		vals, val = parse.ScanSymbol(vals, 0x2C)
 	}
 	if res == nil {
-		println("res == nil, return iter, true")
 		return iter, true
 	}
-	println("return NewInterIter, true")
 	return iterator.NewInterIter(iter, res), true
 }
 
@@ -135,11 +127,8 @@ func filterHandler(ctx *fasthttp.RequestCtx) {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		return
 	}
-	//var iter iterator.Iterator
 	args.VisitAll(func(k, v []byte) {
 		switch string(k) {
-		case `likes_contains`:
-			//iter, _ = buildIter(iter, v, intToken, searchSvc.Likes, interOper)
 		}
 	})
 }
