@@ -10,6 +10,6 @@ func TestDefaultIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	index := NewDefaultIndex(rep)
+	index := NewCommonIndex(rep)
 	index.Rebuild()
 }

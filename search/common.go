@@ -7,40 +7,22 @@ import (
 	"gitlab.com/freepk/hlc18r4/tokens"
 )
 
-const (
-	DefaultPartition = 0
-)
-
-const (
-	SexField = iota
-	StatusField
-	CountryField
-	CityField
-	InterestField
-	FnameField
-	SnameField
-	BirthYearField
-	PremiumField
-	PhoneCodeField
-	EmailDomainField
-)
-
-type DefaultIndex struct {
+type CommonIndex struct {
 	inv *inverted.Inverted
 }
 
-func NewDefaultIndex(rep *repo.AccountsRepo) *DefaultIndex {
-	proc := NewAccountsProcessor(rep, DefaultProc, 1, 12)
+func NewCommonIndex(rep *repo.AccountsRepo) *CommonIndex {
+	proc := NewAccountsProcessor(rep, CommonProc, 1, 12)
 	inv := inverted.NewInverted(proc)
-	return &DefaultIndex{inv: inv}
+	return &CommonIndex{inv: inv}
 }
 
-func (idx *DefaultIndex) Rebuild() {
+func (idx *CommonIndex) Rebuild() {
 	idx.inv.Rebuild()
 }
 
-func DefaultProc(doc *inverted.Document, acc *proto.Account) {
-	doc.Parts = append(doc.Parts, DefaultPartition)
+func CommonProc(doc *inverted.Document, acc *proto.Account) {
+	doc.Parts = append(doc.Parts, CommonPartition)
 	switch acc.Sex {
 	case tokens.MaleSex:
 		doc.Fields[SexField] = append(doc.Fields[SexField], tokens.MaleSex)
@@ -81,7 +63,9 @@ func DefaultProc(doc *inverted.Document, acc *proto.Account) {
 		}
 		doc.Fields[InterestField] = append(doc.Fields[InterestField], int(acc.Interests[i]))
 	}
-	//doc.Fields[birthYearField] = append(doc.Fields[birthYearField], yearTokenTS(int(acc.BirthTS)))
+	//if birthYear, ok := tokens.YearFromTS(int(acc.BirthTS)); ok {
+	//	doc.Fields[BirthYearField] = append(doc.Fields[BirthYearField], birthYear)
+	//}
 	if acc.PremiumFinish[0] > 0 {
 		doc.Fields[PremiumField] = append(doc.Fields[PremiumField], tokens.NotNull)
 	} else {
@@ -104,49 +88,59 @@ func DefaultProc(doc *inverted.Document, acc *proto.Account) {
 }
 
 /*
-func (idx *DefaultIndex) part() *inverted.Part {
-	return idx.inv.Part(defaultPartition)
+func iterFromField(field *inverted.Field, token int)
+
+func (idx *CommonIndex) part() *inverted.Part {
+	return idx.inv.Part(CommonPartition)
 }
 
-func (idx *DefaultIndex) Sex(t int) *inverted.TokenIter {
-	return idx.part().Field(sexField).Iterator(t)
+func (idx *CommonIndex) Sex(t int) *inverted.TokenIter {
+	if field := idx.part().Field(SexField); field != nil {
+		if token := field.Token(t); token != nil {
+			return token.Iterator()
+		}
+	}
+	return nil
 }
 
-func (idx *DefaultIndex) Status(t int) *inverted.TokenIter {
-	return idx.part().Field(statusField).Iterator(t)
+func (idx *CommonIndex) Status(t int) *inverted.TokenIter {
+	return idx.part().Field(StatusField).Iterator(t)
 }
 
-func (idx *DefaultIndex) EmailDomain(t int) *inverted.TokenIter {
-	return idx.part().Field(emailDomainField).Iterator(t)
+//func (idx *CommonIndex) EmailDomain(t int) *inverted.TokenIter {
+//	return idx.part().Field(emailDomainField).Iterator(t)
+//}
+
+func (idx *CommonIndex) Fname(t int) *inverted.TokenIter {
+	return idx.part().Field(FnameField).Iterator(t)
 }
 
-func (idx *DefaultIndex) Fname(t int) *inverted.TokenIter {
-	return idx.part().Field(fnameField).Iterator(t)
+func (idx *CommonIndex) Sname(t int) *inverted.TokenIter {
+	return idx.part().Field(SnameField).Iterator(t)
 }
 
-func (idx *DefaultIndex) Sname(t int) *inverted.TokenIter {
-	return idx.part().Field(snameField).Iterator(t)
+//func (idx *CommonIndex) PhoneCode(t int) *inverted.TokenIter {
+//	return idx.part().Field(phoneCodeField).Iterator(t)
+//}
+
+func (idx *CommonIndex) Country(t int) *inverted.TokenIter {
+	return idx.part().Field(CountryField).Iterator(t)
 }
 
-func (idx *DefaultIndex) PhoneCode(t int) *inverted.TokenIter {
-	return idx.part().Field(phoneCodeField).Iterator(t)
-}
-func (idx *DefaultIndex) Country(t int) *inverted.TokenIter {
-	return idx.part().Field(countryField).Iterator(t)
+func (idx *CommonIndex) City(t int) *inverted.TokenIter {
+	return idx.part().Field(CityField).Iterator(t)
 }
 
-func (idx *DefaultIndex) City(t int) *inverted.TokenIter {
-	return idx.part().Field(cityField).Iterator(t)
-}
-func (idx *DefaultIndex) BirthYear(t int) *inverted.TokenIter {
-	return idx.part().Field(birthYearField).Iterator(t)
+//func (idx *CommonIndex) BirthYear(t int) *inverted.TokenIter {
+//	return idx.part().Field(birthYearField).Iterator(t)
+//}
+
+func (idx *CommonIndex) Interest(t int) *inverted.TokenIter {
+	return idx.part().Field(InterestField).Iterator(t)
 }
 
-func (idx *DefaultIndex) Interest(t int) *inverted.TokenIter {
-	return idx.part().Field(interestField).Iterator(t)
-}
+//func (idx *CommonIndex) Premium(t int) *inverted.TokenIter {
+//	return idx.part().Field(premiumField).Iterator(t)
+//}
 
-func (idx *DefaultIndex) Premium(t int) *inverted.TokenIter {
-	return idx.part().Field(premiumField).Iterator(t)
-}
 */

@@ -23,6 +23,10 @@ const (
 	NotComplStatus
 )
 
+const (
+	PremiumNow = 4
+)
+
 var (
 	fnameDict       = dictionary.NewDictionary(4)
 	snameDict       = dictionary.NewDictionary(4)
@@ -90,6 +94,52 @@ func AddCity(b []byte) int {
 func AddInterest(b []byte) int {
 	k, _ := interestDict.AddKey(b)
 	return k
+}
+
+func AddPhoneCode(b []byte) int {
+	k, _ := phoneCodeDict.AddKey(b)
+	return k
+}
+
+func AddEmailDomain(b []byte) int {
+	k, _ := emailDomainDict.AddKey(b)
+	return k
+}
+
+func Fname(b []byte) (int, bool) {
+	return fnameDict.Key(b)
+}
+
+func Sname(b []byte) (int, bool) {
+	return snameDict.Key(b)
+}
+
+func Country(b []byte) (int, bool) {
+	return countryDict.Key(b)
+}
+
+func City(b []byte) (int, bool) {
+	return cityDict.Key(b)
+}
+
+func Interest(b []byte) (int, bool) {
+	return interestDict.Key(b)
+}
+
+func PhoneCode(b []byte) (int, bool) {
+	return phoneCodeDict.Key(b)
+}
+
+func EmailDomain(b []byte) (int, bool) {
+	return emailDomainDict.Key(b)
+}
+
+func Year(b []byte) (int, bool) {
+	return 0, false
+}
+
+func YearFromTS(b []byte) (int, bool) {
+	return 0, false
 }
 
 func FnameVal(k int) ([]byte, bool) {
