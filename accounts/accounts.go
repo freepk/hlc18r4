@@ -5,10 +5,10 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/freepk/hlc18r4/proto"
+	"github.com/freepk/hlc18r4/repo"
 	"github.com/freepk/parse"
 	"github.com/spaolacci/murmur3"
-	"gitlab.com/freepk/hlc18r4/proto"
-	"gitlab.com/freepk/hlc18r4/repo"
 )
 
 var (

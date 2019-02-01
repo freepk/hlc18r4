@@ -3,8 +3,8 @@ package search
 import (
 	"sync"
 
+	"github.com/freepk/hlc18r4/repo"
 	"github.com/freepk/inverted"
-	"gitlab.com/freepk/hlc18r4/repo"
 )
 
 const (

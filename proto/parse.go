@@ -1,8 +1,8 @@
 package proto
 
 import (
+	"github.com/freepk/hlc18r4/tokens"
 	"github.com/freepk/parse"
-	"gitlab.com/freepk/hlc18r4/tokens"
 )
 
 func parseFname(b []byte, c *buffer) ([]byte, uint8, bool) {

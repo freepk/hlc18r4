@@ -5,12 +5,12 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/freepk/hlc18r4/accounts"
+	"github.com/freepk/hlc18r4/backup"
+	"github.com/freepk/hlc18r4/search"
 	"github.com/freepk/iterator"
 	"github.com/freepk/parse"
 	"github.com/valyala/fasthttp"
-	"gitlab.com/freepk/hlc18r4/accounts"
-	"gitlab.com/freepk/hlc18r4/backup"
-	"gitlab.com/freepk/hlc18r4/search"
 )
 
 var (

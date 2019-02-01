@@ -175,4 +175,3 @@ func InterestVal(k int) ([]byte, bool) {
 //        token, _ := emailDomainDict.AddToken(b)
 //        return token
 //}
-

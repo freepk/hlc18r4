@@ -3,8 +3,8 @@ package proto
 import (
 	"sync"
 
+	"github.com/freepk/hlc18r4/tokens"
 	"github.com/freepk/parse"
-	"gitlab.com/freepk/hlc18r4/tokens"
 )
 
 type buffer struct {

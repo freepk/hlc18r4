@@ -3,8 +3,8 @@ package search
 import (
 	"testing"
 
-	"gitlab.com/freepk/hlc18r4/backup"
-	"gitlab.com/freepk/hlc18r4/tokens"
+	"github.com/freepk/hlc18r4/backup"
+	"github.com/freepk/hlc18r4/tokens"
 )
 
 func TestSearch(t *testing.T) {

@@ -1,9 +1,9 @@
 package search
 
 import (
+	"github.com/freepk/hlc18r4/proto"
+	"github.com/freepk/hlc18r4/repo"
 	"github.com/freepk/inverted"
-	"gitlab.com/freepk/hlc18r4/proto"
-	"gitlab.com/freepk/hlc18r4/repo"
 )
 
 type ProcessFunc func(doc *inverted.Document, acc *proto.Account)

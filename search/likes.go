@@ -1,8 +1,8 @@
 package search
 
 import (
-	"gitlab.com/freepk/hlc18r4/proto"
-	"gitlab.com/freepk/hlc18r4/repo"
+	"github.com/freepk/hlc18r4/proto"
+	"github.com/freepk/hlc18r4/repo"
 )
 
 type LikeIter struct {

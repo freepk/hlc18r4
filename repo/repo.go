@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"gitlab.com/freepk/hlc18r4/proto"
+	"github.com/freepk/hlc18r4/proto"
 )
 
 type AccountsRepo struct {
