@@ -67,7 +67,7 @@ func parseSex(b []byte) ([]byte, uint8, bool) {
 		case `"m"`:
 			return t[3:], uint8(tokens.MaleSex), true
 		case `"f"`:
-			return t[3:], uint8(tokens.MaleSex), true
+			return t[3:], uint8(tokens.FemaleSex), true
 		}
 	}
 	return b, 0, false
