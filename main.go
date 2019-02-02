@@ -8,7 +8,6 @@ import (
 	"github.com/freepk/hlc18r4/accounts"
 	"github.com/freepk/hlc18r4/backup"
 	"github.com/freepk/hlc18r4/search"
-	"github.com/freepk/iterator"
 	"github.com/freepk/parse"
 	"github.com/valyala/fasthttp"
 )
@@ -73,51 +72,6 @@ func updateHandler(id int, ctx *fasthttp.RequestCtx) {
 	} else {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 	}
-}
-
-type tokenFunc func([]byte) (int, bool)
-
-type iterFunc func(int) iterator.Iterator
-
-type operFunc func(iterator.Iterator, iterator.Iterator) iterator.Iterator
-
-func interOper(a, b iterator.Iterator) iterator.Iterator {
-	return iterator.NewInterIter(a, b)
-}
-
-func unionOper(a, b iterator.Iterator) iterator.Iterator {
-	return iterator.NewUnionIter(a, b)
-}
-
-func buildIter(iter iterator.Iterator, vals []byte, tokenFn tokenFunc, iterFn iterFunc, operFn operFunc) (iterator.Iterator, bool) {
-	var res iterator.Iterator
-	vals, val := parse.ScanSymbol(vals, 0x2C)
-	for len(val) > 0 {
-		token, ok := tokenFn(val)
-		if !ok {
-			return iter, false
-		}
-		it := iterFn(token)
-		if it == nil {
-			return iter, false
-		}
-		if res != nil {
-			res = operFn(res, it)
-		}
-		if res == nil {
-			res = it
-		}
-		vals, val = parse.ScanSymbol(vals, 0x2C)
-	}
-	if res == nil {
-		return iter, true
-	}
-	return iterator.NewInterIter(iter, res), true
-}
-
-func intToken(b []byte) (int, bool) {
-	_, token, ok := parse.ParseInt(b)
-	return token, ok
 }
 
 func filterHandler(ctx *fasthttp.RequestCtx) {
