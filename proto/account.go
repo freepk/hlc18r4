@@ -1,8 +1,17 @@
 package proto
 
 import (
-	"gitlab.com/freepk/hlc18r4/parse"
+	"sync"
+
+	"github.com/freepk/hlc18r4/tokens"
+	"github.com/freepk/parse"
 )
+
+type buffer struct {
+	B []byte
+}
+
+var bufferPool = &sync.Pool{New: func() interface{} { return new(buffer) }}
 
 const (
 	IDField        = 1
@@ -64,26 +73,6 @@ type Account struct {
 	LikesTo       []Like
 }
 
-func (a *Account) GetFname() []byte {
-	b, _ := fnameDict.Value(int(a.Fname))
-	return b
-}
-
-func (a *Account) GetSname() []byte {
-	b, _ := snameDict.Value(int(a.Sname))
-	return b
-}
-
-func (a *Account) GetCountry() []byte {
-	b, _ := countryDict.Value(int(a.Country))
-	return b
-}
-
-func (a *Account) GetCity() []byte {
-	b, _ := cityDict.Value(int(a.City))
-	return b
-}
-
 func (a *Account) reset() {
 	var number NumberBuf
 	var email EmailBuf
@@ -142,13 +131,13 @@ func (a *Account) WriteJSON(fields int, w extendedWriter) {
 		w.WriteString(`"`)
 	}
 	if (fields&FnameField) == FnameField && a.Fname > 0 {
-		fname, _ := fnameDict.Value(int(a.Fname))
+		fname, _ := tokens.FnameVal(int(a.Fname))
 		w.WriteString(`,"fname":"`)
 		w.Write(fname)
 		w.WriteString(`"`)
 	}
 	if (fields&SnameField) == SnameField && a.Sname > 0 {
-		sname, _ := snameDict.Value(int(a.Sname))
+		sname, _ := tokens.SnameVal(int(a.Sname))
 		w.WriteString(`,"sname":"`)
 		w.Write(sname)
 		w.WriteString(`"`)
@@ -160,31 +149,31 @@ func (a *Account) WriteJSON(fields int, w extendedWriter) {
 	}
 	if (fields & SexField) == SexField {
 		switch a.Sex {
-		case MaleSex:
+		case tokens.MaleSex:
 			w.WriteString(`,"sex":"m"`)
-		case FemaleSex:
+		case tokens.FemaleSex:
 			w.WriteString(`,"sex":"f"`)
 		}
 	}
 	if (fields&CountryField) == CountryField && a.Country > 0 {
-		country, _ := countryDict.Value(int(a.Country))
+		country, _ := tokens.CountryVal(int(a.Country))
 		w.WriteString(`,"country":"`)
 		w.Write(country)
 		w.WriteString(`"`)
 	}
 	if (fields&CityField) == CityField && a.City > 0 {
-		city, _ := cityDict.Value(int(a.City))
+		city, _ := tokens.CityVal(int(a.City))
 		w.WriteString(`,"city":"`)
 		w.Write(city)
 		w.WriteString(`"`)
 	}
 	if (fields & StatusField) == StatusField {
 		switch a.Status {
-		case SingleStatus:
+		case tokens.SingleStatus:
 			w.WriteString(`,"status":"свободны"`)
-		case InRelStatus:
+		case tokens.InRelStatus:
 			w.WriteString(`,"status":"заняты"`)
-		case ComplStatus:
+		case tokens.ComplStatus:
 			w.WriteString(`,"status":"всё сложно"`)
 		}
 	}
@@ -204,6 +193,9 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 	var ok bool
 
 	a.reset()
+
+	enc := bufferPool.Get().(*buffer)
+	defer bufferPool.Put(enc)
 
 	if tail, ok = parse.SkipSymbol(buf, '{'); !ok {
 		return buf, false
@@ -234,11 +226,11 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			}
 			a.Email.Len = uint8(copy(a.Email.Buf[:], temp))
 		case len(tail) > 8 && string(tail[:8]) == `"fname":`:
-			if tail, a.Fname, ok = parseFname(tail[8:]); !ok {
+			if tail, a.Fname, ok = parseFname(tail[8:], enc); !ok {
 				return buf, false
 			}
 		case len(tail) > 8 && string(tail[:8]) == `"sname":`:
-			if tail, a.Sname, ok = parseSname(tail[8:]); !ok {
+			if tail, a.Sname, ok = parseSname(tail[8:], enc); !ok {
 				return buf, false
 			}
 		case len(tail) > 8 && string(tail[:8]) == `"phone":`:
@@ -251,11 +243,11 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				return buf, false
 			}
 		case len(tail) > 10 && string(tail[:10]) == `"country":`:
-			if tail, a.Country, ok = parseCountry(tail[10:]); !ok {
+			if tail, a.Country, ok = parseCountry(tail[10:], enc); !ok {
 				return buf, false
 			}
 		case len(tail) > 7 && string(tail[:7]) == `"city":`:
-			if tail, a.City, ok = parseCity(tail[7:]); !ok {
+			if tail, a.City, ok = parseCity(tail[7:], enc); !ok {
 				return buf, false
 			}
 		case len(tail) > 9 && string(tail[:9]) == `"status":`:
@@ -294,8 +286,8 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 			var i uint8
 			var interest uint8
 			for {
-				if tail, interest, ok = parseInterest(tail); !ok {
-					return buf, false
+				if tail, interest, ok = parseInterest(tail, enc); !ok {
+					break
 				}
 				a.Interests[i] = interest
 				i++
@@ -311,20 +303,20 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				return buf, false
 			}
 			for {
-				ID := 0
-				TS := 0
+				id := 0
+				ts := 0
 				if tail, ok = parse.SkipSymbol(tail, '{'); !ok {
-					return buf, false
+					break
 				}
 				for {
 					tail = parse.SkipSpaces(tail)
 					switch {
 					case len(tail) > 5 && string(tail[:5]) == `"id":`:
-						if tail, ID, ok = parse.ParseInt(tail[5:]); !ok {
+						if tail, id, ok = parse.ParseInt(tail[5:]); !ok {
 							return buf, false
 						}
 					case len(tail) > 5 && string(tail[:5]) == `"ts":`:
-						if tail, TS, ok = parse.ParseInt(tail[5:]); !ok {
+						if tail, ts, ok = parse.ParseInt(tail[5:]); !ok {
 							return buf, false
 						}
 					}
@@ -335,7 +327,7 @@ func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 				if tail, ok = parse.SkipSymbol(tail, '}'); !ok {
 					return buf, false
 				}
-				a.LikesTo = append(a.LikesTo, Like{ID: uint32(ID), TS: uint32(TS)})
+				a.LikesTo = append(a.LikesTo, Like{ID: uint32(id), TS: uint32(ts)})
 				if tail, ok = parse.SkipSymbol(tail, ','); !ok {
 					break
 				}

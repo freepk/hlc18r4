@@ -1,96 +1,87 @@
 package proto
 
 import (
-	"gitlab.com/freepk/hlc18r4/dictionary"
-	"gitlab.com/freepk/hlc18r4/parse"
+	"github.com/freepk/hlc18r4/tokens"
+	"github.com/freepk/parse"
 )
 
-var (
-	fnameDict    = dictionary.NewDictionary(4)
-	snameDict    = dictionary.NewDictionary(4)
-	countryDict  = dictionary.NewDictionary(4)
-	cityDict     = dictionary.NewDictionary(4)
-	interestDict = dictionary.NewDictionary(4)
-)
-
-const (
-	MaleSex   = 'm'
-	FemaleSex = 'f'
-)
-
-const (
-	SingleStatus = 's'
-	InRelStatus  = 'r'
-	ComplStatus  = 'c'
-)
-
-func parseFname(b []byte) ([]byte, uint8, bool) {
-	tail, value, ok := parse.ParseQuoted(b)
+func parseFname(b []byte, c *buffer) ([]byte, uint8, bool) {
+	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
 	}
-	token, _ := fnameDict.AddToken(value)
-	return tail, uint8(token), true
+	c.B = append(c.B[:0], v...)
+	c.B = parse.Unquote(c.B)
+	k := tokens.AddFname(c.B)
+	return t, uint8(k), true
 }
 
-func parseSname(b []byte) ([]byte, uint16, bool) {
-	tail, value, ok := parse.ParseQuoted(b)
+func parseSname(b []byte, c *buffer) ([]byte, uint16, bool) {
+	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
 	}
-	token, _ := snameDict.AddToken(value)
-	return tail, uint16(token), true
+	c.B = append(c.B[:0], v...)
+	c.B = parse.Unquote(c.B)
+	k := tokens.AddSname(c.B)
+	return t, uint16(k), true
 }
 
-func parseCountry(b []byte) ([]byte, uint8, bool) {
-	tail, value, ok := parse.ParseQuoted(b)
+func parseCountry(b []byte, c *buffer) ([]byte, uint8, bool) {
+	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
 	}
-	token, _ := countryDict.AddToken(value)
-	return tail, uint8(token), true
+	c.B = append(c.B[:0], v...)
+	c.B = parse.Unquote(c.B)
+	k := tokens.AddCountry(c.B)
+	return t, uint8(k), true
 }
 
-func parseCity(b []byte) ([]byte, uint16, bool) {
-	tail, value, ok := parse.ParseQuoted(b)
+func parseCity(b []byte, c *buffer) ([]byte, uint16, bool) {
+	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
 	}
-	token, _ := cityDict.AddToken(value)
-	return tail, uint16(token), true
+	c.B = append(c.B[:0], v...)
+	c.B = parse.Unquote(c.B)
+	k := tokens.AddCity(c.B)
+	return t, uint16(k), true
 }
 
-func parseInterest(b []byte) ([]byte, uint8, bool) {
-	tail, value, ok := parse.ParseQuoted(b)
+func parseInterest(b []byte, c *buffer) ([]byte, uint8, bool) {
+	t, v, ok := parse.ParseQuoted(b)
 	if !ok {
 		return b, 0, false
 	}
-	token, _ := interestDict.AddToken(value)
-	return tail, uint8(token), true
+	c.B = append(c.B[:0], v...)
+	c.B = parse.Unquote(c.B)
+	k := tokens.AddInterest(c.B)
+	return t, uint8(k), true
 }
 
 func parseSex(b []byte) ([]byte, uint8, bool) {
-	tail := parse.SkipSpaces(b)
-	if len(tail) > 3 {
-		switch string(tail[:3]) {
+	t := parse.SkipSpaces(b)
+	if len(t) > 3 {
+		switch string(t[:3]) {
 		case `"m"`:
-			return tail[3:], MaleSex, true
+			return t[3:], uint8(tokens.MaleSex), true
 		case `"f"`:
-			return tail[3:], FemaleSex, true
+			return t[3:], uint8(tokens.FemaleSex), true
 		}
 	}
 	return b, 0, false
 }
 
 func parseStatus(b []byte) ([]byte, uint8, bool) {
-	tail := parse.SkipSpaces(b)
+	t := parse.SkipSpaces(b)
 	switch {
-	case len(tail) > 50 && string(tail[:50]) == `"\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b"`:
-		return tail[50:], SingleStatus, true
-	case len(tail) > 38 && string(tail[:38]) == `"\u0437\u0430\u043d\u044f\u0442\u044b"`:
-		return tail[38:], InRelStatus, true
-	case len(tail) > 57 && string(tail[:57]) == `"\u0432\u0441\u0451 \u0441\u043b\u043e\u0436\u043d\u043e"`:
-		return tail[57:], ComplStatus, true
+	case len(t) > 50 && string(t[:50]) == `"\u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b"`:
+		return t[50:], uint8(tokens.SingleStatus), true
+	case len(t) > 38 && string(t[:38]) == `"\u0437\u0430\u043d\u044f\u0442\u044b"`:
+		return t[38:], uint8(tokens.InRelStatus), true
+	case len(t) > 57 && string(t[:57]) == `"\u0432\u0441\u0451 \u0441\u043b\u043e\u0436\u043d\u043e"`:
+		return t[57:], uint8(tokens.ComplStatus), true
 	}
 	return b, 0, false
 }

@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"gitlab.com/freepk/hlc18r4/proto"
+	"github.com/freepk/hlc18r4/proto"
 )
 
 type AccountsRepo struct {
@@ -11,6 +11,13 @@ type AccountsRepo struct {
 func NewAccountsRepo(num int) *AccountsRepo {
 	accounts := make([]proto.Account, num)
 	return &AccountsRepo{accounts: accounts}
+}
+
+func (rep *AccountsRepo) IsSet(id int) bool {
+	if id < len(rep.accounts) && rep.accounts[id].Email.Len > 0 {
+		return true
+	}
+	return false
 }
 
 func (rep *AccountsRepo) Get(id int) *proto.Account {

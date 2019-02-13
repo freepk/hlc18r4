@@ -1,8 +1,8 @@
-package indexes
+package search
 
 import (
-	"gitlab.com/freepk/hlc18r4/proto"
-	"gitlab.com/freepk/hlc18r4/repo"
+	"github.com/freepk/hlc18r4/proto"
+	"github.com/freepk/hlc18r4/repo"
 )
 
 type LikeIter struct {
@@ -30,7 +30,6 @@ func (it *LikeIter) Next() (int, bool) {
 type LikeIndex struct {
 	rep   *repo.AccountsRepo
 	likes [][]proto.Like
-	last  uint32
 }
 
 func NewLikeIndex(rep *repo.AccountsRepo) *LikeIndex {
@@ -78,6 +77,9 @@ func (idx *LikeIndex) Rebuild() {
 	}
 }
 
-func (idx *LikeIndex) Iterator(id int) *LikeIter {
-	return NewLikeIter(idx.likes[id])
+func (idx *LikeIndex) Likes(id int) *LikeIter {
+	if id < len(idx.likes) {
+		return NewLikeIter(idx.likes[id])
+	}
+	return nil
 }

@@ -1,0 +1,10 @@
+overload:
+  enabled: true
+  package: yandextank.plugins.DataUploader
+  token_file: "token.txt"
+phantom:
+  address: localhost
+  ammofile: /tmp/ammo/phase_2_post.ammo
+  load_profile:
+    load_type: rps
+    schedule: line(0, 600, 300)

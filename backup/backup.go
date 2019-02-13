@@ -6,10 +6,10 @@ import (
 	"log"
 	"sync"
 
+	"github.com/freepk/hlc18r4/proto"
+	"github.com/freepk/hlc18r4/repo"
+	"github.com/freepk/parse"
 	"github.com/klauspost/compress/zip"
-	"gitlab.com/freepk/hlc18r4/parse"
-	"gitlab.com/freepk/hlc18r4/proto"
-	"gitlab.com/freepk/hlc18r4/repo"
 )
 
 const (
