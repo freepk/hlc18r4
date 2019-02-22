@@ -24,6 +24,8 @@ func routerHandler(ctx *fasthttp.RequestCtx) {
 	switch string(path) {
 	case `/test0`:
 		test0Handler(ctx)
+	case `/test1`:
+		test1Handler(ctx)
 	case `/accounts/filter/`:
 		filterHandler(ctx)
 	case `/accounts/likes/`:
@@ -119,18 +121,39 @@ func test0Handler(ctx *fasthttp.RequestCtx) {
 		if !ok {
 			break
 		}
-		if id == 0 {
-			continue
-		}
 		*acc = *accountsSvc.Get(2000000 - id)
 		if acc.Sex != tokens.MaleSex {
 			continue
 		}
-		_ = acc
 		acc.WriteJSON((proto.IDField | proto.EmailField | proto.SexField | proto.CountryField), ctx)
 		limit--
 	}
 
+}
+
+func test1Handler(ctx *fasthttp.RequestCtx) {
+	interestKey, ok := tokens.Interest([]byte(`South Park`))
+	if !ok {
+		log.Fatal("Invalid interest")
+	}
+	iter := iterator.Iterator(searchSvc.Common().Interest(interestKey))
+	acc := &proto.Account{}
+	limit := 24
+	for {
+		if limit == 0 {
+			break
+		}
+		id, ok := iter.Next()
+		if !ok {
+			break
+		}
+		*acc = *accountsSvc.Get(2000000 - id)
+		if acc.Status != tokens.ComplStatus {
+			continue
+		}
+		acc.WriteJSON((proto.IDField | proto.EmailField | proto.StatusField), ctx)
+		limit--
+	}
 }
 
 func groupHandler(ctx *fasthttp.RequestCtx) {
