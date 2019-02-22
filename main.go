@@ -122,7 +122,7 @@ func test0Handler(ctx *fasthttp.RequestCtx) {
 			break
 		}
 		*acc = *accountsSvc.Get(2000000 - id)
-		if acc.Sex != tokens.MaleSex {
+		if acc.Sex != tokens.FemaleSex {
 			continue
 		}
 		acc.WriteJSON((proto.IDField | proto.EmailField | proto.SexField | proto.CountryField), ctx)
