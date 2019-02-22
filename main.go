@@ -2,12 +2,13 @@ package main
 
 import (
 	"log"
-	"sync/atomic"
-	"time"
 
 	"github.com/freepk/hlc18r4/accounts"
 	"github.com/freepk/hlc18r4/backup"
+	"github.com/freepk/hlc18r4/proto"
 	"github.com/freepk/hlc18r4/search"
+	"github.com/freepk/hlc18r4/tokens"
+	"github.com/freepk/iterator"
 	"github.com/freepk/parse"
 	"github.com/valyala/fasthttp"
 )
@@ -19,11 +20,10 @@ var (
 )
 
 func routerHandler(ctx *fasthttp.RequestCtx) {
-	if ctx.IsPost() {
-		atomic.StoreUint64(&writesCount, 1)
-	}
 	path := ctx.Path()
 	switch string(path) {
+	case `/test0`:
+		test0Handler(ctx)
 	case `/accounts/filter/`:
 		filterHandler(ctx)
 	case `/accounts/likes/`:
@@ -82,9 +82,55 @@ func filterHandler(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	args.VisitAll(func(k, v []byte) {
-		switch string(k) {
-		}
 	})
+}
+
+func test0Handler(ctx *fasthttp.RequestCtx) {
+	countryKey, ok := tokens.Country([]byte(`Испезия`))
+	if !ok {
+		log.Fatal("Invalid country")
+	}
+	country := searchSvc.Countries(countryKey)
+	if country == nil {
+		log.Fatal("Country index is null")
+	}
+	interestKey, ok := tokens.Interest([]byte(`Обнимашки`))
+	if !ok {
+		log.Fatal("Invalid interest")
+	}
+	iter := iterator.Iterator(country.Interest(interestKey))
+	interestKey, ok = tokens.Interest([]byte(`YouTube`))
+	if !ok {
+		log.Fatal("Invalid interest")
+	}
+	iter = iterator.NewUnionIter(iter, country.Interest(interestKey))
+	interestKey, ok = tokens.Interest([]byte(`Солнце`))
+	if !ok {
+		log.Fatal("Invalid interest")
+	}
+	iter = iterator.NewUnionIter(iter, country.Interest(interestKey))
+	acc := &proto.Account{}
+	limit := 22
+	for {
+		if limit == 0 {
+			break
+		}
+		id, ok := iter.Next()
+		if !ok {
+			break
+		}
+		if id == 0 {
+			continue
+		}
+		*acc = *accountsSvc.Get(2000000 - id)
+		if acc.Sex != tokens.MaleSex {
+			continue
+		}
+		_ = acc
+		acc.WriteJSON((proto.IDField | proto.EmailField | proto.SexField | proto.CountryField), ctx)
+		limit--
+	}
+
 }
 
 func groupHandler(ctx *fasthttp.RequestCtx) {
@@ -104,24 +150,11 @@ func main() {
 	}
 	log.Println("Accounts service")
 	accountsSvc = accounts.NewAccountsService(rep)
+
 	log.Println("Search service")
 	searchSvc = search.NewSearchService(rep)
 	searchSvc.Rebuild()
-	go func() {
-		writeProcess := false
-		for {
-			temp := atomic.LoadUint64(&writesCount)
-			if temp > 0 {
-				writeProcess = true
-				atomic.StoreUint64(&writesCount, 0)
-			} else if writeProcess {
-				writeProcess = false
-				log.Println("Write process finished")
-				searchSvc.Rebuild()
-			}
-			time.Sleep(time.Second)
-		}
-	}()
+
 	log.Println("Start listen")
 	if err := fasthttp.ListenAndServe(":80", routerHandler); err != nil {
 		log.Fatal(err)

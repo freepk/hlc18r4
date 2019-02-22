@@ -1,7 +1,7 @@
 package search
 
 import (
-	"sync"
+	//"sync"
 
 	"github.com/freepk/hlc18r4/repo"
 	"github.com/freepk/inverted"
@@ -42,22 +42,22 @@ func NewSearchService(rep *repo.AccountsRepo) *SearchService {
 }
 
 func (svc *SearchService) Rebuild() {
-	gr := &sync.WaitGroup{}
-	gr.Add(3)
-	go func() {
-		defer gr.Done()
-		svc.likes.Rebuild()
-	}()
-	go func() {
-		defer gr.Done()
-		svc.common.Rebuild()
-	}()
-	go func() {
-		defer gr.Done()
-		svc.countries.Rebuild()
-		svc.cities.Rebuild()
-	}()
-	gr.Wait()
+	//gr := &sync.WaitGroup{}
+	//gr.Add(3)
+	//go func() {
+	//	defer gr.Done()
+	svc.likes.Rebuild()
+	//}()
+	//go func() {
+	//	defer gr.Done()
+	svc.common.Rebuild()
+	//}()
+	//go func() {
+	//	defer gr.Done()
+	svc.countries.Rebuild()
+	svc.cities.Rebuild()
+	//}()
+	//gr.Wait()
 }
 
 func (svc *SearchService) Likes(t int) *LikeIter {
@@ -73,13 +73,13 @@ type CommonIndex struct {
 	part *inverted.Part
 }
 
-func (idx *CommonIndex) Sex(t int) *inverted.TokenIter {
-	return idx.part.Field(SexField).Token(t).Iter()
-}
+//func (idx *CommonIndex) Sex(t int) *inverted.TokenIter {
+//	return idx.part.Field(SexField).Token(t).Iter()
+//}
 
-func (idx *CommonIndex) Status(t int) *inverted.TokenIter {
-	return idx.part.Field(StatusField).Token(t).Iter()
-}
+//func (idx *CommonIndex) Status(t int) *inverted.TokenIter {
+//	return idx.part.Field(StatusField).Token(t).Iter()
+//}
 
 func (idx *CommonIndex) Fname(t int) *inverted.TokenIter {
 	return idx.part.Field(FnameField).Token(t).Iter()
@@ -119,13 +119,13 @@ type CountryIndex struct {
 	part *inverted.Part
 }
 
-func (idx *CountryIndex) Sex(t int) *inverted.TokenIter {
-	return idx.part.Field(SexField).Token(t).Iter()
-}
+//func (idx *CountryIndex) Sex(t int) *inverted.TokenIter {
+//	return idx.part.Field(SexField).Token(t).Iter()
+//}
 
-func (idx *CountryIndex) Status(t int) *inverted.TokenIter {
-	return idx.part.Field(StatusField).Token(t).Iter()
-}
+//func (idx *CountryIndex) Status(t int) *inverted.TokenIter {
+//	return idx.part.Field(StatusField).Token(t).Iter()
+//}
 
 func (idx *CountryIndex) Interest(t int) *inverted.TokenIter {
 	return idx.part.Field(InterestField).Token(t).Iter()
@@ -141,13 +141,13 @@ type CityIndex struct {
 	part *inverted.Part
 }
 
-func (idx *CityIndex) Sex(t int) *inverted.TokenIter {
-	return idx.part.Field(SexField).Token(t).Iter()
-}
+//func (idx *CityIndex) Sex(t int) *inverted.TokenIter {
+//	return idx.part.Field(SexField).Token(t).Iter()
+//}
 
-func (idx *CityIndex) Status(t int) *inverted.TokenIter {
-	return idx.part.Field(StatusField).Token(t).Iter()
-}
+//func (idx *CityIndex) Status(t int) *inverted.TokenIter {
+//	return idx.part.Field(StatusField).Token(t).Iter()
+//}
 
 func (idx *CityIndex) Interest(t int) *inverted.TokenIter {
 	return idx.part.Field(InterestField).Token(t).Iter()
