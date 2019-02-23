@@ -3,6 +3,7 @@ package search
 import (
 	"log"
 	"testing"
+	"bytes"
 
 	"github.com/freepk/hlc18r4/accounts"
 	"github.com/freepk/hlc18r4/backup"
@@ -80,11 +81,13 @@ func BenchmarkTest0(b *testing.B) {
 	}
 	iter = iterator.NewUnionIter(iter, country.Interest(interestKey))
 	acc := &proto.Account{}
+	buf := &bytes.Buffer{}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		limit := 22
 		iter.Reset()
+		buf.Reset()
 		for {
 			if limit == 0 {
 				break
@@ -97,7 +100,7 @@ func BenchmarkTest0(b *testing.B) {
 			if acc.Sex != tokens.FemaleSex {
 				continue
 			}
-			//acc.WriteJSON((proto.IDField | proto.EmailField | proto.SexField | proto.CountryField), ctx)
+			acc.WriteJSON((proto.IDField | proto.EmailField | proto.SexField | proto.CountryField), buf)
 			limit--
 		}
 	}
@@ -110,12 +113,13 @@ func BenchmarkTest1(b *testing.B) {
 	}
 	iter := iterator.Iterator(searchSvc.Common().Interest(interestKey))
 	acc := &proto.Account{}
+	buf := &bytes.Buffer{}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-
 		limit := 24
 		iter.Reset()
+		buf.Reset()
 		for {
 			if limit == 0 {
 				break
@@ -128,7 +132,7 @@ func BenchmarkTest1(b *testing.B) {
 			if acc.Status != tokens.ComplStatus {
 				continue
 			}
-			//acc.WriteJSON((proto.IDField | proto.EmailField | proto.StatusField), ctx)
+			acc.WriteJSON((proto.IDField | proto.EmailField | proto.StatusField), buf)
 			limit--
 		}
 	}
