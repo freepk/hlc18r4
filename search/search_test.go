@@ -1,19 +1,35 @@
 package search
 
 import (
+	"log"
 	"testing"
 
+	"github.com/freepk/hlc18r4/accounts"
 	"github.com/freepk/hlc18r4/backup"
+	"github.com/freepk/hlc18r4/proto"
 	"github.com/freepk/hlc18r4/tokens"
+	"github.com/freepk/iterator"
 )
 
-func TestSearch(t *testing.T) {
+var (
+	accountsSvc *accounts.AccountsService
+	searchSvc   *SearchService
+)
+
+func init() {
+	log.Println("Restoring")
 	rep, err := backup.Restore("../tmp/data/data.zip")
 	if err != nil {
-		t.Fatal(err)
+		log.Fatal(err)
 	}
-	svc := NewSearchService(rep)
-	svc.Rebuild()
+	log.Println("Accounts service")
+	accountsSvc = accounts.NewAccountsService(rep)
+	log.Println("Search service")
+	searchSvc = NewSearchService(rep)
+	searchSvc.Rebuild()
+}
+
+func TestSearch(t *testing.T) {
 	countryName := []byte(`Геризия`)
 	countryKey, ok := tokens.Country(countryName)
 	if !ok {
@@ -25,7 +41,7 @@ func TestSearch(t *testing.T) {
 		t.Fatal("Invalid interest")
 	}
 	t.Log(string(countryName), countryKey, string(interestName), interestKey)
-	country := svc.Countries(countryKey)
+	country := searchSvc.Countries(countryKey)
 	iter := country.Interest(interestKey)
 	count := 0
 	for {
@@ -36,5 +52,84 @@ func TestSearch(t *testing.T) {
 		_ = id
 		count++
 	}
-	t.Log(count)
+	t.Log("count", count)
+}
+
+func BenchmarkTest0(b *testing.B) {
+	countryKey, ok := tokens.Country([]byte(`Испезия`))
+	if !ok {
+		log.Fatal("Invalid country")
+	}
+	country := searchSvc.Countries(countryKey)
+	if country == nil {
+		log.Fatal("Country index is null")
+	}
+	interestKey, ok := tokens.Interest([]byte(`Обнимашки`))
+	if !ok {
+		log.Fatal("Invalid interest")
+	}
+	iter := iterator.Iterator(country.Interest(interestKey))
+	interestKey, ok = tokens.Interest([]byte(`YouTube`))
+	if !ok {
+		log.Fatal("Invalid interest")
+	}
+	iter = iterator.NewUnionIter(iter, country.Interest(interestKey))
+	interestKey, ok = tokens.Interest([]byte(`Солнце`))
+	if !ok {
+		log.Fatal("Invalid interest")
+	}
+	iter = iterator.NewUnionIter(iter, country.Interest(interestKey))
+	acc := &proto.Account{}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		limit := 22
+		iter.Reset()
+		for {
+			if limit == 0 {
+				break
+			}
+			id, ok := iter.Next()
+			if !ok {
+				break
+			}
+			*acc = *accountsSvc.Get(2000000 - id)
+			if acc.Sex != tokens.FemaleSex {
+				continue
+			}
+			//acc.WriteJSON((proto.IDField | proto.EmailField | proto.SexField | proto.CountryField), ctx)
+			limit--
+		}
+	}
+}
+
+func BenchmarkTest1(b *testing.B) {
+	interestKey, ok := tokens.Interest([]byte(`South Park`))
+	if !ok {
+		log.Fatal("Invalid interest")
+	}
+	iter := iterator.Iterator(searchSvc.Common().Interest(interestKey))
+	acc := &proto.Account{}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+
+		limit := 24
+		iter.Reset()
+		for {
+			if limit == 0 {
+				break
+			}
+			id, ok := iter.Next()
+			if !ok {
+				break
+			}
+			*acc = *accountsSvc.Get(2000000 - id)
+			if acc.Status != tokens.ComplStatus {
+				continue
+			}
+			//acc.WriteJSON((proto.IDField | proto.EmailField | proto.StatusField), ctx)
+			limit--
+		}
+	}
 }

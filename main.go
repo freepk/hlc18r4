@@ -128,7 +128,6 @@ func test0Handler(ctx *fasthttp.RequestCtx) {
 		acc.WriteJSON((proto.IDField | proto.EmailField | proto.SexField | proto.CountryField), ctx)
 		limit--
 	}
-
 }
 
 func test1Handler(ctx *fasthttp.RequestCtx) {
