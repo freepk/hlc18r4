@@ -113,6 +113,7 @@ func test0Handler(ctx *fasthttp.RequestCtx) {
 	iter = iterator.NewUnionIter(iter, country.Interest(interestKey))
 	acc := &proto.Account{}
 	limit := 22
+	body := ctx.Response.Body()
 	for {
 		if limit == 0 {
 			break
@@ -125,9 +126,10 @@ func test0Handler(ctx *fasthttp.RequestCtx) {
 		if acc.Sex != tokens.FemaleSex {
 			continue
 		}
-		acc.WriteJSON((proto.IDField | proto.EmailField | proto.SexField | proto.CountryField), ctx)
+		body = acc.MarshalJSON((proto.IDField | proto.EmailField | proto.SexField | proto.CountryField), body)
 		limit--
 	}
+	ctx.SetBody(body)
 }
 
 func test1Handler(ctx *fasthttp.RequestCtx) {
@@ -138,6 +140,7 @@ func test1Handler(ctx *fasthttp.RequestCtx) {
 	iter := iterator.Iterator(searchSvc.Common().Interest(interestKey))
 	acc := &proto.Account{}
 	limit := 24
+	body := ctx.Response.Body()
 	for {
 		if limit == 0 {
 			break
@@ -150,9 +153,10 @@ func test1Handler(ctx *fasthttp.RequestCtx) {
 		if acc.Status != tokens.ComplStatus {
 			continue
 		}
-		acc.WriteJSON((proto.IDField | proto.EmailField | proto.StatusField), ctx)
+		body = acc.MarshalJSON((proto.IDField | proto.EmailField | proto.StatusField), body)
 		limit--
 	}
+	ctx.SetBody(body)
 }
 
 func groupHandler(ctx *fasthttp.RequestCtx) {

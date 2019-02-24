@@ -99,7 +99,7 @@ func BenchmarkTest0(b *testing.B) {
 			if acc.Sex != tokens.FemaleSex {
 				continue
 			}
-			acc.MarshalJSON((proto.IDField | proto.EmailField | proto.SexField | proto.CountryField), buf)
+			buf = acc.MarshalJSON((proto.IDField | proto.EmailField | proto.SexField | proto.CountryField), buf)
 			limit--
 		}
 	}
@@ -131,7 +131,7 @@ func BenchmarkTest1(b *testing.B) {
 			if acc.Status != tokens.ComplStatus {
 				continue
 			}
-			acc.MarshalJSON((proto.IDField | proto.EmailField | proto.StatusField), buf)
+			buf = acc.MarshalJSON((proto.IDField | proto.EmailField | proto.StatusField), buf)
 			limit--
 		}
 	}

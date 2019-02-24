@@ -187,7 +187,7 @@ func (a *Account) WriteJSON(fields int, w extendedWriter) {
 	w.WriteString(`}`)
 }
 
-func (a *Account) MarshalJSON(fields int, buf []byte) {
+func (a *Account) MarshalJSON(fields int, buf []byte) []byte {
 	buf = append(buf, `{"id":`...)
 	buf = append(buf, trim(a.ID[:])...)
 	if (fields & BirthField) == BirthField {
@@ -258,6 +258,7 @@ func (a *Account) MarshalJSON(fields int, buf []byte) {
 		buf = append(buf, '}')
 	}
 	buf = append(buf, '}')
+	return buf
 }
 
 func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
