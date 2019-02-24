@@ -187,6 +187,79 @@ func (a *Account) WriteJSON(fields int, w extendedWriter) {
 	w.WriteString(`}`)
 }
 
+func (a *Account) MarshalJSON(fields int, buf []byte) {
+	buf = append(buf, `{"id":`...)
+	buf = append(buf, trim(a.ID[:])...)
+	if (fields & BirthField) == BirthField {
+		buf = append(buf, `,"birth":`...)
+		buf = append(buf, trim(a.Birth[:])...)
+	}
+	if (fields & JoinedField) == JoinedField {
+		buf = append(buf, `,"joined":`...)
+		buf = append(buf, trim(a.Joined[:])...)
+	}
+	if (fields & EmailField) == EmailField {
+		buf = append(buf, `,"email":"`...)
+		buf = append(buf, a.Email.Buf[:a.Email.Len]...)
+		buf = append(buf, '"')
+	}
+	if (fields&FnameField) == FnameField && a.Fname > 0 {
+		fname, _ := tokens.FnameVal(int(a.Fname))
+		buf = append(buf, `,"fname":"`...)
+		buf = append(buf, fname...)
+		buf = append(buf, '"')
+	}
+	if (fields&SnameField) == SnameField && a.Sname > 0 {
+		sname, _ := tokens.SnameVal(int(a.Sname))
+		buf = append(buf, `,"sname":"`...)
+		buf = append(buf, sname...)
+		buf = append(buf, '"')
+	}
+	if (fields&PhoneField) == PhoneField && a.Phone[0] > 0 {
+		buf = append(buf, `,"phone":"`...)
+		buf = append(buf, trim(a.Phone[:])...)
+		buf = append(buf, '"')
+	}
+	if (fields & SexField) == SexField {
+		switch a.Sex {
+		case tokens.MaleSex:
+			buf = append(buf, `,"sex":"m"`...)
+		case tokens.FemaleSex:
+			buf = append(buf, `,"sex":"f"`...)
+		}
+	}
+	if (fields&CountryField) == CountryField && a.Country > 0 {
+		country, _ := tokens.CountryVal(int(a.Country))
+		buf = append(buf, `,"country":"`...)
+		buf = append(buf, country...)
+		buf = append(buf, '"')
+	}
+	if (fields&CityField) == CityField && a.City > 0 {
+		city, _ := tokens.CityVal(int(a.City))
+		buf = append(buf, `,"city":"`...)
+		buf = append(buf, city...)
+		buf = append(buf, '"')
+	}
+	if (fields & StatusField) == StatusField {
+		switch a.Status {
+		case tokens.SingleStatus:
+			buf = append(buf, `,"status":"свободны"`...)
+		case tokens.InRelStatus:
+			buf = append(buf, `,"status":"заняты"`...)
+		case tokens.ComplStatus:
+			buf = append(buf, `,"status":"всё сложно"`...)
+		}
+	}
+	if (fields&PremiumField) == PremiumField && a.PremiumFinish[0] > 0 {
+		buf = append(buf, `,"premium":{"finish":`...)
+		buf = append(buf, trim(a.PremiumFinish[:])...)
+		buf = append(buf, `,"start":`...)
+		buf = append(buf, trim(a.PremiumStart[:])...)
+		buf = append(buf, '}')
+	}
+	buf = append(buf, '}')
+}
+
 func (a *Account) UnmarshalJSON(buf []byte) ([]byte, bool) {
 	var tail []byte
 	var temp []byte
